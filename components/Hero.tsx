@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import NextImage from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -18,13 +18,14 @@ export default function HeroSection({ profile }: { profile: any }) {
   }, [roles.length]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center dark:text-white overflow-hidden mt-[-64px]">
-      <div className="relative z-10 container mx-auto px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center text-center lg:text-left">
+    <section className="relative min-h-screen flex flex-col-reverse lg:block items-center justify-center dark:text-white overflow-hidden mt-[-64px] pt-28 lg:pt-0">
+      <div className="relative z-10 container mx-auto px-6 lg:px-10 flex flex-col justify-center lg:grid lg:grid-cols-2 gap-12 items-center text-center lg:text-left min-h-[50vh] lg:min-h-screen">
         {/* Left content */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex-1 pb-20 lg:pb-0"
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -96,31 +97,35 @@ export default function HeroSection({ profile }: { profile: any }) {
         </motion.div>
 
       </div>
+
       {/* Right content - image */}
-      <div className="absolute flex justify-center lg:justify-end bottom-0 left-1/2 lg:left-[calc(62%-540px)] hidden lg:block pointer-events-none z-10">
-        <div className="relative w-96 h-112 lg:w-[1080px] lg:h-[1275px] [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
+      <div className="relative w-full h-[50vh] lg:absolute lg:flex lg:justify-end lg:bottom-0 lg:left-1/2 lg:left-[calc(62%-540px)] lg:h-auto lg:w-auto pointer-events-none z-0 lg:z-10 flex items-end justify-center">
+        <div className="relative w-[90vw] h-[50vh] lg:w-[1080px] lg:h-[1275px] [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
           {/* Animated outline box behind image */}
-          <div className="absolute inset-0 w-[500px] h-[500px] left-[30%] top-[35%] rounded-3xl border-4 border-cyan-400/50 animate-spin-slow bg-white/5"></div>
+          <div className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[500px] lg:h-[500px] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-cyan-400/50 animate-spin-slow bg-white/5"></div>
 
           {profile?.profileImage ? (
-            <Image
+            <NextImage
               src={urlFor(profile.profileImage).url()}
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
-              className="relative object-cover w-full h-full rounded-3xl top-[64px]"
+              className="relative object-cover w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              priority
             />
           ) : (
-            <Image
+            <NextImage
               src="/profile.png"
               alt="Hero Model"
               width={1080}
               height={1275}
-              className="relative object-cover w-full h-full rounded-3xl top-[64px]"
+              className="relative object-cover w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              priority
             />
           )}
         </div>
       </div>
+
       {/* 3/4 background */}
       <div className="absolute top-0 bottom-0 right-0 w-[45%] bg-gradient-to-b from-teal-500/50 to-transparent rounded-l-full hidden lg:block pointer-events-none"></div>
 

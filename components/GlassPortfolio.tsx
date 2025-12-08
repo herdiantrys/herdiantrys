@@ -337,12 +337,12 @@ const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => vo
                 )}
 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                        <span className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-2 block">
+                <div className="absolute inset-0 p-3 md:p-6 flex flex-col justify-end opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+                    <div className="transform translate-y-0 md:translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <span className="text-[10px] md:text-xs font-bold text-teal-400 uppercase tracking-wider mb-1 md:mb-2 block">
                             {project.category}
                         </span>
-                        <h3 className="text-xl font-bold text-white mb-1">{project.title}</h3>
+                        <h3 className="text-sm md:text-xl font-bold text-white mb-1 leading-tight">{project.title}</h3>
 
                         {/* Gallery Preview Thumbnails */}
                         {allMedia.length > 1 && (
@@ -454,7 +454,7 @@ const ProjectModalContent = ({ project, onClose }: { project: Project; onClose: 
     return (
         <motion.div
             layoutId={`card-${project.id}`}
-            className="relative w-[80vw] h-[80vh] glass bg-[var(--glass-bg)] border-[var(--glass-border)] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
+            className="relative w-[95vw] h-[90vh] md:w-[80vw] md:h-[80vh] glass bg-[var(--glass-bg)] border-[var(--glass-border)] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
             onClick={(e) => e.stopPropagation()}
             transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
         >
@@ -469,7 +469,7 @@ const ProjectModalContent = ({ project, onClose }: { project: Project; onClose: 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="w-full md:max-w-[80%] relative h-64 md:h-auto bg-black flex flex-col group/media"
+                className="w-full md:max-w-[80%] relative h-[40vh] md:h-auto bg-black flex flex-col group/media"
             >
                 <div className="flex-1 relative w-full h-full">
                     <AnimatePresence mode="wait">
@@ -695,7 +695,7 @@ const GlassPortfolio = ({ projects }: { projects: Project[] }) => {
 
                 <motion.div
                     layout
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8"
                 >
                     <AnimatePresence mode="popLayout">
                         {paginatedProjects.map((project) => (
