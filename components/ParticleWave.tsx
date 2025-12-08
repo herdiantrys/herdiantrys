@@ -168,7 +168,13 @@ const ParticleWave = () => {
             init();
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
+        // Only enable mouse interaction on devices that support hover
+        const mediaQuery = window.matchMedia("(hover: hover)");
+
+        if (mediaQuery.matches) {
+            window.addEventListener("mousemove", handleMouseMove);
+        }
+
         window.addEventListener("resize", handleResize);
 
         init();
