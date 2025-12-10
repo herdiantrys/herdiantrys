@@ -7,7 +7,7 @@ import { Edit2, MapPin, Link as LinkIcon, X, Save, Settings, User, Bell, Shield,
 import { updateUserProfile, uploadProfileImage, removeProfileImage, uploadBannerImage, removeBannerImage } from "@/lib/actions/user.actions";
 import { useRouter } from "next/navigation";
 
-const UserProfile = ({ user, isOwner }: { user: any; isOwner: boolean }) => {
+const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dict: any }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
     const [formData, setFormData] = useState({
@@ -236,18 +236,18 @@ const UserProfile = ({ user, isOwner }: { user: any; isOwner: boolean }) => {
                             <div className="md:col-span-2 space-y-8">
                                 <div className="glass p-8 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)]">
                                     <h2 className="text-2xl font-bold text-[var(--glass-text)] mb-6 flex items-center gap-2">
-                                        <User size={24} className="text-teal-400" /> About
+                                        <User size={24} className="text-teal-400" /> {dict.profile.about}
                                     </h2>
                                     <div className="space-y-6">
                                         {user.headline && (
                                             <div>
-                                                <h3 className="text-sm font-medium text-[var(--glass-text-muted)] uppercase tracking-wider mb-2">Headline</h3>
+                                                <h3 className="text-sm font-medium text-[var(--glass-text-muted)] uppercase tracking-wider mb-2">{dict.profile.headline}</h3>
                                                 <p className="text-lg text-teal-400 font-medium">{user.headline}</p>
                                             </div>
                                         )}
                                         {user.bio && (
                                             <div>
-                                                <h3 className="text-sm font-medium text-[var(--glass-text-muted)] uppercase tracking-wider mb-2">Bio</h3>
+                                                <h3 className="text-sm font-medium text-[var(--glass-text-muted)] uppercase tracking-wider mb-2">{dict.profile.bio}</h3>
                                                 <p className="text-[var(--glass-text-muted)] leading-relaxed">{user.bio}</p>
                                             </div>
                                         )}
@@ -258,7 +258,7 @@ const UserProfile = ({ user, isOwner }: { user: any; isOwner: boolean }) => {
                             {/* Right Column: Details */}
                             <div className="space-y-8">
                                 <div className="glass p-8 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)]">
-                                    <h2 className="text-xl font-bold text-[var(--glass-text)] mb-6">Details</h2>
+                                    <h2 className="text-xl font-bold text-[var(--glass-text)] mb-6">{dict.profile.details}</h2>
                                     <div className="space-y-4">
                                         {user.location && (
                                             <div className="flex items-center gap-3 text-[var(--glass-text-muted)]">

@@ -38,6 +38,22 @@ export const profile = defineType({
             validation: (rule) => rule.required(),
         }),
         defineField({
+            name: 'aboutImage',
+            title: 'About Section Image',
+            type: 'image',
+            options: {
+                hotspot: true,
+            },
+            fields: [
+                {
+                    name: 'alt',
+                    type: 'string',
+                    title: 'Alternative Text',
+                }
+            ],
+            description: 'Image displayed in the About section (GlassAbout.tsx)',
+        }),
+        defineField({
             name: 'bio',
             title: 'Biography',
             type: 'array',

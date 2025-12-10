@@ -19,6 +19,11 @@ export const getUserByUsername = async (username: string) => {
                     url
                 }
             },
+            aboutImage {
+                asset->{
+                    url
+                }
+            },
             bannerImage {
                 asset->{
                     url

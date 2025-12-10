@@ -3,11 +3,15 @@ import { incrementViews } from "./actions";
 import ProjectDetail from "@/components/ProjectDetail";
 import { notFound } from "next/navigation";
 import { defineQuery } from "next-sanity";
+import { getDictionary } from "@/get-dictionary";
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
+export default async function ProjectPage({ params }: { params: Promise<{ lang: string, slug: string }> }) {
+    const { slug, lang } = await params;
+
+    // Fetch dictionary
+    const dict = await getDictionary((lang || 'en') as "en" | "id");
 
     // Fetch project data by slug
     const query = defineQuery(`*[_type == "project" && slug.current == $slug][0]{
@@ -49,5 +53,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     // Increment views
     // await incrementViews(project._id, slug);
 
-    return <ProjectDetail project={project} />;
+    return (
+        <div className="pt-28">
+            <ProjectDetail project={project} dict={dict} />
+        </div>
+    );
 }

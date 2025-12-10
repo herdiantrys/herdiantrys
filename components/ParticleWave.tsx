@@ -168,10 +168,12 @@ const ParticleWave = () => {
             init();
         };
 
-        // Only enable mouse interaction on devices that support hover
-        const mediaQuery = window.matchMedia("(hover: hover)");
+        // Only enable mouse interaction on desktop devices (non-touch and large screen)
+        // We check for hover support AND screen width to be safe
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth < 1024;
 
-        if (mediaQuery.matches) {
+        if (!isTouch && !isSmallScreen) {
             window.addEventListener("mousemove", handleMouseMove);
         }
 

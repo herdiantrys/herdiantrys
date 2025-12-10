@@ -98,10 +98,10 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
       </div>
 
       {/* Right content - image */}
-      <div className="relative w-full h-[50vh] lg:absolute lg:flex lg:justify-end lg:bottom-0 lg:left-1/2 lg:left-[calc(62%-540px)] lg:h-auto lg:w-auto pointer-events-none z-0 lg:z-10 flex items-end justify-center">
-        <div className="relative w-[90vw] h-[50vh] lg:w-[1080px] lg:h-[1275px] [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+      <div className="relative w-full h-[50vh] lg:absolute lg:flex lg:justify-end lg:top-0 lg:left-[60%] lg:-translate-x-1/2 lg:h-screen lg:w-auto lg:aspect-[1080/1275] pointer-events-none z-0 lg:z-10 flex items-end justify-center">
+        <div className="relative w-[90vw] h-[50vh] lg:w-full lg:h-full [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
           {/* Animated outline box behind image */}
-          <div className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[500px] lg:h-[500px] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-cyan-400/50 animate-spin-slow bg-white/5"></div>
+          <div className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-cyan-400/50 animate-spin-slow bg-white/5"></div>
 
           {profile?.profileImage ? (
             <NextImage
@@ -109,7 +109,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
-              className="relative object-cover w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
               priority
             />
           ) : (
@@ -118,7 +118,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
               alt="Hero Model"
               width={1080}
               height={1275}
-              className="relative object-cover w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
               priority
             />
           )}

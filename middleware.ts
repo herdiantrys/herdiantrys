@@ -15,13 +15,20 @@ function getLocale(request: NextRequest): string | undefined {
     const locales: string[] = i18n.locales
 
     // Use negotiator and intl-localematcher to get best locale
-    let languages = new Negotiator({ headers: negotiatorHeaders }).languages(
-        locales
-    )
+    let languages = new Negotiator({ headers: negotiatorHeaders }).languages()
 
-    const locale = matchLocale(languages, locales, i18n.defaultLocale)
+    console.log("Negotiator headers:", negotiatorHeaders['accept-language'])
+    console.log("Extracted languages:", languages)
+    console.log("Available locales:", locales)
 
-    return locale
+    try {
+        const locale = matchLocale(languages, locales, i18n.defaultLocale)
+        console.log("Matched locale:", locale)
+        return locale
+    } catch (error) {
+        console.error("Locale matching error:", error)
+        return i18n.defaultLocale
+    }
 }
 
 export function middleware(request: NextRequest) {
@@ -49,5 +56,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     // Matcher ignoring `/_next/` and `/api/`
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/((?!api|_next/static|_next/image|studio|favicon.ico).*)'],
 }

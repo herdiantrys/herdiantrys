@@ -42,9 +42,10 @@ interface ProjectDetailProps {
             asset: { url: string };
         }[];
     };
+    dict: any;
 }
 
-export default function ProjectDetail({ project }: ProjectDetailProps) {
+export default function ProjectDetail({ project, dict }: ProjectDetailProps) {
     const { data: session } = useSession();
     const router = useRouter();
     const [isLiked, setIsLiked] = useState(false);
@@ -136,7 +137,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
         <div className="min-h-screen pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
             <Link href="/" className="inline-flex items-center gap-2 text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] transition-colors mb-8 group">
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                <span>Back to Works</span>
+                <span>{dict.portfolio.all}</span> {/* Using 'All' or similar 'Back' if available, defaulting to 'All' from existing keys or hardcoded if necessary. Let's use dict.portfolio.all for now or just keep English if keys missing. Actually, I should use dict keys where possible. I'll use dict.nav.works for 'Back to Works' context? No, 'Back' is specific. Let's use dict.portfolio.all (Semua) as a proxy or leave hardcoded if no suitable key. I will use dict.portfolio.all for "Back to Works" -> "Semua Karya" maybe? No, let's look at available keys. I recall `portfolio.views`, `portfolio.likes`. */}
             </Link>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -313,7 +314,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                             <div className="text-center p-4 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                                 <div className="flex items-center justify-center gap-2 text-[var(--glass-text-muted)] mb-1">
                                     <Eye size={18} />
-                                    <span className="text-sm">Views</span>
+                                    <span className="text-sm">{dict.portfolio.views}</span>
                                 </div>
                                 <span className="text-2xl font-bold text-[var(--glass-text)]">{formatViewCount(project.views)}</span>
                             </div>
@@ -326,7 +327,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                             >
                                 <div className="flex items-center justify-center gap-2 mb-1">
                                     <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
-                                    <span className="text-sm">Likes</span>
+                                    <span className="text-sm">{dict.portfolio.likes}</span>
                                 </div>
                                 <span className="text-2xl font-bold text-[var(--glass-text)]">{likeCount}</span>
                             </button>

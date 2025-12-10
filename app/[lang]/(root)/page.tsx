@@ -1,12 +1,13 @@
-import GlassHero from "@/components/GlassHero";
-import GlassPartners from "@/components/GlassPartners";
-import GlassPortfolio, { Project } from "@/components/GlassPortfolio";
-import GlassAbout from "@/components/GlassAbout";
-import GlassContact from "@/components/GlassContact";
-import GlassTestimonials from "@/components/GlassTestimonials";
-import GlassServices from "@/components/GlassServices";
 import Hero from "@/components/Hero";
 import { getSanityProjects } from "@/lib/sanityProjects";
+import dynamic from "next/dynamic";
+
+const GlassPartners = dynamic(() => import("@/components/GlassPartners"));
+const GlassPortfolio = dynamic(() => import("@/components/GlassPortfolio"));
+const GlassAbout = dynamic(() => import("@/components/GlassAbout"));
+const GlassContact = dynamic(() => import("@/components/GlassContact"));
+const GlassTestimonials = dynamic(() => import("@/components/GlassTestimonials"));
+const GlassServices = dynamic(() => import("@/components/GlassServices"));
 import { getSanityTestimonials } from "@/lib/sanityTestimonials";
 import { getSanityPartners } from "@/lib/sanityPartners";
 import { getProfile } from "@/lib/sanityProfile";
@@ -14,10 +15,10 @@ import { getServices } from "@/lib/sanityServices";
 import { auth } from "@/auth";
 import { getDictionary } from "@/get-dictionary";
 
-const Home = async ({ params }: { params: { lang: string } }) => {
+const Home = async ({ params }: { params: Promise<{ lang: string }> }) => {
+  const { lang } = await params;
   const session = await auth();
   const userId = session?.user?.id;
-  const lang = (params.lang || 'en') as "en" | "id";
   const dict = await getDictionary(lang);
 
   const [projects, testimonials, partners, profile, services] = await Promise.all([

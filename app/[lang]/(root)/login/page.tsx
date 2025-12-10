@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Github, Mail, Lock, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, Github, Mail, Lock, ArrowRight, Check, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 
@@ -12,11 +12,13 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get("email") as string;
@@ -30,20 +32,21 @@ export default function LoginPage() {
             });
 
             if (result?.error) {
-                // Handle error (e.g., show toast or error message)
+                setError("Invalid email or password. Please try again.");
                 console.error("Login failed:", result.error);
             } else {
                 router.push("/");
             }
         } catch (error) {
             console.error("Login error:", error);
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden py-20">
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden py-20 pt-28">
             {/* Background Elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-500/20 rounded-full blur-[100px]" />
@@ -61,6 +64,14 @@ export default function LoginPage() {
                         <h1 className="text-3xl font-bold text-[var(--glass-text)] mb-2">Welcome Back</h1>
                         <p className="text-[var(--glass-text-muted)]">Sign in to continue to your account</p>
                     </div>
+
+                    {/* Error Alert */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                            <AlertCircle size={16} />
+                            {error}
+                        </div>
+                    )}
 
                     {/* Social Login */}
                     <div className="grid grid-cols-2 gap-4 mb-8">

@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { Briefcase } from 'lucide-react'
 
 export const project = defineType({
     name: 'project',
     title: 'Project',
     type: 'document',
+    icon: Briefcase,
     fields: [
         defineField({
             name: 'title',

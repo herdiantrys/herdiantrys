@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Briefcase, GraduationCap } from "lucide-react";
 import { PortableText } from "@portabletext/react";
+import { urlFor } from "@/sanity/lib/image";
 
 const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
     const stats = [
@@ -65,7 +66,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                         <div className="glass p-4 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] relative group overflow-hidden">
                             <div className="aspect-[3/4] rounded-2xl overflow-hidden relative">
                                 <img
-                                    src={profile?.profileImage || "/placeholder-user.jpg"}
+                                    src={profile?.aboutImage ? urlFor(profile.aboutImage).url() : (profile?.profileImage ? urlFor(profile.profileImage).url() : "/placeholder-user.jpg")}
                                     alt={profile?.fullName || "Profile"}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />

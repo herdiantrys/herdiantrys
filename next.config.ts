@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // reactCompiler: true,
   experimental: {
+    // @ts-expect-error - React Compiler is experimental
+    reactCompiler: true,
   },
   images: {
     remotePatterns: [

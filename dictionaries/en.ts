@@ -94,6 +94,34 @@ const en = {
             motion_graphics: "Motion Graphics",
             brand_identity: "Brand Identity"
         }
+    },
+    dashboard: {
+        title: "Dashboard",
+        welcome: "Welcome back",
+        total_projects: "Total Projects",
+        total_users: "Total Users",
+        total_views: "Total Views",
+        recent_projects: "Recent Projects",
+        new_users: "New Users",
+        popular_projects: "Popular Projects",
+        recent_updates: "Recent Updates",
+        updated: "Updated"
+    },
+    profile: {
+        edit_profile: "Edit Profile",
+        change_photo: "Change Photo",
+        remove: "Remove",
+        about: "About",
+        headline: "Headline",
+        bio: "Bio",
+        details: "Details",
+        account_settings: "Account Settings",
+        notifications: "Notifications",
+        privacy: "Privacy",
+        appearance: "Appearance",
+        save_changes: "Save Changes",
+        cancel: "Cancel",
+        saving: "Saving..."
     }
 };
 

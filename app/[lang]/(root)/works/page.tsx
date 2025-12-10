@@ -1,24 +1,21 @@
 import { getSanityProjects } from "@/lib/sanityProjects";
-import GlassPortfolio from "@/components/GlassPortfolio";
+import WorksExplorer from "@/components/WorksExplorer";
+import WorksHero from "@/components/WorksHero";
+import { getDictionary } from "@/get-dictionary";
 
 
-export default async function WorksPage() {
+export default async function WorksPage({ params }: { params: Promise<{ lang: string }> }) {
+    const { lang: langParam } = await params;
     const projects = await getSanityProjects(undefined, false);
+    const lang = (langParam || 'en') as "en" | "id";
+    const dict = await getDictionary(lang);
 
     return (
-        <main className="min-h-screen relative overflow-hidden">
+        <main className="min-h-screen relative overflow-hidden pt-28">
+            <WorksHero dict={dict} projectCount={projects.length} />
 
-            <div className="pt-24 pb-12 container mx-auto px-4 relative z-10">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[var(--glass-text)]">
-                        All Works
-                    </h1>
-                    <p className="text-[var(--glass-text-muted)] max-w-2xl mx-auto text-lg">
-                        A comprehensive collection of my creative journey, featuring design, illustration, and videography projects.
-                    </p>
-                </div>
-
-                <GlassPortfolio projects={projects} />
+            <div className="pb-12 container mx-auto px-0 relative z-10 w-full max-w-none">
+                <WorksExplorer projects={projects} dict={dict} />
             </div>
         </main>
     );

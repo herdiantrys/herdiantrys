@@ -1,11 +1,11 @@
 import { defineField, defineType } from 'sanity'
-import { ShoppingBag } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 export const service = defineType({
     name: 'service',
     title: 'Service',
     type: 'document',
-    icon: ShoppingBag,
+    icon: Sparkles,
     fields: [
         defineField({
             name: 'title',

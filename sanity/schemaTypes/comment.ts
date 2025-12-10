@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { MessageSquareText } from 'lucide-react'
 
 export const comment = defineType({
     name: 'comment',
     title: 'Comment',
     type: 'document',
+    icon: MessageSquareText,
     fields: [
         defineField({
             name: 'text',

@@ -7,6 +7,7 @@ export const getProfile = async () => {
             fullName,
             headline,
             profileImage,
+            aboutImage,
             bio,
             email,
             phoneNumber,

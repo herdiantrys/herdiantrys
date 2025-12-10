@@ -13,9 +13,10 @@ interface DashboardProps {
     recentUsers: any[];
     recentUpdates: any[];
     popularProjects: any[];
+    dict: any;
 }
 
-export default function Dashboard({ stats, recentProjects, recentUsers, recentUpdates, popularProjects }: DashboardProps) {
+export default function Dashboard({ stats, recentProjects, recentUsers, recentUpdates, popularProjects, dict }: DashboardProps) {
     return (
         <div className="space-y-8">
             {/* Stats Grid */}
@@ -28,7 +29,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                             <FileImage size={24} />
                         </div>
                         <div>
-                            <p className="text-sm text-[var(--glass-text-muted)]">Total Projects</p>
+                            <p className="text-sm text-[var(--glass-text-muted)]">{dict.dashboard.total_projects}</p>
                             <h3 className="text-2xl font-bold text-[var(--glass-text)]">{stats.totalProjects}</h3>
                         </div>
                     </div>
@@ -45,7 +46,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                             <Users size={24} />
                         </div>
                         <div>
-                            <p className="text-sm text-[var(--glass-text-muted)]">Total Users</p>
+                            <p className="text-sm text-[var(--glass-text-muted)]">{dict.dashboard.total_users}</p>
                             <h3 className="text-2xl font-bold text-[var(--glass-text)]">{stats.totalUsers}</h3>
                         </div>
                     </div>
@@ -62,7 +63,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                             <Eye size={24} />
                         </div>
                         <div>
-                            <p className="text-sm text-[var(--glass-text-muted)]">Total Views</p>
+                            <p className="text-sm text-[var(--glass-text-muted)]">{dict.dashboard.total_views}</p>
                             <h3 className="text-2xl font-bold text-[var(--glass-text)]">{stats.totalViews}</h3>
                         </div>
                     </div>
@@ -79,7 +80,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                 >
                     <div className="flex items-center gap-2 mb-6">
                         <Clock size={20} className="text-teal-500" />
-                        <h3 className="text-lg font-bold text-[var(--glass-text)]">Recent Projects</h3>
+                        <h3 className="text-lg font-bold text-[var(--glass-text)]">{dict.dashboard.recent_projects}</h3>
                     </div>
                     <div className="space-y-4">
                         {recentProjects.map((project) => (
@@ -110,7 +111,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                 >
                     <div className="flex items-center gap-2 mb-6">
                         <Users size={20} className="text-cyan-500" />
-                        <h3 className="text-lg font-bold text-[var(--glass-text)]">New Users</h3>
+                        <h3 className="text-lg font-bold text-[var(--glass-text)]">{dict.dashboard.new_users}</h3>
                     </div>
                     <div className="space-y-4">
                         {recentUsers.map((user) => (
@@ -145,7 +146,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                 >
                     <div className="flex items-center gap-2 mb-6">
                         <Heart size={20} className="text-red-500" />
-                        <h3 className="text-lg font-bold text-[var(--glass-text)]">Popular Projects</h3>
+                        <h3 className="text-lg font-bold text-[var(--glass-text)]">{dict.dashboard.popular_projects}</h3>
                     </div>
                     <div className="space-y-4">
                         {popularProjects.map((project) => (
@@ -176,7 +177,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                 >
                     <div className="flex items-center gap-2 mb-6">
                         <Activity size={20} className="text-yellow-500" />
-                        <h3 className="text-lg font-bold text-[var(--glass-text)]">Recent Updates</h3>
+                        <h3 className="text-lg font-bold text-[var(--glass-text)]">{dict.dashboard.recent_updates}</h3>
                     </div>
                     <div className="space-y-4">
                         {recentUpdates.map((project) => (
@@ -188,7 +189,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-[var(--glass-text)] truncate">{project.title}</p>
-                                    <p className="text-xs text-[var(--glass-text-muted)]">Updated</p>
+                                    <p className="text-xs text-[var(--glass-text-muted)]">{dict.dashboard.updated}</p>
                                 </div>
                                 <span className="text-xs text-[var(--glass-text-muted)]">
                                     {new Date(project._updatedAt).toLocaleDateString()}

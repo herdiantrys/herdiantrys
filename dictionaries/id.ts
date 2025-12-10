@@ -94,6 +94,34 @@ const id = {
             motion_graphics: "Grafis Gerak",
             brand_identity: "Identitas Merek"
         }
+    },
+    dashboard: {
+        title: "Dasbor",
+        welcome: "Selamat datang kembali",
+        total_projects: "Total Proyek",
+        total_users: "Total Pengguna",
+        total_views: "Total Dilihat",
+        recent_projects: "Proyek Terbaru",
+        new_users: "Pengguna Baru",
+        popular_projects: "Proyek Populer",
+        recent_updates: "Pembaruan Terbaru",
+        updated: "Diperbarui"
+    },
+    profile: {
+        edit_profile: "Edit Profil",
+        change_photo: "Ganti Foto",
+        remove: "Hapus",
+        about: "Tentang",
+        headline: "Judul",
+        bio: "Bio",
+        details: "Detail",
+        account_settings: "Pengaturan Akun",
+        notifications: "Notifikasi",
+        privacy: "Privasi",
+        appearance: "Tampilan",
+        save_changes: "Simpan Perubahan",
+        cancel: "Batal",
+        saving: "Menyimpan..."
     }
 };
 

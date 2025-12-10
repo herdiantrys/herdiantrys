@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { Handshake } from 'lucide-react'
 
 export const partner = defineType({
     name: 'partner',
     title: 'Partner',
     type: 'document',
+    icon: Handshake,
     fields: [
         defineField({
             name: 'name',

@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+import GitHub from "next-auth/providers/github"
 import Credentials from "next-auth/providers/credentials"
 import { client } from "@/sanity/lib/client"
 import { writeClient } from "@/sanity/lib/write-client"
@@ -8,6 +9,7 @@ import bcrypt from "bcryptjs"
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google,
+    GitHub,
     Credentials({
       name: "Credentials",
       credentials: {
@@ -43,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
+      if (account?.provider === 'google' || account?.provider === 'github') {
         const { email, name, image } = user;
 
         try {
@@ -56,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               _type: 'user',
               email,
               fullName: name,
-              username: email?.split('@')[0],
+              username: email?.split('@')[0], // Use part of email as initial username
               imageURL: image,
             });
           }
@@ -76,7 +78,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async jwt({ token, user, account }) {
-      if (account?.provider === 'google' && user?.email) {
+      if ((account?.provider === 'google' || account?.provider === 'github') && user?.email) {
         // Always fetch the Sanity user ID by email to ensure we get the correct existing ID
         const sanityUser = await client.fetch(`*[_type == "user" && email == $email][0]`, { email: user.email });
         if (sanityUser) {
