@@ -10,10 +10,10 @@ export default async function Layout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }>) {
-  const lang = (params.lang || 'en') as "en" | "id";
-  const dict = await getDictionary(lang);
+  const { lang } = await params;
+  const dict = await getDictionary((lang || 'en') as "en" | "id");
 
   return (
     <SessionProviderWrapper>
