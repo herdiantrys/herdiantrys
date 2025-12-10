@@ -15,7 +15,7 @@ const getIcon = (platform: string) => {
     }
 };
 
-const Footer = async () => {
+const Footer = async ({ dict }: { dict: any }) => {
     const currentYear = new Date().getFullYear();
     const profile = await getProfile();
 
@@ -29,35 +29,35 @@ const Footer = async () => {
                             {profile?.fullName || "Herdian"}
                         </h2>
                         <p className="text-gray-400 text-sm leading-relaxed">
-                            {profile?.headline?.[0] || "Crafting digital experiences with passion and precision."}
+                            {profile?.headline?.[0] || dict.footer.headline_fallback}
                         </p>
                     </div>
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+                        <h3 className="text-lg font-semibold mb-4">{dict.footer.quick_links}</h3>
                         <ul className="space-y-2 text-gray-400 text-sm">
-                            <li><Link href="/" className="hover:text-teal-400 transition-colors">Home</Link></li>
-                            <li><Link href="/works" className="hover:text-teal-400 transition-colors">Works</Link></li>
-                            <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
-                            <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
+                            <li><Link href="/" className="hover:text-teal-400 transition-colors">{dict.nav.home}</Link></li>
+                            <li><Link href="/works" className="hover:text-teal-400 transition-colors">{dict.nav.works}</Link></li>
+                            <li><Link href="/about" className="hover:text-teal-400 transition-colors">{dict.nav.about}</Link></li>
+                            <li><Link href="/contact" className="hover:text-teal-400 transition-colors">{dict.nav.contact}</Link></li>
                         </ul>
                     </div>
 
                     {/* Services */}
                     <div>
-                        <h3 className="text-lg font-semibold mb-4">Services</h3>
+                        <h3 className="text-lg font-semibold mb-4">{dict.footer.services}</h3>
                         <ul className="space-y-2 text-gray-400 text-sm">
-                            <li>UI/UX Design</li>
-                            <li>Web Development</li>
-                            <li>Motion Graphics</li>
-                            <li>Brand Identity</li>
+                            <li>{dict.footer.service_list.ui_ux}</li>
+                            <li>{dict.footer.service_list.web_dev}</li>
+                            <li>{dict.footer.service_list.motion_graphics}</li>
+                            <li>{dict.footer.service_list.brand_identity}</li>
                         </ul>
                     </div>
 
                     {/* Socials */}
                     <div>
-                        <h3 className="text-lg font-semibold mb-4">Connect</h3>
+                        <h3 className="text-lg font-semibold mb-4">{dict.footer.connect}</h3>
                         <div className="flex gap-4 flex-wrap">
                             {profile?.socialMedia?.map((social: any) => (
                                 <a
@@ -76,10 +76,10 @@ const Footer = async () => {
                 </div>
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-                    <p>&copy; {currentYear} {profile?.fullName || "Herdian"}. All rights reserved.</p>
+                    <p>&copy; {currentYear} {profile?.fullName || "Herdian"}. {dict.footer.rights}</p>
                     <div className="flex gap-6">
-                        <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
-                        <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
+                        <Link href="/privacy" className="hover:text-gray-300 transition-colors">{dict.footer.privacy}</Link>
+                        <Link href="/terms" className="hover:text-gray-300 transition-colors">{dict.footer.terms}</Link>
                     </div>
                 </div>
             </div>

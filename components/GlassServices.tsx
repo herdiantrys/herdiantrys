@@ -16,11 +16,13 @@ interface Service {
     orderLink?: string;
 }
 
-const GlassServices = ({ services }: { services: Service[] }) => {
-    // Duplicate services for infinite loop illusion
-    const extendedServices = [...services, ...services, ...services];
+// ... imports
 
-    const [currentIndex, setCurrentIndex] = useState(services.length);
+const GlassServices = ({ services, dict }: { services: Service[], dict: any }) => {
+    // Duplicate services for infinite loop illusion
+    const extendedServices = services ? [...services, ...services, ...services] : [];
+
+    const [currentIndex, setCurrentIndex] = useState(services?.length || 0);
     const [isAnimating, setIsAnimating] = useState(false);
     const controls = useAnimation();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +44,7 @@ const GlassServices = ({ services }: { services: Service[] }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const itemWidth = 100 / extendedServices.length;
+    const itemWidth = extendedServices.length > 0 ? 100 / extendedServices.length : 0;
 
     const slideTo = async (index: number) => {
         if (isAnimating) return;
@@ -58,7 +60,7 @@ const GlassServices = ({ services }: { services: Service[] }) => {
     };
 
     const handleNext = async () => {
-        if (isAnimating) return;
+        if (isAnimating || !services) return;
         const nextIndex = currentIndex + 1;
         await slideTo(nextIndex);
 
@@ -69,7 +71,7 @@ const GlassServices = ({ services }: { services: Service[] }) => {
     };
 
     const handlePrev = async () => {
-        if (isAnimating) return;
+        if (isAnimating || !services) return;
         const prevIndex = currentIndex - 1;
         await slideTo(prevIndex);
 
@@ -80,11 +82,13 @@ const GlassServices = ({ services }: { services: Service[] }) => {
     };
 
     useEffect(() => {
-        controls.set({ x: `-${services.length * itemWidth}%` });
-    }, [controls, itemWidth, services.length]);
+        if (services && services.length > 0) {
+            controls.set({ x: `-${services.length * itemWidth}%` });
+        }
+    }, [controls, itemWidth, services?.length]);
 
     useEffect(() => {
-        if (isAnimating) return;
+        if (isAnimating || !services) return;
         const N = services.length;
         if (currentIndex >= N * 2) {
             const newIndex = currentIndex - N;
@@ -95,7 +99,7 @@ const GlassServices = ({ services }: { services: Service[] }) => {
             controls.set({ x: `-${newIndex * itemWidth}%` });
             setCurrentIndex(newIndex);
         }
-    }, [currentIndex, isAnimating, controls, itemWidth, services.length]);
+    }, [currentIndex, isAnimating, controls, itemWidth, services?.length]);
 
     // Auto-play
     useEffect(() => {
@@ -122,7 +126,7 @@ const GlassServices = ({ services }: { services: Service[] }) => {
                         viewport={{ once: true }}
                         className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500"
                     >
-                        Premium Services
+                        {dict.services.title}
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -131,20 +135,12 @@ const GlassServices = ({ services }: { services: Service[] }) => {
                         transition={{ delay: 0.1 }}
                         className="text-gray-400 max-w-2xl mx-auto"
                     >
-                        Elevate your digital presence with our tailored solutions.
+                        {dict.services.description}
                     </motion.p>
                 </div>
 
                 <div className="relative max-w-7xl mx-auto">
-                    <div
-                        className="overflow-hidden py-10 px-4"
-                        style={{
-                            maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-                            maskComposite: "intersect",
-                            WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-                            WebkitMaskComposite: "source-in"
-                        }}
-                    >
+                    <div className="overflow-hidden py-10 px-4">
                         <motion.div
                             ref={containerRef}
                             animate={controls}
@@ -175,78 +171,71 @@ const GlassServices = ({ services }: { services: Service[] }) => {
                                     className="w-full px-4"
                                     style={{ width: `${100 / extendedServices.length}%` }}
                                 >
-                                    <div className="glass h-full rounded-3xl overflow-hidden border border-white/10 shadow-xl backdrop-blur-xl bg-black/40 flex flex-col hover:scale-[1.02] transition-transform duration-300 group">
-                                        {/* Image Section */}
-                                        <div className="w-full h-48 relative overflow-hidden">
+                                    <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-300 relative group flex flex-col">
+                                        {/* Image */}
+                                        <div className="relative h-56 w-full overflow-hidden">
                                             {service.imageUrl ? (
                                                 <Image
                                                     src={service.imageUrl}
                                                     alt={service.title}
                                                     fill
-                                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                                                    <span className="text-gray-500">No Image</span>
+                                                    <span className="text-gray-500">{dict.services.no_image}</span>
                                                 </div>
                                             )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                                         </div>
 
-                                        {/* Content Section */}
-                                        <div className="p-6 flex flex-col flex-grow">
-                                            <h3 className="text-2xl font-bold text-white mb-3 leading-tight">
-                                                {service.title}
-                                            </h3>
+                                        {/* Content */}
+                                        <div className="p-6 flex-grow flex flex-col">
+                                            <h3 className="text-xl font-bold mb-2 text-[var(--glass-text)]">{service.title}</h3>
+                                            <p className="text-sm text-[var(--glass-text-muted)] mb-6 line-clamp-3">{service.description}</p>
 
-                                            <p className="text-gray-400 mb-6 text-sm line-clamp-3 flex-grow">
-                                                {service.description}
-                                            </p>
-
-                                            <div className="grid grid-cols-1 gap-2 mb-6">
-                                                {service.features?.slice(0, 4).map((feature, idx) => (
-                                                    <div key={idx} className="flex items-center gap-2 text-gray-300">
-                                                        <div className="w-5 h-5 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
-                                                            <Check size={12} />
-                                                        </div>
-                                                        <span className="text-xs font-medium truncate">{feature}</span>
-                                                    </div>
+                                            {/* ... features ... */}
+                                            <ul className="mb-6 space-y-2 flex-grow">
+                                                {service.features?.slice(0, 4).map((feature, i) => (
+                                                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                                                        <Check size={16} className="text-teal-400 mt-0.5 shrink-0" />
+                                                        <span>{feature}</span>
+                                                    </li>
                                                 ))}
+                                            </ul>
+
+                                            <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between mb-6">
+                                                {/* ... prices ... */}
+                                                <span className="text-gray-400 line-through text-sm">
+                                                    {(() => {
+                                                        const priceStr = service.price.replace(/[^0-9]/g, '');
+                                                        const price = parseInt(priceStr);
+                                                        if (!isNaN(price)) {
+                                                            const originalPrice = Math.round(price * 1.25);
+                                                            return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(originalPrice)}`;
+                                                        }
+                                                        return null;
+                                                    })()}
+                                                </span>
+                                                <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
+                                                    {(() => {
+                                                        const priceStr = service.price.replace(/[^0-9]/g, '');
+                                                        const price = parseInt(priceStr);
+                                                        if (!isNaN(price)) {
+                                                            return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price)}`;
+                                                        }
+                                                        return service.price;
+                                                    })()}
+                                                </span>
                                             </div>
 
-                                            <div className="mt-auto pt-6 border-t border-white/10">
-                                                <div className="flex flex-col mb-4">
-                                                    <span className="text-gray-500 text-xs line-through decoration-red-500/50 decoration-2 mb-1">
-                                                        {(() => {
-                                                            const priceStr = service.price.replace(/[^0-9]/g, '');
-                                                            const price = parseInt(priceStr);
-                                                            if (!isNaN(price)) {
-                                                                const originalPrice = Math.round(price * 1.25);
-                                                                return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(originalPrice)}`;
-                                                            }
-                                                            return null;
-                                                        })()}
-                                                    </span>
-                                                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
-                                                        {(() => {
-                                                            const priceStr = service.price.replace(/[^0-9]/g, '');
-                                                            const price = parseInt(priceStr);
-                                                            if (!isNaN(price)) {
-                                                                return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)}`;
-                                                            }
-                                                            return service.price;
-                                                        })()}
-                                                    </span>
-                                                </div>
-
-                                                <a
-                                                    href={service.orderLink || "#contact"}
-                                                    className="w-full inline-flex items-center justify-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-teal-50 transition-all duration-300 group shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]"
-                                                >
-                                                    {service.buttonText || "Order Now"}
-                                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                                </a>
-                                            </div>
+                                            <a
+                                                href={service.orderLink || "#contact"}
+                                                className="w-full inline-flex items-center justify-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-teal-50 transition-all duration-300 group shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]"
+                                            >
+                                                {service.buttonText || dict.services.order_now}
+                                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

@@ -386,7 +386,7 @@ const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => vo
     );
 };
 
-const ProjectModalContent = ({ project, onClose }: { project: Project; onClose: () => void }) => {
+const ProjectModalContent = ({ project, onClose, dict }: { project: Project; onClose: () => void, dict: any }) => {
     const allMedia = [
         { type: project.type, url: project.image },
         ...(project.gallery || []).map(item => ({ type: item.type, url: item.url }))
@@ -558,17 +558,17 @@ const ProjectModalContent = ({ project, onClose }: { project: Project; onClose: 
 
                     <div className="space-y-4 mb-8">
                         <div className="flex justify-between border-b border-[var(--glass-border)] pb-2">
-                            <span className="text-[var(--glass-text-muted)]">Album</span>
+                            <span className="text-[var(--glass-text-muted)]">{dict.portfolio.album}</span>
                             <span className="text-[var(--glass-text)] font-medium">{project.album || "-"}</span>
                         </div>
                         <div className="flex justify-between border-b border-[var(--glass-border)] pb-2">
-                            <span className="text-[var(--glass-text-muted)]">Year</span>
+                            <span className="text-[var(--glass-text-muted)]">{dict.portfolio.year}</span>
                             <span className="text-[var(--glass-text)] font-medium">
                                 {project.uploadDate ? new Date(project.uploadDate).getFullYear() : new Date().getFullYear()}
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-[var(--glass-border)] pb-2 items-center">
-                            <span className="text-[var(--glass-text-muted)]">Stats</span>
+                            <span className="text-[var(--glass-text-muted)]">{dict.portfolio.stats}</span>
                             <div className="flex items-center gap-4 text-[var(--glass-text)] font-medium">
                                 <span className="flex items-center gap-1"><Eye size={16} /> {formatViewCount(project.views || 0)}</span>
 
@@ -618,23 +618,23 @@ const ProjectModalContent = ({ project, onClose }: { project: Project; onClose: 
                 </div>
 
                 <Link href={`/projects/${project.slug?.current}`} className="w-full py-4 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold hover:opacity-90 transition-all shadow-lg hover:shadow-teal-500/25 flex items-center justify-center gap-2 group">
-                    View Project <ExternalLink size={18} className="group-hover:translate-x-1 transition-transform" />
+                    {dict.portfolio.view_project} <ExternalLink size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
             </motion.div>
         </motion.div>
     );
 };
 
-const GlassPortfolio = ({ projects }: { projects: Project[] }) => {
+const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) => {
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
-    const [activeCategory, setActiveCategory] = useState("All");
+    const [activeCategory, setActiveCategory] = useState(dict.portfolio.all);
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 9;
 
     // Derive unique categories from projects
-    const categories = ["All", ...Array.from(new Set(projects.map((p) => p.category)))];
+    const categories = [dict.portfolio.all, ...Array.from(new Set(projects.map((p) => p.category)))];
 
-    const filteredProjects = activeCategory === "All"
+    const filteredProjects = activeCategory === dict.portfolio.all
         ? projects
         : projects.filter(project => project.category === activeCategory);
 
@@ -671,23 +671,23 @@ const GlassPortfolio = ({ projects }: { projects: Project[] }) => {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-12"
                 >
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">Selected Works</h2>
+                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">{dict.portfolio.title}</h2>
                     <p className="text-[var(--glass-text-muted)] max-w-2xl mx-auto mb-8">
-                        A curated collection of projects across various disciplines.
+                        {dict.portfolio.description}
                     </p>
 
                     {/* Category Tabs */}
                     <div className="flex flex-wrap justify-center gap-4 mb-12">
                         {categories.map((category) => (
                             <button
-                                key={category}
+                                key={category as string}
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
                                     ? "bg-[var(--glass-text)] text-[var(--background)] border-[var(--glass-text)] shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                                     : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] border-[var(--glass-border)] hover:border-[var(--glass-text)]"
                                     }`}
                             >
-                                {category}
+                                {category as string}
                             </button>
                         ))}
                     </div>
@@ -760,7 +760,7 @@ const GlassPortfolio = ({ projects }: { projects: Project[] }) => {
                                     const project = projects.find((p) => p.id === selectedId);
                                     if (!project) return null;
 
-                                    return <ProjectModalContent project={project} onClose={() => setSelectedId(null)} />;
+                                    return <ProjectModalContent project={project} onClose={() => setSelectedId(null)} dict={dict} />;
                                 })()}
                             </div>
                         </Portal>

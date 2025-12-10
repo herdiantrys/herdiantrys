@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
 import { urlFor } from "@/sanity/lib/image";
-import { toggleLike, postComment } from "@/app/(root)/projects/[slug]/actions";
+import { toggleLike, postComment } from "@/app/[lang]/(root)/projects/[slug]/actions";
 import { incrementView } from "@/actions/incrementView";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";

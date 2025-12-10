@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Testimonial } from "@/lib/sanityTestimonials";
 import Image from "next/image";
 
-const GlassTestimonials = ({ testimonials = [] }: { testimonials: Testimonial[] }) => {
+const GlassTestimonials = ({ testimonials = [], dict }: { testimonials: Testimonial[], dict: any }) => {
     // Duplicate testimonials to create infinite loop illusion
     // If we have few testimonials, we might need to duplicate more times
     const extendedTestimonials = [...testimonials, ...testimonials, ...testimonials];
@@ -120,9 +120,9 @@ const GlassTestimonials = ({ testimonials = [] }: { testimonials: Testimonial[] 
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">Client Stories</h2>
+                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">{dict.testimonials.title}</h2>
                     <p className="text-[var(--glass-text-muted)] max-w-2xl mx-auto">
-                        Hear from those who have experienced the magic of glassmorphism.
+                        {dict.testimonials.description}
                     </p>
                 </motion.div>
 

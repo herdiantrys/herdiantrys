@@ -4,7 +4,7 @@ import UserNavbar from "./UserNavbar";
 import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
 
-export default async function Navbar() {
+export default async function Navbar({ dict }: { dict: any }) {
   const session = await auth();
   let username = null;
 
@@ -16,6 +16,7 @@ export default async function Navbar() {
   // Kirim data user (atau null) ke client
   return (
     <UserNavbar
+      dict={dict}
       user={
         session?.user
           ? {

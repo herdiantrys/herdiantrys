@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { urlFor } from "@/sanity/lib/image";
 
-export default function HeroSection({ profile }: { profile: any }) {
+export default function HeroSection({ profile, dict }: { profile: any, dict: any }) {
   const [index, setIndex] = useState(0);
   const roles = profile?.headline && profile.headline.length > 0 ? profile.headline : ["Creative Developer", "UI/UX Designer"];
 
@@ -34,7 +34,7 @@ export default function HeroSection({ profile }: { profile: any }) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass bg-white/10 border border-teal-500/30 text-teal-600 dark:text-teal-300 mb-6"
           >
             <Sparkles size={16} />
-            <span className="text-sm font-medium tracking-wide uppercase">Creative Digital Artist</span>
+            <span className="text-sm font-medium tracking-wide uppercase">{dict.hero.creative_role}</span>
           </motion.div>
 
           <motion.h1
@@ -43,7 +43,7 @@ export default function HeroSection({ profile }: { profile: any }) {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-5xl lg:text-7xl font-bold leading-tight mb-6"
           >
-            Hi There! I'm <br />
+            {dict.hero.greeting} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-500 to-emerald-500 animate-gradient-x">
               {profile?.fullName || "Herdian"}
             </span>
@@ -70,8 +70,7 @@ export default function HeroSection({ profile }: { profile: any }) {
             transition={{ delay: 0.8, duration: 0.6 }}
             className="text-lg text-[var(--glass-text-muted)] max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed"
           >
-            Crafting visual experiences that blend imagination with digital precision.
-            Specializing in brand identity, character design, and immersive illustrations.
+            {dict.hero.description}
           </motion.p>
 
           <motion.div
@@ -84,14 +83,14 @@ export default function HeroSection({ profile }: { profile: any }) {
               onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
-              View Portfolio
+              {dict.hero.view_portfolio}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-8 py-4 rounded-2xl glass bg-white/5 border border-white/10 hover:bg-white/10 text-[var(--glass-text)] font-semibold hover:scale-105 transition-all duration-300"
             >
-              Contact Me
+              {dict.hero.contact_me}
             </button>
           </motion.div>
         </motion.div>

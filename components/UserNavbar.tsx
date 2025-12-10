@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Menu, X, Sun, Moon, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, Sun, Moon, User, LogOut, Settings, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn, signOut } from "next-auth/react";
 
@@ -16,16 +16,10 @@ type UserLike = {
 
 type NavbarClientProps = {
   user: UserLike;
+  dict: any;
 };
 
-const navLinks = [
-  { name: "Home", href: "#hero" },
-  { name: "Portfolio", href: "#portfolio" },
-  { name: "About", href: "#about" },
-  { name: "Contact", href: "#contact" },
-];
-
-export default function UserNavbar({ user }: NavbarClientProps) {
+export default function UserNavbar({ user, dict }: NavbarClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -33,8 +27,16 @@ export default function UserNavbar({ user }: NavbarClientProps) {
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("#hero");
 
+  // Create navLinks inside component to access dict
+  const navLinks = [
+    { name: dict.nav.home, href: "#hero" },
+    { name: dict.nav.works, href: "#portfolio" },
+    { name: dict.nav.about, href: "#about" },
+    { name: dict.nav.contact, href: "#contact" },
+  ];
+
   // Memoize sections to avoid unnecessary re-renders in the effect
-  const sections = useMemo(() => navLinks.map(link => link.href), []);
+  const sections = useMemo(() => navLinks.map(link => link.href), [navLinks]);
 
   useEffect(() => {
     setMounted(true);
@@ -71,8 +73,12 @@ export default function UserNavbar({ user }: NavbarClientProps) {
     const observer = new IntersectionObserver(observerCallback, observerOptions);
 
     sections.forEach((section) => {
-      const element = document.querySelector(section);
-      if (element) observer.observe(element);
+      try {
+        const element = document.querySelector(section);
+        if (element) observer.observe(element);
+      } catch (e) {
+        console.warn("Invalid selector:", section);
+      }
     });
 
     // Handle bottom of page detection
@@ -188,7 +194,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                       )}
                     </div>
                     <span className="text-sm font-medium text-[var(--glass-text)] hidden sm:block">
-                      {user.name?.split(" ")[0] || "Account"}
+                      {user.name?.split(" ")[0] || dict.nav.account}
                     </span>
                   </button>
 
@@ -220,7 +226,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                           <div className="p-1.5 rounded-lg bg-teal-500/10 group-hover:bg-teal-500/20 transition-colors text-teal-500">
                             <User size={16} />
                           </div>
-                          Profile
+                          {dict.nav.profile}
                         </Link>
 
                         <button
@@ -245,7 +251,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                           <div className="p-1.5 rounded-lg bg-red-500/10 group-hover:bg-red-500/20 transition-colors text-red-500">
                             <LogOut size={16} />
                           </div>
-                          Logout
+                          {dict.nav.logout}
                         </button>
                       </motion.div>
                     )}
@@ -257,7 +263,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                   className="relative px-6 py-2 rounded-full font-medium text-[var(--glass-text)] dark:text-white transition-all duration-300 ease-out hover:scale-105 hover:shadow-[0_0_20px_rgba(32,178,170,0.5)] bg-white/50 dark:bg-white/5 backdrop-blur-md border border-white/20 overflow-hidden group"
                 >
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                  <span className="relative z-10 text-gradient">Login</span>
+                  <span className="relative z-10 text-gradient">{dict.nav.login}</span>
                 </a>
               )}
             </div>
@@ -336,7 +342,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                     }}
                     className="px-8 py-3 rounded-full font-bold text-lg text-black bg-white hover:bg-gray-200 transition-colors"
                   >
-                    Login
+                    {dict.nav.login}
                   </button>
                 ) : (
                   <button
@@ -346,7 +352,7 @@ export default function UserNavbar({ user }: NavbarClientProps) {
                     }}
                     className="text-xl font-medium text-red-500 hover:text-red-400 transition-colors"
                   >
-                    Logout
+                    {dict.nav.logout}
                   </button>
                 )}
               </motion.div>

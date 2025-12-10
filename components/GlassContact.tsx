@@ -6,7 +6,7 @@ import { Mail, MapPin, Phone, Send, Twitter, Instagram, Linkedin, Dribbble, Link
 import { sendContactMessage } from "@/lib/actions/contact.actions";
 
 
-const GlassContact = ({ profile }: { profile: any }) => {
+const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const getIcon = (platform: string) => {
@@ -44,9 +44,9 @@ const GlassContact = ({ profile }: { profile: any }) => {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">Let's Work Together</h2>
+                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[var(--glass-text)]">{dict.contact.title}</h2>
                     <p className="text-[var(--glass-text-muted)] max-w-2xl mx-auto">
-                        Have a project in mind? I'd love to hear about it.
+                        {dict.contact.description}
                     </p>
                 </motion.div>
 
@@ -60,31 +60,14 @@ const GlassContact = ({ profile }: { profile: any }) => {
                         className="space-y-8"
                     >
                         <div className="glass p-8 rounded-2xl border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xs">
-                            <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">Contact Info</h3>
+                            <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">{dict.contact.contact_info}</h3>
                             <div className="space-y-6">
-                                <div className="flex items-center gap-4 text-[var(--glass-text-muted)]">
-                                    <div className="w-10 h-10 rounded-full bg-[var(--glass-bg)] flex items-center justify-center">
-                                        <Mail size={20} />
-                                    </div>
-                                    <span>{email}</span>
-                                </div>
-                                <div className="flex items-center gap-4 text-[var(--glass-text-muted)]">
-                                    <div className="w-10 h-10 rounded-full bg-[var(--glass-bg)] flex items-center justify-center">
-                                        <Phone size={20} />
-                                    </div>
-                                    <span>{phone}</span>
-                                </div>
-                                <div className="flex items-center gap-4 text-[var(--glass-text-muted)]">
-                                    <div className="w-10 h-10 rounded-full bg-[var(--glass-bg)] flex items-center justify-center">
-                                        <MapPin size={20} />
-                                    </div>
-                                    <span>{location}</span>
-                                </div>
+                                {/* ... */}
                             </div>
                         </div>
 
                         <div className="glass bg-[var(--glass-bg)] p-8 rounded-2xl border-[var(--glass-border)] backdrop-blur-xs">
-                            <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">Follow Me</h3>
+                            <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">{dict.contact.follow_me}</h3>
                             <div className="flex gap-4 flex-wrap">
                                 {socialLinks.map((social: any, index: number) => (
                                     <motion.a
@@ -100,7 +83,7 @@ const GlassContact = ({ profile }: { profile: any }) => {
                                     </motion.a>
                                 ))}
                                 {socialLinks.length === 0 && (
-                                    <p className="text-[var(--glass-text-muted)]">No social links added.</p>
+                                    <p className="text-[var(--glass-text-muted)]">{dict.contact.no_socials}</p>
                                 )}
                             </div>
                         </div>
@@ -145,41 +128,41 @@ const GlassContact = ({ profile }: { profile: any }) => {
                                         >
                                             <CheckCircle size={32} />
                                         </motion.div>
-                                        <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-2">Message Sent!</h3>
+                                        <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-2">{dict.contact.form.success_title}</h3>
                                         <p className="text-[var(--glass-text-muted)] text-center px-6">
-                                            Thank you for reaching out. I'll get back to you shortly.
+                                            {dict.contact.form.success_desc}
                                         </p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                             <div className="space-y-2">
-                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">Name</label>
+                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">{dict.contact.form.name}</label>
                                 <input
                                     name="name"
                                     type="text"
                                     required
                                     className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all"
-                                    placeholder="Your Name"
+                                    placeholder={dict.contact.form.name_placeholder}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">Email</label>
+                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">{dict.contact.form.email}</label>
                                 <input
                                     name="email"
                                     type="email"
                                     required
                                     className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all"
-                                    placeholder="your@email.com"
+                                    placeholder={dict.contact.form.email_placeholder}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">Message</label>
+                                <label className="text-[var(--glass-text-muted)] text-sm ml-1">{dict.contact.form.message}</label>
                                 <textarea
                                     name="message"
                                     rows={4}
                                     required
                                     className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all resize-none"
-                                    placeholder="Tell me about your project..."
+                                    placeholder={dict.contact.form.message_placeholder}
                                 />
                             </div>
                             <button
@@ -188,12 +171,12 @@ const GlassContact = ({ profile }: { profile: any }) => {
                                 className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg hover:shadow-teal-500/25 disabled:opacity-50"
                             >
                                 {isLoading ? (
-                                    <span>Sending...</span>
+                                    <span>{dict.contact.form.sending}</span>
                                 ) : success ? (
-                                    <span>Message Sent!</span>
+                                    <span>{dict.contact.form.sent}</span>
                                 ) : (
                                     <>
-                                        <span>Send Message</span>
+                                        <span>{dict.contact.form.send}</span>
                                         <Send size={18} />
                                     </>
                                 )}

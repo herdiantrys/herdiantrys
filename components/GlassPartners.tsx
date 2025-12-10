@@ -6,14 +6,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Partner } from "@/lib/sanityPartners";
 
-const GlassPartners = ({ partners }: { partners: Partner[] }) => {
+const GlassPartners = ({ partners, dict }: { partners: Partner[], dict: any }) => {
     // Duplicate partners to create seamless infinite loop
     const extendedPartners = [...partners, ...partners, ...partners];
     return (
         <section className="py-10 relative z-10 overflow-hidden">
             <div className="container mx-auto px-4 mb-8 text-center">
                 <p className="text-[var(--glass-text-muted)] text-sm uppercase tracking-widest font-semibold">
-                    Trusted by Industry Leaders
+                    {dict.partners.trusted_by}
                 </p>
             </div>
 
