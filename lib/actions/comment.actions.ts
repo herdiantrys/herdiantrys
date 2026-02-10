@@ -66,7 +66,7 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
     }
 };
 
-import { auth } from "@/auth";
+import { trackComment, trackNightOwl } from "./gamification.actions";
 
 export const createComment = async (targetId: string, targetType: "project" | "post", text: string) => {
     try {
@@ -118,6 +118,13 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 relatedCommentId: newComment.id
             });
         }
+
+        // Gamification Hooks
+        // 1. Track Comment (Social Butterfly)
+        await trackComment(userId);
+
+        // 2. Track Night Owl (if active at night)
+        await trackNightOwl(userId);
 
         // Return structured comment object
         const createdComment = newComment as any; // Cast to any to bypass missing type inference

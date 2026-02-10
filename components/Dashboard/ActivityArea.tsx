@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { LayoutGrid, Bookmark, ShoppingBag, Bell } from "lucide-react";
+import { LayoutGrid, Bookmark, ShoppingBag, Bell, Trophy } from "lucide-react";
 import ActivityFeed from "@/components/Dashboard/ActivityFeed";
 import CreatePost from "@/components/Dashboard/CreatePost";
 import { Activity } from "@/lib/actions/activity.actions";
+import AchievementsList from "@/components/Gamification/AchievementsList";
 
 interface ActivityAreaProps {
     user: any; // The current logged-in user (for actions)
@@ -37,13 +38,13 @@ export default function ActivityArea({
     const pathname = usePathname();
 
     // Derived state from URL (Source of Truth)
-    const currentTab = searchParams.get('tab') as 'feed' | 'saved' | null;
+    const currentTab = searchParams.get('tab') as 'feed' | 'saved' | 'achievements' | null;
     console.log("ActivityArea Debug:", {
         rawTab: searchParams.get('tab'),
         currentTab,
         pathname
     });
-    const activeTab = (currentTab && ['feed', 'saved'].includes(currentTab)) ? currentTab : 'feed';
+    const activeTab = (currentTab && ['feed', 'saved', 'achievements'].includes(currentTab)) ? currentTab : 'feed';
     const t = dict?.dashboard || {};
 
     const handleTabChange = (tabId: string) => {
@@ -60,6 +61,7 @@ export default function ActivityArea({
     const tabs = [
         { id: 'feed', icon: LayoutGrid, label: t.feed || "Feed", show: true },
         { id: 'saved', icon: Bookmark, label: t.saved_nav || "Saved", show: isOwner }, // Only show saved for owner
+        { id: 'achievements', icon: Trophy, label: "Achievements", show: true }, // Always show achievements
     ].filter(tab => tab.show);
 
     return (
@@ -160,6 +162,21 @@ export default function ActivityArea({
                                 <p className="text-[var(--glass-text-muted)]">Bookmarks posts to see them here.</p>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'achievements' && (
+                    <div className="relative animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-black/5 dark:border-white/5">
+                            <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+                                <Trophy size={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">Achievements</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">Badges earned through community participation.</p>
+                            </div>
+                        </div>
+                        <AchievementsList user={targetUser} isOwner={isOwner} />
                     </div>
                 )}
             </div>

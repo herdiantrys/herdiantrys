@@ -116,7 +116,7 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            router.push(`/works?search=${encodeURIComponent(searchQuery)}`);
+            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
         }
     };
 

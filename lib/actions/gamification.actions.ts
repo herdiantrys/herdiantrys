@@ -13,10 +13,25 @@ export async function awardXP(userId: string, amount: number, reason: string) {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.findUnique({
                 where: { id: userId },
-                select: { xp: true, level: true, explorationProgress: true }
+                select: { xp: true, level: true, gamificationState: true }
             });
 
             if (!user) throw new Error("User not found");
+
+            // Daily Limit Check
+            const state: any = user.gamificationState || {};
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+            // Initialize limits if not present
+            if (!state.dailyLimits) state.dailyLimits = {};
+
+            // Check if already awarded today for this reason
+            if (state.dailyLimits[reason] === today) {
+                return { success: false, limitReached: true, message: "Daily limit reached for this action." };
+            }
+
+            // Update limit for today
+            state.dailyLimits[reason] = today;
 
             const newXP = (user.xp || 0) + amount;
 
@@ -38,7 +53,8 @@ export async function awardXP(userId: string, amount: number, reason: string) {
                 where: { id: userId },
                 data: {
                     xp: newXP,
-                    level: newLevel
+                    level: newLevel,
+                    gamificationState: state
                 }
             });
 
@@ -52,8 +68,10 @@ export async function awardXP(userId: string, amount: number, reason: string) {
             };
         });
 
-        revalidatePath("/");
-        revalidatePath("/dashboard");
+        if (result.success) {
+            revalidatePath("/");
+            revalidatePath("/dashboard");
+        }
 
         return result;
 
@@ -201,5 +219,83 @@ export async function trackDeepThinker(userId: string) {
         });
     } catch (e) {
         console.error(e);
+    }
+}
+
+export async function trackComment(userId: string) {
+    try {
+        // limit 5 XP awards per day for commenting
+        const xpResult = await awardXP(userId, 5, "daily_comment");
+
+        // Track for badge (Social Butterfly)
+        await prisma.$transaction(async (tx) => {
+            const user = await tx.user.findUnique({
+                where: { id: userId },
+                select: { gamificationState: true }
+            });
+            if (!user) return;
+
+            const state: any = user.gamificationState || {};
+            state.commentCount = (state.commentCount || 0) + 1;
+
+            await tx.user.update({
+                where: { id: userId },
+                data: { gamificationState: state }
+            });
+
+            if (state.commentCount >= 5) {
+                await checkAndAwardBadge(userId, "social_butterfly", tx);
+            }
+        });
+
+        return xpResult;
+    } catch (e) {
+        console.error("Error tracking comment:", e);
+    }
+}
+
+export async function trackLikeReceived(authorId: string) {
+    try {
+        // limit 10 XP awards per day for receiving likes
+        const xpResult = await awardXP(authorId, 2, "daily_like_received");
+
+        // Track for badge (Trendsetter)
+        await prisma.$transaction(async (tx) => {
+            const user = await tx.user.findUnique({
+                where: { id: authorId },
+                select: { gamificationState: true }
+            });
+            if (!user) return;
+
+            const state: any = user.gamificationState || {};
+            state.likeReceivedCount = (state.likeReceivedCount || 0) + 1;
+
+            await tx.user.update({
+                where: { id: authorId },
+                data: { gamificationState: state }
+            });
+
+            if (state.likeReceivedCount >= 10) {
+                await checkAndAwardBadge(authorId, "trendsetter", tx);
+            }
+        });
+
+        return xpResult;
+    } catch (e) {
+        console.error("Error tracking like received:", e);
+    }
+}
+
+export async function trackNightOwl(userId: string) {
+    try {
+        const now = new Date();
+        const hour = now.getHours();
+
+        // Between 00:00 (12 AM) and 04:00 (4 AM)
+        if (hour >= 0 && hour < 4) {
+            await checkAndAwardBadge(userId, "night_owl");
+        }
+    } catch (e) {
+        console.error("Error tracking night owl:", e);
     }
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Sidebar from "./Sidebar";
+import AdminSidebar from "../Admin/AdminSidebar";
 import { usePathname } from "next/navigation";
 import ParticleWaveWrapper from "../ParticleWaveWrapper";
 import GlobalNavbarClient from "../GlobalNavbarClient";
@@ -18,6 +19,9 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
     const [isCollapsed, setIsCollapsed] = useState(false);
     const pathname = usePathname();
     const isHome = ["/", "/en", "/id"].includes(pathname);
+
+    const normalizedPath = pathname?.replace(/^\/[a-z]{2}/, "") || "/";
+    const isAdmin = normalizedPath.startsWith("/admin") || normalizedPath === "/admin";
 
     // Common background logic
     const bgClass = "bg-transparent";
@@ -48,14 +52,23 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
                 }
             `}} />
             <ParticleWaveWrapper />
-            <Sidebar
-                dict={dict}
-                isOpen={isSidebarOpen}
-                setIsOpen={setIsSidebarOpen}
-                user={user}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-            />
+            {isAdmin ? (
+                <AdminSidebar
+                    isOpen={isSidebarOpen}
+                    setIsOpen={setIsSidebarOpen}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                />
+            ) : (
+                <Sidebar
+                    dict={dict}
+                    isOpen={isSidebarOpen}
+                    setIsOpen={setIsSidebarOpen}
+                    user={user}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                />
+            )}
 
             <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <GlobalNavbarClient user={user} dict={dict} />

@@ -21,7 +21,9 @@ export default async function AdminLayout({
 
     return (
         <AppLayoutAdapter dict={dict}>
-            {children}
+            <div className="container mx-auto px-4 pb-8 pt-24">
+                {children}
+            </div>
         </AppLayoutAdapter>
     );
 }

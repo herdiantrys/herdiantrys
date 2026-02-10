@@ -32,7 +32,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && searchQuery.trim()) {
-            router.push(`/projects?search=${encodeURIComponent(searchQuery)}`);
+            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
         }
     };
 
@@ -94,7 +94,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors" size={16} />
                     <input
                         type="text"
-                        placeholder="Search works..."
+                        placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={handleSearch}

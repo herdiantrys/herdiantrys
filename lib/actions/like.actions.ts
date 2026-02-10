@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "./notification.actions";
 import { auth } from "@/auth";
+import { trackLikeReceived } from "./gamification.actions";
 
 export const toggleLike = async (targetId: string, targetType: "project" | "user" | "post" = "project") => {
     try {
@@ -89,6 +90,9 @@ export const toggleLike = async (targetId: string, targetType: "project" | "user
                 relatedPostId: targetType === 'post' ? targetId : undefined,
                 relatedProjectId: targetType === 'project' ? targetId : undefined
             });
+
+            // Gamification Hook: Reward the Author for receiving a like
+            await trackLikeReceived(recipientId);
         }
 
         revalidatePath("/dashboard");
