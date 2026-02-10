@@ -3,12 +3,16 @@
 import ProfileCard from "./ProfileCard";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Bell, Bookmark, Settings, LogOut } from "lucide-react";
+import { Home, Bell, Bookmark, Settings, LogOut, ShieldCheck, LayoutDashboard, ShoppingBag, Search, Briefcase } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { LEVELS } from "@/lib/constants/gamification";
+import { useState } from "react";
 
 export default function DashboardSidebar({ user, isPublic = false, dict }: { user: any; isPublic?: boolean; dict?: any }) {
-    const pathname = usePathname();
+    const pathname = usePathname() || "/";
+    const normalizedPath = pathname?.replace(/^\/[a-z]{2}/, "") || "/";
+
 
     if (!user) return null;
 
@@ -34,9 +38,81 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
 
             <ProfileCard user={user} isPublic={isPublic} />
 
-            {/* Navigation Menu - Only show if NOT public */}
+            {/* Admin Quick Access - For robust visibility */}
+            {!isPublic && ['admin', 'superadmin'].includes(user.role?.toLowerCase() || '') && (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0">
+                    <Link
+                        href="/admin"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 border border-teal-500/20 group"
+                    >
+                        <ShieldCheck size={18} className="group-hover:scale-110 transition-transform" />
+                        Admin Management
+                    </Link>
+                </div>
+            )}
+
+            {/* Quick Navigation Menu */}
+            {!isPublic && (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0">
+                    <div className="px-4 pt-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-teal-500/40">
+                        Navigation
+                    </div>
+                    <div className="space-y-1 py-1">
+                        {[
+                            { name: "Home", href: "/dashboard", icon: Home },
+                            { name: "Inventory", href: "/dashboard?tab=inventory", icon: ShoppingBag },
+                            { name: "Notifications", href: "/notifications", icon: Bell },
+                            { name: "Works", href: "/projects", icon: Briefcase },
+                            { name: "Search", href: "/search", icon: Search },
+                            { name: "Settings", href: "/settings", icon: Settings },
+                            // Add Admin Panel link directly in menu for admins
+                            ...(['admin', 'superadmin'].includes(user.role?.toLowerCase() || '')
+                                ? [{ name: "Admin Panel", href: "/admin", icon: ShieldCheck }]
+                                : [])
+                        ].map((item) => {
+                            const isActive = normalizedPath === item.href || (item.href !== "/dashboard" && normalizedPath.startsWith(item.href));
+                            const Icon = item.icon;
+
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`
+                                        flex items-center px-4 py-3 rounded-xl transition-all group relative duration-300
+                                        ${isActive ? "text-teal-400 font-bold" : "text-[var(--glass-text-muted)] hover:text-white"}
+                                    `}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="dashboard-nav-active-bg"
+                                            className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 shadow-[0_4px_16px_rgba(255,255,255,0.05)] backdrop-blur-sm -z-10"
+                                            transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
+                                        />
+                                    )}
+
+                                    <div className="relative">
+                                        <Icon size={18} className={`min-w-[18px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.4)]" : "opacity-70 group-hover:opacity-100"}`} />
+                                    </div>
+
+                                    <span className="ml-3 text-sm tracking-tight whitespace-nowrap">
+                                        {item.name}
+                                    </span>
+
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/4 bottom-1/4 w-[2.5px] bg-teal-500 rounded-full shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* Gamification Stats */}
-            <div className="bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg space-y-6">
+            <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl space-y-6 overflow-hidden relative group">
+                {/* Liquid Shine Edge */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+
                 {/* Level & XP */}
                 <div>
                     <div className="flex justify-between items-end mb-2">
@@ -81,7 +157,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
                             {user.badges.map((badge: any, idx: number) => (
                                 <div
                                     key={idx}
-                                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 shadow-sm flex items-center justify-center text-xl relative group cursor-help transition-transform hover:scale-105 hover:shadow-md hover:border-teal-500/30"
+                                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 shadow-sm flex items-center justify-center text-xl relative group cursor-help transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_20px_rgba(0,0,0,0.2)] hover:border-teal-500/30"
                                     title={badge.name || "Badge"}
                                 >
                                     {/* Render emoji/icon based on content */}

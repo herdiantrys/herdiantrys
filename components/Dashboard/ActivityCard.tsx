@@ -100,7 +100,7 @@ export default function ActivityCard({
             if (activity.type === 'new_user') targetType = 'user';
             if (activity.type === 'user_post') targetType = 'post';
 
-            const result = await toggleLike(userId, targetId, targetType);
+            const result = await toggleLike(targetId, targetType);
             if (result.success && result.isLiked !== undefined) {
                 // Sync with server truth
                 setIsLiked(result.isLiked);
@@ -212,10 +212,10 @@ export default function ActivityCard({
 
     return (
         <>
-            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-6 shadow-lg transition-transform hover:scale-[1.01]">
+            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg transition-transform hover:scale-[1.01]">
                 {/* Repost Header */}
                 {activity.originalPost && (
-                    <div className="flex items-center gap-2 mb-2 ml-[3.5rem] text-xs font-semibold text-[var(--glass-text-muted)]">
+                    <div className="flex items-center gap-2 mb-2 ml-12 sm:ml-16 text-xs font-semibold text-[var(--glass-text-muted)]">
                         <Repeat size={14} />
                         <span>{activity.actor.name} reposted</span>
                     </div>
@@ -279,7 +279,7 @@ export default function ActivityCard({
                 </div>
 
                 {/* Content */}
-                <div className="pl-0 md:pl-16 mt-4 md:mt-0">
+                <div className="pl-12 sm:pl-16 mt-3 sm:mt-0">
                     {activity.details.description && activity.type === 'new_user' && (
                         <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-500/20 rounded-xl p-4">
                             <p className="text-[var(--glass-text)] italic">{t.welcome_quote || "\"Just joined! excited to be here.\""}</p>
@@ -369,7 +369,7 @@ export default function ActivityCard({
                 </div>
 
                 {/* Action Footer */}
-                <div className="pl-0 md:pl-16 mt-4 flex items-center justify-between md:justify-start gap-2 md:gap-6 border-t border-white/10 pt-3">
+                <div className="pl-0 sm:pl-16 mt-4 flex items-center justify-between sm:justify-start gap-1 sm:gap-6 border-t border-white/5 pt-3">
                     <button
                         onClick={handleLike}
                         disabled={isLikePending}
@@ -422,7 +422,7 @@ export default function ActivityCard({
 
                 {/* Comment Section */}
                 {showComments && commentTargetType && (
-                    <div className="pl-0 md:pl-16 mt-4">
+                    <div className="pl-0 sm:pl-16 mt-4">
                         <CommentSection
                             targetId={targetId}
                             targetType={commentTargetType}

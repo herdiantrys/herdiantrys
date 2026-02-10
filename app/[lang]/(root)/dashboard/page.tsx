@@ -16,6 +16,7 @@ import ActivityArea from "@/components/Dashboard/ActivityArea";
 import { getBookmarkedProjects } from "@/lib/actions/bookmark.actions";
 import { Activity } from "@/lib/actions/activity.actions";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
+import { getUserInventory } from "@/lib/actions/inventory.actions";
 
 export default async function DashboardPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -28,10 +29,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
     const dict = await getDictionary((lang || 'en') as "en" | "id");
 
     // Parallel fetching for performance
-    const [user, activities, trendingPosts] = await Promise.all([
+    const [user, activities, trendingPosts, inventoryData] = await Promise.all([
         getUserByEmail(session.user.email),
         getRecentActivities(session.user.id),
-        getTrendingPosts()
+        getTrendingPosts(),
+        session.user.id ? getUserInventory(session.user.id) : null
     ]);
 
     if (!user) {
@@ -105,7 +107,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
                                 user={safeUser}
                                 activities={activities}
                                 savedActivities={uniqueSavedActivities as Activity[]}
-                                savedActivities={uniqueSavedActivities as Activity[]}
+                                inventoryData={inventoryData as any}
                                 dict={dict}
                                 isOwner={true}
                                 dbUserId={session.user.id}

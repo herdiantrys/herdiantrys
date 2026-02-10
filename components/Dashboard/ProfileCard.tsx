@@ -8,27 +8,23 @@ import { useState, useRef, useEffect } from "react";
 import EditProfileModal from "./EditProfileModal";
 import { uploadProfileImage } from "@/lib/actions/user.actions";
 import { getUserPoints } from "@/lib/actions/points.actions";
+import { motion } from "framer-motion";
 
-export default function ProfileCard({ user, isPublic = false }: { user: any; isPublic?: boolean }) {
+export default function ProfileCard({
+    user,
+    isPublic = false,
+    isCollapsed = false
+}: {
+    user: any;
+    isPublic?: boolean;
+    isCollapsed?: boolean
+}) {
     const pathname = usePathname();
     const router = useRouter();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [points, setPoints] = useState(user?.points || 0);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Poll for points updates - REMOVED to prevent CPU spikes
-    /*
-    useEffect(() => {
-        if (user?._id) {
-            const fetchPoints = async () => {
-                const latestPoints = await getUserPoints(user._id);
-                setPoints((prev: number) => latestPoints !== prev ? latestPoints : prev);
-            };
-            fetchPoints();
-        }
-    }, [user?._id]);
-    */
 
     const isProfilePage = pathname?.includes("/user/");
 
@@ -66,32 +62,33 @@ export default function ProfileCard({ user, isPublic = false }: { user: any; isP
 
     return (
         <div
-            className={`glass-liquid flex flex-col items-center text-center relative overflow-hidden ${isUploading ? 'animate-pulse' : ''}`}
+            className={`glass-liquid flex flex-col items-center text-center relative overflow-hidden transition-all duration-500 ${isUploading ? 'animate-pulse' : ''} ${isCollapsed ? 'p-2 rounded-2xl' : ''}`}
         >
             <EditProfileModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} user={user} />
 
             {/* Banner Section */}
-            <div className="w-full h-32 relative bg-gradient-to-r from-teal-900/50 to-slate-900/50">
-                {bannerUrl && (
-                    <img
-                        src={bannerUrl}
-                        alt="Profile Banner"
-                        className="w-full h-full object-cover"
-                    />
-                )}
-                {/* Gradient Overlay for better text readability if we put text there, mostly for aesthetics */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
+            {!isCollapsed && (
+                <div className="w-full h-32 relative bg-gradient-to-r from-teal-900/50 to-slate-900/50">
+                    {bannerUrl && (
+                        <img
+                            src={bannerUrl}
+                            alt="Profile Banner"
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+            )}
 
-            {/* Main Content with Negative Margin for Avatar Overlap */}
-            <div className="w-full px-6 pb-6 relative flex flex-col items-center">
+            {/* Main Content */}
+            <div className={`w-full relative flex flex-col items-center transition-all duration-500 ${isCollapsed ? 'px-0 pb-0' : 'px-6 pb-6'}`}>
 
                 <div
                     onClick={handleImageClick}
-                    className={`relative w-24 h-24 -mt-12 mb-3 group 
+                    className={`relative group transition-all duration-500
+                        ${isCollapsed ? 'w-12 h-12 mb-0' : 'w-20 h-20 -mt-10 sm:w-24 sm:h-24 sm:-mt-12 mb-3'} 
                         ${!isPublic ? 'cursor-pointer' : ''}`}>
 
-                    {/* Glow Effect / Background Layer */}
                     {(user.equippedBackground || user.equippedEffect) && (
                         <div
                             className={`absolute -inset-4 rounded-full opacity-60 blur-xl transition-opacity duration-500
@@ -103,7 +100,6 @@ export default function ProfileCard({ user, isPublic = false }: { user: any; isP
                         />
                     )}
 
-                    {/* Frame Layer (Separate from Background) */}
                     {user.equippedFrame && (
                         <div
                             className={`absolute -inset-2 rounded-full opacity-50 blur-lg group-hover:opacity-75 transition-opacity duration-500
@@ -112,7 +108,6 @@ export default function ProfileCard({ user, isPublic = false }: { user: any; isP
                         />
                     )}
 
-                    {/* Main Avatar Container */}
                     <div className={`relative w-full h-full rounded-full shadow-2xl overflow-hidden
                          ${(user.equippedFrame) && !(user.equippedFrame?.startsWith('/') || user.equippedFrame?.startsWith('http'))
                             ? `p-1 bg-gradient-to-br ${user.equippedFrame}`
@@ -122,7 +117,6 @@ export default function ProfileCard({ user, isPublic = false }: { user: any; isP
 
                         <div className="w-full h-full rounded-full overflow-hidden relative bg-[#121212]">
 
-                            {/* Image Frame Overlay (if URL) */}
                             {user.equippedFrame && (user.equippedFrame.startsWith('http') || user.equippedFrame.startsWith('/')) && (
                                 <div className="absolute inset-0 z-20 pointer-events-none">
                                     <img
@@ -147,95 +141,102 @@ export default function ProfileCard({ user, isPublic = false }: { user: any; isP
 
                             {!isPublic && !isUploading && (
                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                                    <Camera size={20} className="text-white" />
+                                    <Camera size={14} className="text-white" />
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
 
-                <h2 className="text-xl font-bold text-[var(--glass-text)] mb-1">{user.fullName}</h2>
-                <p className="text-sm text-[var(--glass-text-muted)] mb-3">@{user.username}</p>
+                {!isCollapsed && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full"
+                    >
+                        <h2 className="text-xl font-bold text-[var(--glass-text)] mb-1">{user.fullName}</h2>
+                        <p className="text-sm text-[var(--glass-text-muted)] mb-3">@{user.username}</p>
 
-                {/* Live Coin Badge */}
-                <Link
-                    href={user.username ? `/${pathname?.split('/')[1] || 'en'}/user/${user.username}?tab=inventory` : "/inventory"}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-amber-500/20 mb-4 shadow-[0_0_15px_rgba(245,158,11,0.1)] backdrop-blur-sm cursor-pointer hover:scale-105 transition-transform"
-                >
-                    <Coins size={16} className="text-amber-400 animate-pulse drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                    <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">
-                        {points.toLocaleString('en-US')} Coins
-                    </span>
-                </Link>
-
-                {user.headline && (
-                    <p className="text-sm text-[var(--glass-text)] italic mb-4 px-4">{user.headline}</p>
-                )}
-
-                <div className="flex flex-col items-center gap-2 mb-6 text-sm text-[var(--glass-text-muted)]">
-                    {user.location && (
-                        <div className="flex items-center gap-1.5">
-                            <MapPin size={14} className="text-teal-400" />
-                            <span>{user.location}</span>
-                        </div>
-                    )}
-                    {user.socialLinks && user.socialLinks.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-3 mt-1">
-                            {user.socialLinks.map((link: any, idx: number) => (
-                                <a
-                                    key={idx}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1.5 hover:text-teal-400 transition-colors"
-                                >
-                                    <LinkIcon size={14} className="text-teal-400" />
-                                    <span>{link.platform || "Website"}</span>
-                                </a>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex justify-center gap-6 text-sm text-[var(--glass-text-muted)] mb-6 w-full">
-                    <div className="flex flex-col items-center">
-                        <span className="font-bold text-lg text-[var(--glass-text)]">{user.stats?.posts || 0}</span>
-                        <span>Posts</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="font-bold text-lg text-[var(--glass-text)]">{user.stats?.likes || 0}</span>
-                        <span>Likes</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="font-bold text-lg text-[var(--glass-text)]">{user.stats?.comments || 0}</span>
-                        <span>Comments</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="font-bold text-lg text-[var(--glass-text)]">{user.bookmarks?.length || 0}</span>
-                        <span>Saved</span>
-                    </div>
-                </div>
-
-                {isPublic ? (
-                    <button className="w-full py-2.5 px-4 rounded-xl bg-white/10 text-[var(--glass-text)] font-medium hover:bg-white/20 transition-all border border-white/10 flex items-center justify-center gap-2">
-                        <span>Follow</span>
-                    </button>
-                ) : (
-                    isProfilePage ? (
-                        <button
-                            onClick={() => setIsEditOpen(true)}
-                            className="w-full py-2.5 px-4 rounded-xl bg-white/10 border border-white/10 text-[var(--glass-text)] font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-                            <Edit size={16} />
-                            <span>Edit Profile</span>
-                        </button>
-                    ) : (
                         <Link
-                            href={`/user/${user.username}`}
-                            className="block w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
+                            href={user.username ? `/${pathname?.split('/')[1] || 'en'}/user/${user.username}?tab=inventory` : "/inventory"}
+                            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-amber-500/20 mb-4 shadow-[0_0_15px_rgba(245,158,11,0.1)] backdrop-blur-sm cursor-pointer hover:scale-105 transition-transform"
                         >
-                            My Profile
+                            <Coins size={16} className="text-amber-400 animate-pulse drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">
+                                {points.toLocaleString('en-US')} Coins
+                            </span>
                         </Link>
-                    )
+
+                        {user.headline && (
+                            <p className="text-sm text-[var(--glass-text)] italic mb-4 px-4">{user.headline}</p>
+                        )}
+
+                        <div className="flex flex-col items-center gap-2 mb-6 text-sm text-[var(--glass-text-muted)]">
+                            {user.location && (
+                                <div className="flex items-center gap-1.5">
+                                    <MapPin size={14} className="text-teal-400" />
+                                    <span>{user.location}</span>
+                                </div>
+                            )}
+                            {user.socialLinks && user.socialLinks.length > 0 && (
+                                <div className="flex flex-wrap justify-center gap-3 mt-1">
+                                    {user.socialLinks.map((link: any, idx: number) => (
+                                        <a
+                                            key={idx}
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1.5 hover:text-teal-400 transition-colors"
+                                        >
+                                            <LinkIcon size={14} className="text-teal-400" />
+                                            <span>{link.platform || "Website"}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-6 text-sm text-[var(--glass-text-muted)] mb-6 w-full px-4">
+                            <div className="flex flex-col items-center">
+                                <span className="font-bold text-base sm:text-lg text-[var(--glass-text)]">{user.stats?.posts || 0}</span>
+                                <span className="text-[10px] sm:text-sm">Posts</span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="font-bold text-base sm:text-lg text-[var(--glass-text)]">{user.stats?.likes || 0}</span>
+                                <span className="text-[10px] sm:text-sm">Likes</span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="font-bold text-base sm:text-lg text-[var(--glass-text)]">{user.stats?.comments || 0}</span>
+                                <span className="text-[10px] sm:text-sm">Comments</span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="font-bold text-base sm:text-lg text-[var(--glass-text)]">{user.bookmarks?.length || 0}</span>
+                                <span className="text-[10px] sm:text-sm">Saved</span>
+                            </div>
+                        </div>
+
+                        {isPublic ? (
+                            <button className="w-full py-2.5 px-4 rounded-xl bg-white/10 text-[var(--glass-text)] font-medium hover:bg-white/20 transition-all border border-white/10 flex items-center justify-center gap-2">
+                                <span>Follow</span>
+                            </button>
+                        ) : (
+                            isProfilePage ? (
+                                <button
+                                    onClick={() => setIsEditOpen(true)}
+                                    className="w-full py-2.5 px-4 rounded-xl bg-white/10 border border-white/10 text-[var(--glass-text)] font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                                    <Edit size={16} />
+                                    <span>Edit Profile</span>
+                                </button>
+                            ) : (
+                                <Link
+                                    href={`/user/${user.username}`}
+                                    className="block w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
+                                >
+                                    My Profile
+                                </Link>
+                            )
+                        )}
+                    </motion.div>
                 )}
                 <input
                     type="file"

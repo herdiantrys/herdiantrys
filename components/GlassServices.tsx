@@ -130,118 +130,125 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                 <div className="relative max-w-7xl mx-auto">
 
                     <div className="relative max-w-7xl mx-auto">
-                        <div className="overflow-hidden py-10 px-4">
-                            <motion.div
-                                ref={containerRef}
-                                animate={controls}
-                                className="flex cursor-grab active:cursor-grabbing"
-                                style={{ width: `${extendedServices.length * (100 / itemsVisible)}%` }}
-                                drag="x"
-                                dragConstraints={{ left: -10000, right: 10000 }}
-                                dragElastic={0.1}
-                                dragMomentum={false}
-                                onDragEnd={(e, { offset, velocity }) => {
-                                    if (!containerRef.current || !containerRef.current.parentElement) return;
-                                    const parentWidth = containerRef.current.parentElement.offsetWidth;
-                                    const itemPixelWidth = parentWidth / itemsVisible;
-                                    const draggedItems = -offset.x / itemPixelWidth;
-                                    let direction = 0;
-                                    if (Math.abs(velocity.x) > 500) {
-                                        direction = velocity.x < 0 ? 1 : -1;
-                                    } else {
-                                        direction = Math.round(draggedItems);
-                                    }
-                                    const targetIndex = currentIndex + direction;
-                                    slideTo(targetIndex);
-                                }}
-                            >
-                                {extendedServices.map((service, index) => (
-                                    <div
-                                        key={`${service._id}-${index}`}
-                                        className="w-full px-4"
-                                        style={{ width: `${100 / extendedServices.length}%` }}
-                                    >
-                                        <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-300 relative group flex flex-col">
-                                            {/* Image */}
-                                            <div className="relative h-56 w-full overflow-hidden">
-                                                {service.imageUrl ? (
-                                                    <Image
-                                                        src={service.imageUrl}
-                                                        alt={service.title}
-                                                        fill
-                                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                                                        <span className="text-gray-500">{dict.services.no_image}</span>
-                                                    </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                                            </div>
+                        <div className="relative">
+                            <div className="overflow-hidden py-20 -my-10 px-4" style={{
+                                maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+                                WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
+                            }}>
+                                <motion.div
+                                    ref={containerRef}
+                                    animate={controls}
+                                    className="flex cursor-grab active:cursor-grabbing"
+                                    style={{ width: `${extendedServices.length * (100 / itemsVisible)}%` }}
+                                    drag="x"
+                                    dragConstraints={{ left: -10000, right: 10000 }}
+                                    dragElastic={0.1}
+                                    dragMomentum={false}
 
-                                            {/* Content */}
-                                            <div className="p-6 flex-grow flex flex-col">
-                                                <h3 className="text-xl font-bold mb-2 text-[var(--glass-text)]">{service.title}</h3>
-                                                <p className="text-sm text-[var(--glass-text-muted)] mb-6 line-clamp-3">{service.description}</p>
-
-                                                {/* ... features ... */}
-                                                <ul className="mb-6 space-y-2 flex-grow">
-                                                    {service.features?.slice(0, 4).map((feature, i) => (
-                                                        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                                                            <Check size={16} className="text-teal-400 mt-0.5 shrink-0" />
-                                                            <span>{feature}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-
-                                                <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between mb-6">
-                                                    {/* ... prices ... */}
-                                                    <span className="text-gray-400 line-through text-sm">
-                                                        {(() => {
-                                                            const originalPrice = Math.round(service.price * 1.25);
-                                                            return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(originalPrice)}`;
-                                                        })()}
-                                                    </span>
-                                                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
-                                                        {(() => {
-                                                            return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(service.price)}`;
-                                                        })()}
-                                                    </span>
+                                    onDragEnd={(e, { offset, velocity }) => {
+                                        if (!containerRef.current || !containerRef.current.parentElement) return;
+                                        const parentWidth = containerRef.current.parentElement.offsetWidth;
+                                        const itemPixelWidth = parentWidth / itemsVisible;
+                                        const draggedItems = -offset.x / itemPixelWidth;
+                                        let direction = 0;
+                                        if (Math.abs(velocity.x) > 500) {
+                                            direction = velocity.x < 0 ? 1 : -1;
+                                        } else {
+                                            direction = Math.round(draggedItems);
+                                        }
+                                        const targetIndex = currentIndex + direction;
+                                        slideTo(targetIndex);
+                                    }}
+                                >
+                                    {extendedServices.map((service, index) => (
+                                        <div
+                                            key={`${service._id}-${index}`}
+                                            className="w-full px-4"
+                                            style={{ width: `${100 / extendedServices.length}%` }}
+                                        >
+                                            <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-300 relative group flex flex-col">
+                                                {/* Image */}
+                                                <div className="relative h-56 w-full overflow-hidden">
+                                                    {service.imageUrl ? (
+                                                        <Image
+                                                            src={service.imageUrl}
+                                                            alt={service.title}
+                                                            fill
+                                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                                            <span className="text-gray-500">{dict.services.no_image}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                                                 </div>
 
-                                                <a
-                                                    href={service.orderLink || "#contact"}
-                                                    className="w-full inline-flex items-center justify-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-teal-50 transition-all duration-300 group shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]"
-                                                >
-                                                    {service.buttonText || dict.services.order_now}
-                                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                                </a>
+                                                {/* Content */}
+                                                <div className="p-6 flex-grow flex flex-col">
+                                                    <h3 className="text-xl font-bold mb-2 text-[var(--glass-text)]">{service.title}</h3>
+                                                    <p className="text-sm text-[var(--glass-text-muted)] mb-6 line-clamp-3">{service.description}</p>
+
+                                                    {/* ... features ... */}
+                                                    <ul className="mb-6 space-y-2 flex-grow">
+                                                        {service.features?.slice(0, 4).map((feature, i) => (
+                                                            <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                                                                <Check size={16} className="text-teal-400 mt-0.5 shrink-0" />
+                                                                <span>{feature}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+
+                                                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between mb-6">
+                                                        {/* ... prices ... */}
+                                                        <span className="text-gray-400 line-through text-sm">
+                                                            {(() => {
+                                                                const originalPrice = Math.round(service.price * 1.25);
+                                                                return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(originalPrice)}`;
+                                                            })()}
+                                                        </span>
+                                                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
+                                                            {(() => {
+                                                                return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(service.price)}`;
+                                                            })()}
+                                                        </span>
+                                                    </div>
+
+                                                    <a
+                                                        href={service.orderLink || "#contact"}
+                                                        className="w-full inline-flex items-center justify-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-teal-50 transition-all duration-300 group shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]"
+                                                    >
+                                                        {service.buttonText || dict.services.order_now}
+                                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </motion.div>
-                        </div>
+                                    ))}
+                                </motion.div>
+                            </div>
 
-                        {/* Navigation Buttons */}
-                        <button
-                            onClick={handlePrev}
-                            className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
-                            aria-label="Previous service"
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
-                            aria-label="Next service"
-                        >
-                            <ChevronRight size={24} />
-                        </button>
+                            {/* Navigation Buttons */}
+                            <button
+                                onClick={handlePrev}
+                                className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
+                                aria-label="Previous service"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
+                                aria-label="Next service"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div >
-        </section >
+            </div>
+        </section>
+
     );
 };
 

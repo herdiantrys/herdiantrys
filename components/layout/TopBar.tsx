@@ -32,7 +32,15 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && searchQuery.trim()) {
-            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+            console.log("[TopBar] Search triggered:", searchQuery);
+
+            // Extract language from current pathname (e.g., "/en/..." -> "en")
+            const pathParts = pathname.split('/').filter(Boolean);
+            const lang = (pathParts[0] === 'en' || pathParts[0] === 'id') ? pathParts[0] : 'en';
+
+            const url = `/${lang}/search?q=${encodeURIComponent(searchQuery)}`;
+            console.log("[TopBar] Navigating to:", url);
+            router.push(url);
         }
     };
 

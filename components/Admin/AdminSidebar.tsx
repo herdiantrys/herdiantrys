@@ -79,34 +79,60 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
             <aside
                 id="admin-sidebar"
                 className={`
-                    fixed top-0 left-0 z-[100] h-screen glass border-r-0 text-[var(--glass-text)] transition-all duration-300 ease-in-out
+                    fixed top-0 left-0 z-[100] h-screen transition-all duration-500 ease-in-out
                     ${isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0 lg:z-40"}
                     ${!isCollapsed ? "lg:w-64" : "lg:w-20"}
                 `}
             >
-                <div className="flex flex-col h-full bg-white/5 dark:bg-black/20 backdrop-blur-md relative">
+                <div className="flex flex-col h-full bg-white/50 dark:bg-black/20 backdrop-blur-2xl border-r border-white/20 dark:border-white/5 relative">
 
-                    {/* Desktop Toggle Button */}
+                    {/* Liquid Shine Overlay */}
+                    <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
+
+
+                    {/* Desktop Toggle Handle - Premium Liquid Glass */}
                     <button
                         id="admin-sidebar-toggle"
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:flex absolute -right-4 top-24 bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded-full p-2 shadow-md hover:scale-110 transition-transform z-50"
+                        className={`
+                            hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 
+                            w-6 h-12 items-center justify-center
+                            bg-white/10 dark:bg-black/60 backdrop-blur-3xl 
+                            border border-white/20 dark:border-white/10 
+                            rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)]
+                            hover:w-7 hover:-right-4 hover:bg-white/20 
+                            transition-all duration-300 ease-out z-[150] group
+                        `}
                     >
-                        {!isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                        <div className="absolute inset-x-0 inset-y-2 bg-teal-500/0 group-hover:bg-teal-500/10 rounded-lg transition-colors" />
+                        <div className={`
+                            transform transition-all duration-500 group-hover:scale-110
+                            ${!isCollapsed ? "rotate-0" : "rotate-180"}
+                        `}>
+                            <ChevronLeft
+                                size={14}
+                                className="text-white/40 group-hover:text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.4)]"
+                            />
+                        </div>
+
+                        {/* Interactive Shine Edge */}
+                        <div className="absolute inset-y-2 left-0 w-[1.5px] bg-gradient-to-b from-transparent via-teal-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
 
                     {/* Header */}
-                    <div className="h-[74px] flex items-center justify-center border-b border-[var(--glass-border)] transition-all duration-300 overflow-hidden">
-                        <span className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500 whitespace-nowrap transition-all duration-300 ${isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
-                            AdminPanel
+                    <div className="h-[74px] flex items-center px-6 border-b border-white/5 transition-all duration-300 overflow-hidden shrink-0">
+                        <span className={`text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500 whitespace-nowrap transition-all duration-500 ${isCollapsed ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"}`}>
+                            Admin<span className="text-foreground/80 font-medium">Panel</span>
                         </span>
                         {isCollapsed && (
-                            <span className="text-xl font-bold text-teal-500 absolute">AP</span>
+                            <div className="absolute inset-x-0 flex justify-center">
+                                <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500">A</span>
+                            </div>
                         )}
                     </div>
 
                     {/* Menu */}
-                    <nav className="flex-1 overflow-y-auto py-4 space-y-1 overflow-x-hidden">
+                    <nav className="flex-1 overflow-y-auto py-6 space-y-1 overflow-x-hidden custom-scrollbar">
                         {menuItems.map((item) => {
                             const isActive = normalizedPath === item.href || (item.href !== "/admin" && normalizedPath.startsWith(item.href));
                             const Icon = item.icon;
@@ -118,32 +144,41 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                                     href={item.href}
                                     title={isCollapsed ? item.name : ""}
                                     className={`
-                                        flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-200
+                                        flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
                                         ${isActive
-                                            ? "bg-gradient-to-r from-teal-500/20 to-cyan-500/10 text-teal-400 border border-teal-500/30 shadow-[0_0_20px_-5px_rgba(45,212,191,0.3)] backdrop-blur-sm"
-                                            : "hover:bg-[var(--glass-border)] text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] border border-transparent"
+                                            ? "text-teal-400 font-bold"
+                                            : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
                                         }
                                     `}
                                 >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="admin-active-bg"
+                                            className="absolute inset-0 rounded-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(45,212,191,0.15)] backdrop-blur-md -z-10"
+                                            transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
+                                        />
+                                    )}
+
                                     <div className="relative">
-                                        <Icon size={20} className={`min-w-[20px] ${isActive ? "text-teal-400" : "text-[var(--glass-text-muted)] group-hover:text-[var(--glass-text)]"}`} />
+                                        <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]" : "opacity-70 group-hover:opacity-100"}`} />
                                         {item.name === "Contacts" && unreadCount > 0 && (
-                                            <span className={`absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg ${isCollapsed ? "lg:top-0 lg:right-0 lg:scale-75" : ""}`}>
+                                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">
                                                 {unreadCount > 99 ? "99+" : unreadCount}
                                             </span>
                                         )}
                                     </div>
 
                                     <span
-                                        className={`ml-3 font-medium whitespace-nowrap transition-all duration-300 ${isCollapsed ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"
-                                            }`}
+                                        className={`ml-3 text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${isCollapsed ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}
                                     >
                                         {item.name}
                                     </span>
                                 </Link>
+
                             );
                         })}
                     </nav>
+
 
                     {/* Footer */}
                     <div className="p-4 border-t border-[var(--glass-border)] overflow-hidden">

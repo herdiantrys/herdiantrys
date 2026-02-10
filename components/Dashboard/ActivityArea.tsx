@@ -7,6 +7,7 @@ import ActivityFeed from "@/components/Dashboard/ActivityFeed";
 import CreatePost from "@/components/Dashboard/CreatePost";
 import { Activity } from "@/lib/actions/activity.actions";
 import AchievementsList from "@/components/Gamification/AchievementsList";
+import InventoryList from "@/components/Dashboard/InventoryList";
 
 interface ActivityAreaProps {
     user: any; // The current logged-in user (for actions)
@@ -38,13 +39,13 @@ export default function ActivityArea({
     const pathname = usePathname();
 
     // Derived state from URL (Source of Truth)
-    const currentTab = searchParams.get('tab') as 'feed' | 'saved' | 'achievements' | null;
+    const currentTab = searchParams.get('tab') as 'feed' | 'saved' | 'achievements' | 'inventory' | null;
     console.log("ActivityArea Debug:", {
         rawTab: searchParams.get('tab'),
         currentTab,
         pathname
     });
-    const activeTab = (currentTab && ['feed', 'saved', 'achievements'].includes(currentTab)) ? currentTab : 'feed';
+    const activeTab = (currentTab && ['feed', 'saved', 'achievements', 'inventory'].includes(currentTab)) ? currentTab : 'feed';
     const t = dict?.dashboard || {};
 
     const handleTabChange = (tabId: string) => {
@@ -60,6 +61,7 @@ export default function ActivityArea({
     // If not owner, hide 'saved'. 'Inventory' might be visible if we want to show other's items (usually yes).
     const tabs = [
         { id: 'feed', icon: LayoutGrid, label: t.feed || "Feed", show: true },
+        { id: 'inventory', icon: ShoppingBag, label: "Inventory", show: true },
         { id: 'saved', icon: Bookmark, label: t.saved_nav || "Saved", show: isOwner }, // Only show saved for owner
         { id: 'achievements', icon: Trophy, label: "Achievements", show: true }, // Always show achievements
     ].filter(tab => tab.show);
@@ -75,10 +77,10 @@ export default function ActivityArea({
                         <button
                             key={tab.id}
                             onClick={() => handleTabChange(tab.id as any)}
-                            className={`relative group flex items-center gap-2 px-6 py-3 rounded-t-2xl text-sm font-medium transition-all duration-200 ease-out whitespace-nowrap backdrop-blur-xl
+                            className={`relative group flex items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-t-xl sm:rounded-t-2xl text-[10px] sm:text-sm font-medium transition-all duration-200 ease-out whitespace-nowrap backdrop-blur-xl
                                 ${isActive
-                                    ? "bg-white/80 dark:bg-black/40 text-teal-600 dark:text-teal-400 border-t border-x border-white/40 dark:border-white/10 mb-[-1px] pb-4 z-30 shadow-sm dark:shadow-none"
-                                    : "bg-transparent text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-black/5 dark:hover:border-white/5 mb-0 pb-3"
+                                    ? "bg-white/80 dark:bg-black/40 text-teal-600 dark:text-teal-400 border-t border-x border-white/40 dark:border-white/10 mb-[-1px] pb-3 sm:pb-4 z-30 shadow-sm dark:shadow-none"
+                                    : "bg-transparent text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-black/5 dark:hover:border-white/5 mb-0 pb-2.5 sm:pb-3"
                                 }`}
                         >
                             {/* Liquid Shine Effect for Active Tab */}
@@ -177,6 +179,26 @@ export default function ActivityArea({
                             </div>
                         </div>
                         <AchievementsList user={targetUser} isOwner={isOwner} />
+                    </div>
+                )}
+
+                {activeTab === 'inventory' && (
+                    <div className="relative animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-black/5 dark:border-white/5">
+                            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                <ShoppingBag size={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">My Inventory</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">Manage your purchased profile effects and items.</p>
+                            </div>
+                        </div>
+                        <InventoryList
+                            userId={targetUser._id}
+                            inventory={inventoryData?.inventory || []}
+                            equippedFrame={inventoryData?.equippedFrame || null}
+                            equippedBackground={inventoryData?.equippedBackground || null}
+                        />
                     </div>
                 )}
             </div>

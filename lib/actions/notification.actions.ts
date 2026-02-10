@@ -88,7 +88,11 @@ interface CreateNotificationParams {
 }
 
 export const createNotification = async ({ recipientId, senderId, type, relatedPostId, relatedCommentId, relatedProjectId }: CreateNotificationParams) => {
-    if (recipientId === senderId && type !== 'system') return;
+    console.log(`[createNotification] Attempting to notify ${recipientId} from ${senderId} (type: ${type})`);
+    if (recipientId === senderId && type !== 'system') {
+        console.log("[createNotification] Self-notification skipped");
+        return;
+    }
 
     try {
         await prisma.notification.create({
@@ -102,9 +106,11 @@ export const createNotification = async ({ recipientId, senderId, type, relatedP
                 read: false
             }
         });
+        console.log("[createNotification] Notification created successfully");
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating notification:", error);
+        console.dir(error); // Log full error details
         return { success: false };
     }
 };

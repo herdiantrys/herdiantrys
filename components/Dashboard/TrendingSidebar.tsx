@@ -9,10 +9,13 @@ export default function TrendingSidebar({ posts, dict }: { posts: TrendingPost[]
     const t = dict?.dashboard || {};
     return (
         <div className="sticky top-28 space-y-6">
-            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-6 shadow-lg">
+            <div className="bg-white/5 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                {/* Liquid Shine Overlay */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+
                 <div className="flex items-center gap-2 mb-6">
                     <Flame className="text-orange-500 fill-orange-500 animate-pulse" />
-                    <h3 className="font-bold text-[var(--glass-text)] text-lg">{t.trending_posts || "Trending Posts"}</h3>
+                    <h3 className="font-bold text-[var(--glass-text)] text-lg tracking-tight">#{t.trending_posts || "Trending Posts"}</h3>
                 </div>
 
                 <div className="space-y-6">

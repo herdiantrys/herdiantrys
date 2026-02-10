@@ -66,13 +66,42 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
     }
 };
 
+import { auth } from "@/auth";
 import { trackComment, trackNightOwl } from "./gamification.actions";
 
 export const createComment = async (targetId: string, targetType: "project" | "post", text: string) => {
+    console.log(`[createComment] Starting comment creation for ${targetType} ${targetId}`);
     try {
         const session = await auth();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+        if (!session?.user?.id) {
+            console.error("[createComment] No user session found");
+            return { success: false, error: "Unauthorized" };
+        }
         const userId = session.user.id;
+        console.log(`[createComment] User ${userId} authenticated`);
+
+        // VALIDATE: Check if target exists before creating comment
+        if (targetType === "project") {
+            const projectExists = await prisma.project.findUnique({
+                where: { id: targetId },
+                select: { id: true }
+            });
+            if (!projectExists) {
+                console.error(`[createComment] Project ${targetId} not found`);
+                return { success: false, error: "Project not found" };
+            }
+            console.log(`[createComment] Project ${targetId} verified to exist`);
+        } else {
+            const postExists = await prisma.post.findUnique({
+                where: { id: targetId },
+                select: { id: true }
+            });
+            if (!postExists) {
+                console.error(`[createComment] Post ${targetId} not found`);
+                return { success: false, error: "Post not found" };
+            }
+            console.log(`[createComment] Post ${targetId} verified to exist`);
+        }
 
         const data: any = {
             text,
@@ -85,6 +114,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             data.postId = targetId;
         }
 
+        console.log("[createComment] Creating comment in DB...");
         const newComment = await prisma.comment.create({
             data: data,
             include: {
@@ -99,6 +129,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 project: { select: { authorId: true } }
             }
         });
+        console.log(`[createComment] Comment created: ${newComment.id}`);
 
         // Trigger Notification
         let recipientId = "";
@@ -108,7 +139,10 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             recipientId = newComment.project.authorId;
         }
 
+        console.log(`[createComment] Notification logic - Recipient: ${recipientId}, sender: ${userId}`);
+
         if (recipientId && recipientId !== userId) {
+            console.log("[createComment] Sending notification...");
             await createNotification({
                 recipientId,
                 senderId: userId,
@@ -117,14 +151,21 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 relatedProjectId: targetType === 'project' ? targetId : undefined,
                 relatedCommentId: newComment.id
             });
+            console.log("[createComment] Notification sent (or failed silently)");
         }
 
         // Gamification Hooks
-        // 1. Track Comment (Social Butterfly)
-        await trackComment(userId);
+        try {
+            console.log("[createComment] Triggering gamification hooks...");
+            // 1. Track Comment (Social Butterfly)
+            await trackComment(userId);
 
-        // 2. Track Night Owl (if active at night)
-        await trackNightOwl(userId);
+            // 2. Track Night Owl (if active at night)
+            await trackNightOwl(userId);
+            console.log("[createComment] Gamification hooks completed");
+        } catch (gameError) {
+            console.error("[createComment] Gamification error (non-blocking):", gameError);
+        }
 
         // Return structured comment object
         const createdComment = newComment as any; // Cast to any to bypass missing type inference
@@ -146,8 +187,10 @@ export const createComment = async (targetId: string, targetType: "project" | "p
         };
 
         return { success: true, comment: commentObj };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating comment:", error);
-        return { success: false, error: "Failed to create comment" };
+        // Log the full error object for better debugging
+        console.dir(error, { depth: null });
+        return { success: false, error: error.message || "Failed to create comment" };
     }
 };

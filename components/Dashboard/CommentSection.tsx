@@ -61,7 +61,7 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
         setNewComment("");
 
         startTransition(async () => {
-            const result = await createComment(userId, targetId, targetType, tempComment.text);
+            const result = await createComment(targetId, targetType, tempComment.text);
             if (!result.success || !result.comment) {
                 // Revert on failure
                 setComments(prev => prev.filter(c => c._id !== tempId));

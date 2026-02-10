@@ -43,10 +43,17 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
     const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const [activeSection, setActiveSection] = useState("hero");
 
-    // Refs
+    // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
+
+    // Track client-side mounting to prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Sync search input with URL
     useEffect(() => {
@@ -88,6 +95,37 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
         return () => window.removeEventListener("scroll", handleScroll);
     }, [isFloatingNav]);
 
+    // Active Section Observer
+    useEffect(() => {
+        if (!isFloatingNav) return;
+
+        const sections = ["hero", "portfolio", "services", "testimonials", "partners", "about", "contact"];
+        const observers: IntersectionObserver[] = [];
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-50% 0px -50% 0px', // Trigger when section is in the middle of the viewport
+            threshold: 0
+        };
+
+        const handleIntersect = (entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    setActiveSection(entry.target.id);
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(handleIntersect, observerOptions);
+
+        sections.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        return () => observer.disconnect();
+    }, [isFloatingNav, pathname]);
+
     // Helper: Generate Breadcrumbs
     const getBreadcrumbs = () => {
         if (!pathname || pathname === "/") return [];
@@ -116,7 +154,15 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+            console.log("[GlobalNavbarClient] Search triggered:", searchQuery);
+
+            // Extract language from current pathname
+            const pathParts = pathname.split('/').filter(Boolean);
+            const lang = (pathParts[0] === 'en' || pathParts[0] === 'id') ? pathParts[0] : 'en';
+
+            const url = `/${lang}/search?q=${encodeURIComponent(searchQuery)}`;
+            console.log("[GlobalNavbarClient] Navigating to:", url);
+            router.push(url);
         }
     };
 
@@ -137,8 +183,8 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                 transition-all duration-500 ease-in-out
                 flex items-center justify-between
                 ${isFloatingNav
-                    ? "fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-xl shadow-2xl border border-white/20 z-50 px-6 py-3"
-                    : `fixed top-0 right-0 h-[74px] px-8 z-40 ${scrolled
+                    ? "fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[95%] max-w-7xl rounded-2xl sm:rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-3xl shadow-2xl border border-white/20 z-50 px-4 sm:px-6 py-3.5 sm:py-3"
+                    : `fixed top-0 right-0 h-[74px] px-4 sm:px-6 md:px-8 z-40 ${scrolled
                         ? "bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 shadow-sm"
                         : "bg-transparent border-b border-transparent"
                     }`
@@ -151,32 +197,54 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                 {isFloatingNav ? (
                     <div className="flex items-center gap-1">
                         {[
-                            { label: dict.nav.home || "Home", href: "#hero" },
-                            { label: dict.nav.works || "Portfolio", href: "#portfolio" },
-                            { label: dict.nav.services || "Services", href: "#services" },
-                            { label: "About", href: "#about" },
-                            { label: dict.nav.contact || "Contact", href: "#contact" },
-                        ].map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    isProgrammaticScroll.current = true; // Set flag
-                                    const element = document.querySelector(item.href);
-                                    if (element) {
-                                        element.scrollIntoView({ behavior: "smooth" });
-                                        // Reset flag after animation
-                                        setTimeout(() => {
-                                            isProgrammaticScroll.current = false;
-                                        }, 1000);
-                                    }
-                                }}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-teal-600 dark:hover:text-white transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/10"
-                            >
-                                {item.label}
-                            </Link>
-                        ))}
+                            { label: dict.nav.home || "Home", href: "#hero", id: "hero" },
+                            { label: dict.nav.works || "Portfolio", href: "#portfolio", id: "portfolio" },
+                            { label: dict.nav.services || "Services", href: "#services", id: "services" },
+                            { label: "About", href: "#about", id: "about" },
+                            { label: dict.nav.contact || "Contact", href: "#contact", id: "contact" },
+                        ].map((item) => {
+                            const isActive = activeSection === item.id;
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        isProgrammaticScroll.current = true;
+                                        const element = document.querySelector(item.href);
+                                        if (element) {
+                                            element.scrollIntoView({ behavior: "smooth" });
+                                            setActiveSection(item.id);
+                                            setTimeout(() => {
+                                                isProgrammaticScroll.current = false;
+                                            }, 1000);
+                                        }
+                                    }}
+                                    className={`
+                                        px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all rounded-full relative group
+                                        ${isActive
+                                            ? "text-teal-600 dark:text-teal-400"
+                                            : "text-gray-700 dark:text-gray-400 hover:text-teal-600 dark:hover:text-white"
+                                        }
+                                    `}
+                                >
+                                    {/* Liquid Background Indicator */}
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="nav-active-bg"
+                                            className="absolute inset-0 bg-teal-500/10 dark:bg-teal-400/10 border border-teal-500/20 dark:border-teal-400/20 rounded-full -z-10"
+                                            initial={false}
+                                            transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                                        />
+                                    )}
+
+                                    {/* Hover Glow */}
+                                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-full -z-20" />
+
+                                    <span className="relative z-10">{item.label}</span>
+                                </Link>
+                            );
+                        })}
                     </div>
                 ) : (
                     <AnimatePresence mode="popLayout">
@@ -184,7 +252,7 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                             <motion.div
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-sm"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-sm ml-14 lg:ml-0"
                             >
                                 <Link href="/" className="p-1.5 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all group">
                                     <HomeIcon className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
@@ -217,13 +285,9 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                 )}
             </nav>
 
-            {/* Mobile Title (visible if breadcrumbs hidden) */}
-            <div className="md:hidden font-bold text-lg">
-                {pathname === "/" ? "Home" : breadcrumbs[breadcrumbs.length - 1]?.label || "Menu"}
-            </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-end flex-1 gap-2 sm:gap-3 md:gap-4">
 
                 {/* Search Bar */}
                 <form
@@ -254,11 +318,11 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                     </div>
                 </form>
 
-                <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 hidden md:block" />
+                <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 hidden lg:block" />
 
-                {/* Coin Badge (Gamification) */}
+                {/* Coin Badge (Gamification) - Hidden on mobile */}
                 {user && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                         <Coins size={14} className="fill-amber-500/20" />
                         <span className="text-xs font-bold font-mono">{user.points || 0}</span>
                     </div>
@@ -277,9 +341,14 @@ export default function GlobalNavbarClient({ user, dict }: GlobalNavbarClientPro
                 <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors relative overflow-hidden"
+                    aria-label="Toggle theme"
                 >
                     <div className="relative z-10">
-                        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                        {mounted ? (
+                            theme === "dark" ? <Sun size={20} /> : <Moon size={20} />
+                        ) : (
+                            <div className="w-5 h-5" /> // Placeholder to prevent layout shift
+                        )}
                     </div>
                 </button>
 
