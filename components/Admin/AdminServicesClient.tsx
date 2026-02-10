@@ -1,0 +1,331 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Search, Filter, ArrowUpDown, ArrowUp, ArrowDown, CheckSquare, Square, Trash2, X, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { bulkDeleteServices, deleteService } from "@/lib/actions/service.actions";
+import { toast } from "sonner";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { AnimatePresence, motion } from "framer-motion";
+
+export default function AdminServicesClient({ services }: { services: any[] }) {
+    const router = useRouter();
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    // Feature State
+    const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // Bulk Action State
+    const [actionType, setActionType] = useState<'DELETE' | null>(null);
+    const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+
+    // Sort Config
+    const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'createdAt', direction: 'desc' });
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10); // Standardized to 10
+
+    const toggleSelect = (id: string) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(itemId => itemId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length > 0) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredAndSortedServices.map(s => s.id));
+        }
+    };
+
+    const handleSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const filteredAndSortedServices = useMemo(() => {
+        let result = [...services];
+
+        // 1. Search Filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(service =>
+                service.title?.toLowerCase().includes(query) ||
+                service.description?.toLowerCase().includes(query)
+            );
+        }
+
+        // 2. Sorting
+        if (sortConfig.key) {
+            result.sort((a, b) => {
+                let aValue = a[sortConfig.key];
+                let bValue = b[sortConfig.key];
+
+                if (sortConfig.key === 'createdAt') {
+                    aValue = new Date(a.createdAt).getTime();
+                    bValue = new Date(b.createdAt).getTime();
+                } else if (typeof aValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return result;
+    }, [services, sortConfig, searchQuery]);
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredAndSortedServices.length / rowsPerPage);
+    const paginatedServices = filteredAndSortedServices.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    // Reset page when filters change
+    useMemo(() => {
+        setCurrentPage(1);
+    }, [searchQuery, rowsPerPage]);
+
+    const SortIcon = ({ columnKey }: { columnKey: string }) => {
+        if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="opacity-30" />;
+        return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-teal-400" /> : <ArrowDown size={14} className="text-teal-400" />;
+    };
+
+    const SortHeader = ({ label, columnKey, className = "" }: { label: string, columnKey: string, className?: string }) => (
+        <th className={`px-6 py-4 cursor-pointer hover:text-white transition-colors group ${className}`} onClick={() => handleSort(columnKey)}>
+            <div className="flex items-center gap-2">
+                {label}
+                <SortIcon columnKey={columnKey} />
+            </div>
+        </th>
+    );
+
+    const performBulkAction = async () => {
+        setIsBulkProcessing(true);
+        try {
+            if (actionType === 'DELETE') {
+                const result = await bulkDeleteServices(selectedIds);
+                if (result.success) {
+                    toast.success(`Deleted ${selectedIds.length} services`);
+                    setSelectedIds([]);
+                    setActionType(null);
+                    router.refresh();
+                } else {
+                    toast.error(result.error);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to perform action");
+        } finally {
+            setIsBulkProcessing(false);
+        }
+    };
+
+    return (
+        <div>
+            {/* Header with New Service Button */}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                        Services
+                    </h1>
+                    <span className="text-gray-400 text-sm mt-1 block">
+                        Manage your service offerings
+                    </span>
+                </div>
+
+                <Link
+                    href="/admin/services/new"
+                    className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-lg shadow-teal-500/20"
+                >
+                    <Plus size={18} />
+                    New Service
+                </Link>
+            </div>
+
+            <div className="flex flex-col gap-4 mb-6">
+                {/* Search and Filters Card */}
+                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
+                    <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
+                        {/* Search Input */}
+                        <div className="relative w-full lg:max-w-md group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-teal-500 transition-colors" size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search services..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-teal-500/50 transition-all"
+                            />
+                        </div>
+
+                        {/* Rows Per Page */}
+                        <div className="relative w-full sm:w-32 group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Show</span>
+                            </div>
+                            <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={rowsPerPage}
+                                onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
+                                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
+                <table className="w-full text-left min-w-[800px]">
+                    <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th className="px-6 py-4 w-10">
+                                <button onClick={toggleSelectAll} className="flex items-center text-gray-400 hover:text-white transition-colors">
+                                    {selectedIds.length === paginatedServices.length && paginatedServices.length > 0 ? <CheckSquare size={18} className="text-teal-400" /> : <Square size={18} />}
+                                </button>
+                            </th>
+                            <SortHeader label="Service" columnKey="title" />
+                            <SortHeader label="Description" columnKey="description" />
+                            <SortHeader label="Price" columnKey="price" />
+                            <SortHeader label="Created" columnKey="createdAt" />
+                            <th className="px-6 py-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
+                        {paginatedServices.length > 0 ? (
+                            paginatedServices.map((service) => (
+                                <tr key={service.id} className={`hover:bg-[var(--glass-border)] transition-colors ${selectedIds.includes(service.id) ? "bg-teal-500/5" : ""}`}>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => toggleSelect(service.id)}
+                                            className={`flex items-center ${selectedIds.includes(service.id) ? "text-teal-400" : "text-gray-400 hover:text-white"}`}
+                                        >
+                                            {selectedIds.includes(service.id) ? <CheckSquare size={18} /> : <Square size={18} />}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700/50 relative flex-shrink-0 border border-white/5">
+                                            {service.imageUrl ? (
+                                                <Image
+                                                    src={service.imageUrl}
+                                                    alt={service.title}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">Img</div>
+                                            )}
+                                        </div>
+                                        <p className="font-semibold text-gray-900 dark:text-white">{service.title}</p>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                                        {service.description}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm font-medium text-teal-500">
+                                        Rp. {service.price?.toLocaleString('id-ID')}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        {new Date(service.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <Link href={`/admin/services/${service.id}`} className="text-sm text-teal-400 hover:text-teal-300 mr-3 font-medium transition-colors">Edit</Link>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Search size={24} opacity={0.5} />
+                                        <p className="font-medium">No services found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+
+                {/* Pagination Footer */}
+                <div className="px-6 py-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Showing <span className="font-bold text-gray-900 dark:text-white">{(currentPage - 1) * rowsPerPage + 1}</span> to <span className="font-bold text-gray-900 dark:text-white">{Math.min(currentPage * rowsPerPage, filteredAndSortedServices.length)}</span> of <span className="font-bold text-gray-900 dark:text-white">{filteredAndSortedServices.length}</span> services
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 pb-1.5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className="px-3 py-1 pb-1.5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <DeleteConfirmationModal
+                isOpen={actionType === 'DELETE' && selectedIds.length > 0}
+                onClose={() => setActionType(null)}
+                onConfirm={performBulkAction}
+                isDeleting={isBulkProcessing}
+                count={selectedIds.length}
+                description={`Are you sure you want to delete ${selectedIds.length} selected services? This action cannot be undone.`}
+            />
+
+            {/* Floating Bulk Action Bar */}
+            <AnimatePresence>
+                {selectedIds.length > 0 && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+                    >
+                        <div className="bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-full px-6 py-3 flex items-center gap-6 backdrop-blur-xl">
+                            <div className="flex items-center gap-3 border-r border-white/10 pr-6">
+                                <span className="text-white font-bold">{selectedIds.length}</span>
+                                <span className="text-gray-400 text-sm">Selected</span>
+                                <button onClick={() => setSelectedIds([])} className="bg-white/10 hover:bg-white/20 p-1 rounded-full transition-colors ml-2">
+                                    <X size={14} className="text-white" />
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setActionType('DELETE')}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-full text-sm font-bold shadow-lg shadow-red-500/20 transition-colors"
+                                disabled={isBulkProcessing}
+                            >
+                                <Trash2 size={16} />
+                                Delete
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}

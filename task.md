@@ -1,0 +1,32 @@
+# Deploy & Server Fix Tasks
+
+- [x] Initial VPS Setup (Node, PM2, Nginx)
+- [x] Local Build & Deploy
+- [x] Fix SSH Key Issues
+- [x] Install SSL (Certbot)
+- [ ] Stabilize Server Performance (Fix 502/CPU 100%) <!-- id: 0 -->
+    - [x] Run `fix_server.sh` (Create Swap, Limit RAM) <!-- id: 1 -->
+    - [x] Verify Server Stats (Free RAM, low CPU) <!-- id: 2 -->
+    - [x] Kill Zombie Processes (Malware Cleanup) <!-- id: 4 -->
+- [x] Verify Website Availability <!-- id: 3 -->
+- [x] Update Social Media Preview (Metadata) <!-- id: 5 -->
+- [x] Investigate Slow Response Time (Performance) <!-- id: 6 -->
+- [x] Deploy Performance Fixes (Log Reduction) <!-- id: 7 -->
+- [x] Adjust Profile Content Top Position (Mobile) <!-- id: 10 -->
+- [x] Banner Upload Improvements (Crop, Feedback, Progress) <!-- id: 12 -->
+- [x] Refine Navbar (Move Toggle, Remove Dashboard Link) <!-- id: 13 -->
+- [x] Restructure Profile Nav (Tabs, Remove Settings/Logout) <!-- id: 14 -->
+- [x] **Migrate to Local DB (SQLite/Postgres)** <!-- id: 15 -->
+    - [x] Schema & Helpers Refactored
+    - [x] Migration Script Created
+    - [x] Run `prisma generate` & `db push`
+    - [x] Run Data Migration Script
+- [x] **Refactor Server Actions (Sanity -> Prisma)** <!-- id: 16 -->
+    - [x] Likes & Comments <!-- id: 17 -->
+    - [x] Projects & Posts <!-- id: 18 -->
+    - [x] Shop & Inventory <!-- id: 19 -->
+    - [x] Bookmarks & Activity <!-- id: 20 -->
+- [ ] **Create Admin Panel** <!-- id: 21 -->
+    - [x] Auth & Layout <!-- id: 22 -->
+    - [x] Dashboard Overview <!-- id: 23 -->
+    - [x] Resource Management (Users, Projects, etc.) <!-- id: 24 -->

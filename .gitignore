@@ -1,0 +1,9 @@
+public/projects/project7.mp4
+node_modules
+.next
+.env
+.env.local
+.DS_Store
+# Deploy files
+*.zip
+prisma/dev.db

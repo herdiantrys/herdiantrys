@@ -1,0 +1,323 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Enums
+enum Role {
+  USER
+  WRITER
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  LIMITED
+  BANNED
+  ARCHIVED
+}
+
+enum ProjectType {
+  IMAGE
+  VIDEO
+}
+
+enum ProjectStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum ShopItemType {
+  FRAME
+  BACKGROUND
+  COURSE
+}
+
+// Models
+
+model User {
+  id             String  @id @default(cuid())
+  name           String? @map("fullName")
+  email          String  @unique
+  username       String? @unique
+  password       String?
+  image          String? @map("profileImage")
+  imageURL       String?
+  bannerImage    String?
+  headline       String?
+  bio            String?
+  location       String?
+  website        String?
+  role           Role    @default(USER)
+  points         Float   @default(0)
+
+  equippedEffect String? // Deprecated
+  equippedFrame  String?
+  equippedBackground String?
+  profileColor   String?
+  phoneNumber    String?
+  resumeURL      String?
+
+  // JSON fields for complex/nested Sanity objects
+  socialLinks Json? // Array of { platform, url, icon }
+  preferences Json? // { language: 'en' }
+  skills      Json? // Array of { name, icon, proficiency }
+  experience  Json? // Array of { jobTitle, company, startDate, endDate, isCurrent, description }
+  education   Json? // Array of { degree, institution, startDate, endDate, description }
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  status             UserStatus @default(ACTIVE)
+
+  // Bonus Tracking
+  lastLoginBonusDate DateTime? // Deprecated/Legacy
+  lastSessionRewardClaimedAt DateTime? // New session-based tracking
+
+  // Gamification
+  level             Int      @default(1)
+  xp                Int      @default(0)
+  badges            Json?    // Array of { id, name, icon, awardedAt }
+  gamificationState Json?    // Internal counters: { viewedProjects: [], messageCount: 0, etc }
+  explorationProgress Int    @default(0) // 0-100 percentage
+
+  // Relations
+  posts    Post[]    @relation("AuthorPosts")
+  projects Project[] @relation("AuthorProjects")
+  comments Comment[]
+
+  // Likes (Many-to-Many)
+  likedPosts    Post[]    @relation("PostLikes")
+  likedProjects Project[] @relation("ProjectLikes")
+
+  // Bookmarks (Sanity 'bookmarks' field)
+  bookmarkedPosts    Post[]    @relation("UserBookmarksPosts")
+  bookmarkedProjects Project[] @relation("UserBookmarksProjects")
+
+  // Inventory
+  inventory UserInventory[]
+
+  // Notifications
+  receivedNotifications Notification[] @relation("ReceivedNotifications")
+  sentNotifications     Notification[] @relation("SentNotifications")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // like_post, comment_post, follow, system
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  recipientId String
+  recipient   User   @relation("ReceivedNotifications", fields: [recipientId], references: [id])
+
+  senderId    String
+  sender      User   @relation("SentNotifications", fields: [senderId], references: [id])
+
+  postId      String?
+  post        Post?   @relation(fields: [postId], references: [id])
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+
+  commentId   String?
+  comment     Comment? @relation(fields: [commentId], references: [id])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String?
+  projects    Project[]
+}
+
+model Project {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  description String? // Short description
+  content     Json? // Portable Text (Block Content) or Markdown
+  type        ProjectType @default(IMAGE)
+
+  image     String? // Main image URL
+  videoFile String? // Video URL
+  gallery   Json? // Array of { type: 'image'|'video', url, ... }
+
+  album   String?
+  tags    String? // CSV string for SQLite
+  demoUrl String?
+  repoUrl String?
+
+  views    Int     @default(0)
+  favorite Boolean @default(false)
+  
+  status ProjectStatus @default(PUBLISHED)
+  isArchived Boolean @default(false) // Deprecated
+
+  uploadDate      DateTime @default(now())
+  customUpdatedAt DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  authorId String
+  author   User   @relation("AuthorProjects", fields: [authorId], references: [id])
+
+  comments Comment[]
+
+  likedBy      User[] @relation("ProjectLikes")
+  bookmarkedBy User[] @relation("UserBookmarksProjects")
+
+  notifications Notification[]
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  text       String // Text content
+  image      String?
+  video      String?
+  isArchived Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  authorId String
+  author   User   @relation("AuthorPosts", fields: [authorId], references: [id])
+
+  comments     Comment[]
+  likedBy      User[]    @relation("PostLikes")
+  bookmarkedBy User[]    @relation("UserBookmarksPosts")
+
+  notifications Notification[]
+
+  // Repost Logic
+  originalPostId String?
+  originalPost   Post?   @relation("Reposts", fields: [originalPostId], references: [id])
+  reposts        Post[]  @relation("Reposts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
+  
+  notifications Notification[]
+}
+
+model ShopItem {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  type        ShopItemType @default(FRAME)
+  category    String?      @default("cosmetics") // cosmetics, designs, courses, apps
+  value       String? // CSS class or value
+  icon        String? // Image URL
+
+  owners UserInventory[]
+}
+
+model UserInventory {
+  id         String   @id @default(cuid())
+  acquiredAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  shopItemId String
+  shopItem   ShopItem @relation(fields: [shopItemId], references: [id])
+
+  @@unique([userId, shopItemId])
+}
+
+// Additional CMS Models
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  price       Int?
+  imageUrl    String?
+  gallery     Json?    // Array of { type: 'image'|'video', url }
+  features    Json?    // Array of strings
+  buttonText  String?
+  orderLink   String?
+  createdAt   DateTime @default(now())
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  iconDark  String?
+  url       String?
+  createdAt DateTime @default(now())
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  content   String?
+  photo     String?
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteContent {
+  id             String  @id @default("main")
+  displayEmail   String?
+  phoneNumber    String?
+  resumeURL      String?
+  
+  // Hero / Profile Display
+  fullName       String?
+  headline       String?
+  bio            String?
+  aboutTitle     String?
+  location       String?
+  website        String?
+  profileImage   String?
+  bannerImage    String?
+  
+  // Collections
+  socialLinks    Json? // Array of { platform, url, icon }
+  skills         Json? // Array of { name, icon, proficiency }
+  experience     Json? // Array of { jobTitle, company, startDate, endDate, isCurrent, description }
+  education      Json? // Array of { degree, institution, startDate, endDate, description }
+
+  updatedAt      DateTime @updatedAt
+}
+
+
