@@ -42,6 +42,9 @@ export async function generateStaticParams() {
   return [{ lang: 'en' }, { lang: 'id' }]
 }
 
+import { getGlobalTheme } from "@/lib/actions/settings.actions";
+import ThemeInjector from "../../components/Theme/ThemeInjector";
+
 export default async function RootLayout({
   children,
   params,
@@ -51,9 +54,12 @@ export default async function RootLayout({
 }>) {
   const { lang } = await params;
   const session = await auth();
+  const theme = await getGlobalTheme();
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
+        <ThemeInjector theme={theme} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster position="bottom-right" richColors closeButton />

@@ -37,7 +37,7 @@ const Home = async ({ params }: { params: Promise<{ lang: string }> }) => {
         <Hero profile={profile} dict={dict} />
       </div>
       <div id="portfolio">
-        <GlassPortfolio projects={projects} dict={dict} />
+        <GlassPortfolio projects={projects as any} dict={dict} />
       </div>
       <div id="services">
         <GlassServices services={services} dict={dict} />

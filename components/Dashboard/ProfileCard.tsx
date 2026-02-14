@@ -68,7 +68,7 @@ export default function ProfileCard({
 
             {/* Banner Section */}
             {!isCollapsed && (
-                <div className="w-full h-32 relative bg-gradient-to-r from-teal-900/50 to-slate-900/50">
+                <div className="w-full h-32 relative bg-gradient-to-r from-teal-100/50 to-blue-100/50 dark:from-teal-900/50 dark:to-slate-900/50">
                     {bannerUrl && (
                         <img
                             src={bannerUrl}
@@ -76,7 +76,7 @@ export default function ProfileCard({
                             className="w-full h-full object-cover"
                         />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/40 dark:from-black/20 to-transparent" />
                 </div>
             )}
 
@@ -90,32 +90,48 @@ export default function ProfileCard({
                         ${!isPublic ? 'cursor-pointer' : ''}`}>
 
                     {(user.equippedBackground || user.equippedEffect) && (
-                        <div
-                            className={`absolute -inset-4 rounded-full opacity-60 blur-xl transition-opacity duration-500
-                                ${user.equippedBackground
-                                    ? user.equippedBackground
-                                    : (user.equippedEffect ? `bg-gradient-to-br ${user.equippedEffect}` : '')
-                                }
-                            `}
-                        />
+                        <>
+                            {user.equippedBackground && (user.equippedBackground.startsWith('http') || user.equippedBackground.startsWith('/')) ? (
+                                <div className="absolute -inset-4 rounded-full opacity-60 blur-xl transition-opacity duration-500 overflow-hidden">
+                                    <img
+                                        src={user.equippedBackground}
+                                        alt="Background"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <div
+                                    className={`absolute -inset-4 rounded-full opacity-60 blur-xl transition-opacity duration-500
+                                        ${user.equippedBackground
+                                            ? user.equippedBackground
+                                            : (user.equippedEffect ? `bg-gradient-to-br ${user.equippedEffect}` : '')
+                                        }
+                                    `}
+                                />
+                            )}
+                        </>
                     )}
 
                     {user.equippedFrame && (
                         <div
                             className={`absolute -inset-2 rounded-full opacity-50 blur-lg group-hover:opacity-75 transition-opacity duration-500
-                                bg-gradient-to-br ${user.equippedFrame}
+                                ${user.equippedFrame === 'custom-color' ? '' : `bg-gradient-to-br ${user.equippedFrame}`}
                             `}
+                            style={user.equippedFrame === 'custom-color' && user.frameColor ? { background: `linear-gradient(135deg, ${user.frameColor}, ${user.frameColor})` } : {}}
                         />
                     )}
 
                     <div className={`relative w-full h-full rounded-full shadow-2xl overflow-hidden
-                         ${(user.equippedFrame) && !(user.equippedFrame?.startsWith('/') || user.equippedFrame?.startsWith('http'))
+                         ${(user.equippedFrame) && !(user.equippedFrame?.startsWith('/') || user.equippedFrame?.startsWith('http')) && user.equippedFrame !== 'custom-color'
                             ? `p-1 bg-gradient-to-br ${user.equippedFrame}`
-                            : 'border-4 border-[#121212] bg-[#121212]'} 
+                            : 'border-4 border-white dark:border-[#121212] bg-white dark:bg-[#121212]'} 
+                         ${user.equippedFrame === 'custom-color' ? 'p-1' : ''}
                          ${!isPublic ? 'hover:border-teal-400/50 transition-colors' : ''}
-                    `}>
+                    `}
+                        style={user.equippedFrame === 'custom-color' && user.frameColor ? { background: `linear-gradient(135deg, ${user.frameColor}, ${user.frameColor})` } : {}}
+                    >
 
-                        <div className="w-full h-full rounded-full overflow-hidden relative bg-[#121212]">
+                        <div className="w-full h-full rounded-full overflow-hidden relative bg-gray-100 dark:bg-[#121212]">
 
                             {user.equippedFrame && (user.equippedFrame.startsWith('http') || user.equippedFrame.startsWith('/')) && (
                                 <div className="absolute inset-0 z-20 pointer-events-none">
@@ -163,7 +179,7 @@ export default function ProfileCard({
                         >
                             <Coins size={16} className="text-amber-400 animate-pulse drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">
-                                {points.toLocaleString('en-US')} Coins
+                                {points.toLocaleString('en-US')} Runes
                             </span>
                         </Link>
 

@@ -1,18 +1,16 @@
 "use server";
 
-import { writeClient } from "@/sanity/lib/write-client";
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function incrementView(projectId: string) {
     try {
-        await writeClient
-            .patch(projectId)
-            .setIfMissing({ views: 0 })
-            .inc({ views: 1 })
-            .commit();
+        await prisma.project.update({
+            where: { id: projectId },
+            data: { views: { increment: 1 } }
+        });
 
-        // We don't necessarily need to revalidate the whole path immediately for views
-        // as it might be too frequent, but for now let's keep it simple.
+        // Optional: Revalidate if needed, but views might updates frequently
         // revalidatePath("/"); 
     } catch (error) {
         console.error("Error incrementing views:", error);

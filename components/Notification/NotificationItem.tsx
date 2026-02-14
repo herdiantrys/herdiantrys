@@ -1,9 +1,8 @@
-
 "use client";
 
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins } from "lucide-react";
+import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins, Zap, Trophy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function NotificationItem({ notification, onClick }: { notification: any; onClick: () => void }) {
@@ -11,21 +10,30 @@ export default function NotificationItem({ notification, onClick }: { notificati
 
     const getIcon = () => {
         switch (type) {
-            case 'like_post': return <Heart size={16} className="text-pink-500 fill-pink-500" />;
-            case 'comment_post': return <MessageSquare size={16} className="text-blue-500 fill-blue-500" />;
-            case 'follow': return <UserPlus size={16} className="text-green-500" />;
-            case 'system': return <Coins size={16} className="text-yellow-500 animate-pulse" />;
-            default: return <Bell size={16} className="text-yellow-500" />;
+            case 'like_post': return <Heart size={14} className="text-pink-500 fill-pink-500" />;
+            case 'comment_post': return <MessageSquare size={14} className="text-blue-500 fill-blue-500" />;
+            case 'follow': return <UserPlus size={14} className="text-green-500" />;
+            case 'system': return <Coins size={14} className="text-yellow-500 animate-pulse" />;
+            case 'xp_award': return <Zap size={14} className="text-[var(--site-secondary)] fill-[var(--site-secondary)]" />;
+            case 'coin_award': return <Coins size={14} className="text-yellow-500 fill-yellow-500" />;
+            case 'achievement':
+            case 'badge_awarded': return <Trophy size={14} className="text-yellow-400 fill-yellow-400" />;
+            default: return <Bell size={14} className="text-yellow-500" />;
         }
     };
 
     const getMessage = () => {
+        const details = notification.details || {};
         switch (type) {
-            case 'like_post': return "liked your post";
-            case 'comment_post': return "commented on your post";
-            case 'follow': return "started following you";
-            case 'system': return "You received 10 Coins";
-            default: return "sent a notification";
+            case 'like_post': return <span>liked your post</span>;
+            case 'comment_post': return <span>commented on your post</span>;
+            case 'follow': return <span>started following you</span>;
+            case 'system': return <span>You received 10 Runes</span>;
+            case 'xp_award': return <span>earned <span className="font-bold text-[var(--site-secondary)]">{details.amount} XP</span> for {details.reason}</span>;
+            case 'coin_award': return <span>{details.amount < 0 ? 'spent' : 'earned'} <span className="font-bold text-yellow-500">{Math.abs(details.amount)} Runes</span> for {details.reason}</span>;
+            case 'badge_awarded': return <span>earned the <span className="font-bold text-yellow-500">{details.badgeName}</span> badge! {details.badgeIcon || ''}</span>;
+            case 'achievement': return <span>unlocked a new achievement: <span className="font-bold text-yellow-500">{details.achievementTitle || 'Achievement'}</span>!</span>;
+            default: return <span>sent a notification</span>;
         }
     };
 
@@ -33,18 +41,13 @@ export default function NotificationItem({ notification, onClick }: { notificati
 
     const resolveAvatar = (image: any, fallbackUrl: string) => {
         if (!image) return fallbackUrl;
-
-        // Check if strictly Sanity object
         if (image.asset?._ref || (typeof image === 'object' && image._type === 'image')) {
             try {
                 return urlFor(image).width(100).url();
             } catch (e) {
-                // If urlFor fails, fallback
                 return fallbackUrl;
             }
         }
-
-        // If string or other format, return as is or fallback
         if (typeof image === 'string') return image;
         return fallbackUrl;
     };
@@ -55,41 +58,53 @@ export default function NotificationItem({ notification, onClick }: { notificati
         <Link
             href={linkHref}
             onClick={onClick}
-            className={`flex items-start gap-4 p-4 rounded-2xl border transition-all ${read
-                ? "bg-transparent border-transparent hover:bg-white/5"
-                : "bg-white/5 border-teal-500/30 hover:bg-white/10"
+            className={`flex items-start gap-4 p-3 rounded-xl transition-all relative overflow-hidden group border border-transparent ${read
+                ? "bg-transparent hover:bg-white/5 opacity-70 hover:opacity-100"
+                : "bg-white/5 hover:bg-white/10 border-white/5"
                 }`}
         >
-            <div className="relative">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-800">
+            {!read && (
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[var(--site-secondary)] rounded-l-xl" />
+            )}
+
+            <div className="relative shrink-0">
+                <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-800 ring-2 ${!read ? 'ring-[var(--site-secondary)]/50' : 'ring-transparent'}`}>
                     <img
                         src={avatarUrl}
                         alt={sender.username}
                         className="w-full h-full object-cover"
                     />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-black rounded-full p-1 shadow-sm">
+                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#1a1a1a] rounded-full p-1 shadow-md border border-gray-100 dark:border-white/10">
                     {getIcon()}
                 </div>
             </div>
 
-            <div className="flex-1">
-                <p className="text-sm text-[var(--glass-text)]">
-                    {type !== 'system' && <span className="font-bold">{sender.fullName}</span>} <span className="text-[var(--glass-text-muted)]">{getMessage()}</span>
+            <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-[var(--glass-text)] leading-snug">
+                    {type !== 'system' && !['xp_award', 'coin_award', 'achievement', 'badge_awarded'].includes(type) && (
+                        <span className="font-bold text-white mr-1 group-hover:underline decoration-[var(--site-secondary)] decoration-2 underline-offset-2">
+                            {sender.fullName}
+                        </span>
+                    )}
+                    <span className="text-[var(--glass-text-muted)]">{getMessage()}</span>
                 </p>
                 {relatedPost && relatedPost.text && (
-                    <p className="text-xs text-[var(--glass-text-muted)] mt-1 line-clamp-1 italic">
-                        "{relatedPost.text}"
-                    </p>
+                    <div className="mt-1.5 pl-2 border-l-2 border-white/10">
+                        <p className="text-xs text-[var(--glass-text-muted)] italic line-clamp-1">
+                            "{relatedPost.text}"
+                        </p>
+                    </div>
                 )}
-                <p className="text-xs text-[var(--glass-text-muted)] mt-2">
+                <p className="text-[10px] text-[var(--glass-text-muted)] mt-1.5 font-medium opacity-60">
                     {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
                 </p>
             </div>
 
-            {!read && (
-                <div className="w-2 h-2 rounded-full bg-teal-500 mt-2" />
-            )}
+            {/* Hover Indicator */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--site-secondary)] shadow-[0_0_10px_var(--site-secondary)]" />
+            </div>
         </Link>
     );
 }

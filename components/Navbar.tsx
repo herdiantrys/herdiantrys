@@ -49,6 +49,8 @@ export default async function Navbar({ dict }: { dict: any }) {
                 equippedEffect: userData?.equippedEffect,
                 equippedFrame: userData?.equippedFrame,
                 equippedBackground: userData?.equippedBackground,
+                profileColor: userData?.profileColor,
+                frameColor: userData?.frameColor,
                 id: userData?._id || session.user.id, // Prefer DB ID
                 points: userData?.points || 0,
                 role: session.user.role

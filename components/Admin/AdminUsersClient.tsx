@@ -308,7 +308,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                             <SortHeader label="User" columnKey="name" />
                             <SortHeader label="Role" columnKey="role" />
                             <SortHeader label="Status" columnKey="status" />
-                            <SortHeader label="Coins" columnKey="points" />
+                            <SortHeader label="Runes" columnKey="points" />
                             <SortHeader label="Email" columnKey="email" />
                             <SortHeader label="Joined" columnKey="createdAt" />
                             <th className="px-6 py-4">Actions</th>

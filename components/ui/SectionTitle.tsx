@@ -48,7 +48,7 @@ export const SectionTitle = ({
                 whileInView={{ scaleX: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: "circOut" }}
-                className="w-24 h-1 bg-gradient-to-r from-teal-500 to-cyan-500 mb-6 rounded-full"
+                className="w-24 h-1 bg-[var(--site-secondary)] mb-6 rounded-full"
             />
 
             {/* Main Title with Parallax */}

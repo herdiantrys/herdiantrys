@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { writeClient } from "@/sanity/lib/write-client"; // Keep for image upload
 import { revalidatePath } from "next/cache";
+import { trackFirstBannerSetup } from "./gamification.actions";
 
 export const getUserByUsername = async (username: string) => {
     try {
@@ -31,7 +32,8 @@ export const getUserByUsername = async (username: string) => {
                     where: { isArchived: false },
                     select: { id: true }
                 },
-                bookmarkedProjects: { select: { id: true } }
+                bookmarkedProjects: { select: { id: true } },
+                inventory: { include: { shopItem: true } }
             }
         });
 
@@ -59,8 +61,10 @@ export const getUserByUsername = async (username: string) => {
             bookmarks: bookmarks,
             points: user.points,
             profileColor: (user as any).profileColor,
+            frameColor: (await getRawFrameColor(user.id)) || (user as any).frameColor,
             equippedFrame: (user as any).equippedFrame,
             equippedBackground: (user as any).equippedBackground,
+            inventory: (user as any).inventory,
             stats: {
                 posts: user._count.posts,
                 comments: user._count.comments,
@@ -72,6 +76,16 @@ export const getUserByUsername = async (username: string) => {
         return null;
     }
 };
+
+// Internal helper for raw frame color fetch
+async function getRawFrameColor(userId: string) {
+    try {
+        const rawUser = await prisma.$queryRawUnsafe(`SELECT frameColor FROM User WHERE id = ?`, userId) as any[];
+        return rawUser[0]?.frameColor || null;
+    } catch (e) {
+        return null;
+    }
+}
 
 export const updateUserProfile = async (userId: string, data: any) => {
     try {
@@ -191,6 +205,9 @@ export const uploadBannerImage = async (userId: string, formData: FormData) => {
             revalidatePath(`/user/${user.username}`);
         }
 
+        // Track Achievement
+        trackFirstBannerSetup(userId).catch(err => console.error("First Banner Track Error:", err));
+
         return { success: true, imageUrl: asset.url };
     } catch (error) {
         console.error("Error uploading banner image:", error);
@@ -228,12 +245,24 @@ export const uploadCustomBackground = async (userId: string, formData: FormData)
             filename: file.name,
         });
 
-        // 2. Update Prisma (equippedBackground stores the URL)
+        // 2. Fetch current preferences to preserve other data
+        const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { preferences: true }
+        });
+
+        const currentPreferences = (currentUser?.preferences as Record<string, any>) || {};
+
+        // 3. Update Prisma (equippedBackground stores the URL AND we save it to preferences for persistence)
         await prisma.user.update({
             where: { id: userId },
             data: {
                 equippedBackground: asset.url,
-                profileColor: null // Enforce mutual exclusivity
+                profileColor: null, // Enforce mutual exclusivity
+                preferences: {
+                    ...currentPreferences,
+                    customBackgroundUrl: asset.url // Persist the URL so we can re-equip later
+                }
             }
         });
 
@@ -246,6 +275,39 @@ export const uploadCustomBackground = async (userId: string, formData: FormData)
     } catch (error) {
         console.error("Error uploading custom background:", error);
         return { success: false, error: "Failed to upload image" };
+    }
+};
+
+export const removeCustomBackground = async (userId: string) => {
+    try {
+        // 1. Fetch current preferences to preserve other data
+        const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { preferences: true, username: true }
+        });
+
+        const currentPreferences = (currentUser?.preferences as Record<string, any>) || {};
+
+        // Remove customBackgroundUrl
+        const { customBackgroundUrl, ...remainingPreferences } = currentPreferences;
+
+        // 2. Update Prisma
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                equippedBackground: null,
+                preferences: remainingPreferences
+            }
+        });
+
+        if (currentUser?.username) {
+            revalidatePath(`/user/${currentUser.username}`);
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error removing custom background:", error);
+        return { success: false, error: "Failed to remove background" };
     }
 };
 
@@ -305,6 +367,7 @@ export const getUserByEmail = async (email: string) => {
             bookmarks: bookmarks,
             points: user.points,
             profileColor: (user as any).profileColor,
+            frameColor: (await getRawFrameColor(user.id)) || (user as any).frameColor,
             equippedFrame: (user as any).equippedFrame,
             equippedBackground: (user as any).equippedBackground,
             inventory: user.inventory,

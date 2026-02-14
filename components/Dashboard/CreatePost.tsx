@@ -163,6 +163,8 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                         effect={user.equippedEffect}
                         frame={user.equippedFrame}
                         background={user.equippedBackground}
+                        profileColor={user.profileColor}
+                        frameColor={user.frameColor}
                     />
                 </div>
 

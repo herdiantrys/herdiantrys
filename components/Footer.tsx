@@ -17,7 +17,7 @@ const getIcon = (platform: string) => {
 
 const Footer = async ({ dict }: { dict: any }) => {
     const currentYear = new Date().getFullYear();
-    const profile = await getProfile();
+    const profile = await getProfile() as any;
 
     return (
         <footer className="bg-black text-white py-12 border-t border-white/10 relative z-10">

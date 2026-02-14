@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { LayoutGrid, Sparkles, Square, Image as ImageIcon, PackageOpen } from "lucide-react";
+import { LayoutGrid, Sparkles, Square, Image as ImageIcon, PackageOpen, Palette } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShopItemCard from "@/components/ShopItemCard";
 
@@ -9,13 +9,14 @@ type ShopGridProps = {
     items: any[];
     userPoints: number;
     userInventory: any[];
-    userId?: string;
-    username?: string;
+    userId?: string | null;
+    username?: string | null;
 };
 
 const CATEGORIES = [
     { id: 'all', label: 'All', icon: LayoutGrid },
-    { id: 'cosmetics', label: 'Cosmetics', icon: Sparkles },
+    { id: 'premium', label: 'Premium', icon: Sparkles },
+    { id: 'cosmetics', label: 'Cosmetics', icon: Palette },
     { id: 'frame', label: 'Frames', icon: Square },
     { id: 'background', label: 'Backgrounds', icon: ImageIcon },
 ];
@@ -29,6 +30,10 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
 
             const itemType = (item.type || '').toLowerCase();
             const itemCategory = (item.category || '').toLowerCase();
+
+            if (activeCategory === 'premium') {
+                return ((itemType === 'saas_template') || (itemCategory === 'premium'));
+            }
 
             if (activeCategory === 'cosmetics') {
                 return ['frame', 'background', 'effect'].includes(itemType) ||

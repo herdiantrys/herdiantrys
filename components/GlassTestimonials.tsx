@@ -179,7 +179,7 @@ const GlassTestimonials = ({ testimonials = [], dict }: { testimonials: Testimon
                                         </p>
 
                                         <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-full ${testimonial.color} flex items-center justify-center text-white font-bold shadow-lg shrink-0 overflow-hidden relative`}>
+                                            <div className={`w-12 h-12 rounded-full bg-[var(--site-secondary)] flex items-center justify-center text-white font-bold shadow-lg shrink-0 overflow-hidden relative`}>
                                                 {testimonial.avatar.startsWith("http") ? (
                                                     <Image
                                                         src={testimonial.avatar}

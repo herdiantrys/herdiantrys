@@ -41,6 +41,7 @@ enum ShopItemType {
   FRAME
   BACKGROUND
   COURSE
+  SAAS_TEMPLATE
 }
 
 // Models
@@ -60,11 +61,15 @@ model User {
   website        String?
   role           Role    @default(USER)
   points         Float   @default(0)
+  stripeCustomerId String?
+
+  portfolioConfig PortfolioConfig?
 
   equippedEffect String? // Deprecated
   equippedFrame  String?
   equippedBackground String?
   profileColor   String?
+  frameColor     String?
   phoneNumber    String?
   resumeURL      String?
 
@@ -109,6 +114,16 @@ model User {
   // Notifications
   receivedNotifications Notification[] @relation("ReceivedNotifications")
   sentNotifications     Notification[] @relation("SentNotifications")
+
+  // Project Views
+  projectViews ProjectView[]
+
+  // Profile Visits
+  visitedProfiles ProfileVisit[] @relation("Visitor")
+  profileVisits   ProfileVisit[] @relation("TargetUser")
+
+  // Activities (Public Feed)
+  activities    Activity[] @relation("UserActivities")
 }
 
 model Notification {
@@ -131,6 +146,18 @@ model Notification {
 
   commentId   String?
   comment     Comment? @relation(fields: [commentId], references: [id])
+
+  details     Json?    // Context for XP/Coins: { amount: 10, reason: "Like" }
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // badge_awarded, achievement, profile_update
+  details   Json?    // { badgeName: "Tycoon", icon: "👑" }
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation("UserActivities", fields: [userId], references: [id])
 }
 
 model Category {
@@ -182,6 +209,9 @@ model Project {
   bookmarkedBy User[] @relation("UserBookmarksProjects")
 
   notifications Notification[]
+
+  // Project Views
+  projectViews ProjectView[]
 }
 
 model Post {
@@ -320,4 +350,75 @@ model SiteContent {
   updatedAt      DateTime @updatedAt
 }
 
+model GlobalSetting {
+  id        String   @id @default("main")
+  theme     Json?    // Stores { primary, secondary, accent, darkPrimary, darkSecondary, darkAccent }
+  updatedAt DateTime @updatedAt
+}
 
+
+
+model ProjectView {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId]) // Ensure unique view per user per project
+}
+
+model ProfileVisit {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  visitorId String
+  visitor   User     @relation("Visitor", fields: [visitorId], references: [id])
+
+  targetUserId String
+  targetUser   User    @relation("TargetUser", fields: [targetUserId], references: [id])
+
+  @@unique([visitorId, targetUserId])
+}
+
+model Rank {
+  id          String   @id @default(cuid())
+  name        String
+  subtitle    String?
+  minXP       Int      @unique
+  description String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PortfolioConfig {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+
+  isEnabled   Boolean  @default(false)
+  domain      String?  // custom domain if supported later
+  
+  // Theme & Layout
+  layoutType  String   @default("minimal") // minimal, creative, professional
+  primaryColor String?
+  fontFamily  String?
+  
+  // Content Sections
+  heroTitle       String?
+  heroDescription String?
+  heroImage       String?
+  
+  showResume      Boolean @default(true)
+  showContact     Boolean @default(true)
+  
+  // Featured Projects (IDs)
+  featuredProjectIds Json? // Array of strings
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

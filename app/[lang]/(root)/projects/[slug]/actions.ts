@@ -51,6 +51,18 @@ export async function toggleLike(projectId: string, slug: string) {
         }
 
         revalidatePath(`/projects/${slug}`);
+
+        // Track Gamification (Only on Like)
+        if (!hasLiked) { // If it was NOT liked before, it is liked now
+            const { trackLike } = await import("@/lib/actions/gamification.actions"); // Dynamic import
+            await trackLike(userId, projectId);
+
+            // Also track Like Received for the author?
+            // The project object here doesn't have authorId easily accessible without another query or include.
+            // But existing logic might handle it elsewhere or we can add it later if needed.
+            // For now, focus on "Liker" achievements.
+        }
+
         return { success: true, hasLiked: !hasLiked };
     } catch (error) {
         console.error("Error toggling like:", error);
@@ -76,6 +88,10 @@ export async function postComment(projectId: string, slug: string, text: string)
                 projectId: projectId
             }
         });
+
+        // Track Gamification
+        const { trackComment } = await import("@/lib/actions/gamification.actions"); // Dynamic import to avoid circular dep if any
+        await trackComment(session.user.id, projectId);
 
         revalidatePath(`/projects/${slug}`);
         return { success: true };

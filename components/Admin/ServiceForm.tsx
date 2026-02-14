@@ -99,7 +99,7 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                 } else {
                     const currentGallery = getValues("gallery") || [];
                     const newGalleryItem = {
-                        type: file.type.startsWith('image/') ? 'image' : 'video' as const,
+                        type: (file.type.startsWith('image/') ? 'image' : 'video') as "image" | "video",
                         url: res.url
                     };
                     setValue("gallery", [...currentGallery, newGalleryItem]);

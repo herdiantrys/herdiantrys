@@ -15,7 +15,20 @@ export type EngagementData = {
     fullMark: number;
 };
 
-export const getAdminStats = async () => {
+export type AdminStatsResponse = {
+    success: true;
+    kpis: { label: string; value: number; trend: string; color: string }[];
+    growthData: GrowthData[];
+    engagement: EngagementData[];
+} | {
+    success: false;
+    error: string;
+    kpis?: never;
+    growthData?: never;
+    engagement?: never;
+};
+
+export const getAdminStats = async (): Promise<AdminStatsResponse> => {
     try {
         const [
             userCount,

@@ -117,7 +117,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
     return (
         <section className="py-20 relative z-10 overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--site-secondary)]/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="container mx-auto px-4">
                 <SectionTitle
@@ -192,8 +192,8 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                     {/* ... features ... */}
                                                     <ul className="mb-6 space-y-2 flex-grow">
                                                         {service.features?.slice(0, 4).map((feature, i) => (
-                                                            <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                                                                <Check size={16} className="text-teal-400 mt-0.5 shrink-0" />
+                                                            <li key={i} className="flex items-start gap-2 text-sm text-[var(--glass-text-muted)]">
+                                                                <Check size={16} className="text-[var(--site-secondary)] mt-0.5 shrink-0" />
                                                                 <span>{feature}</span>
                                                             </li>
                                                         ))}
@@ -207,7 +207,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                                 return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(originalPrice)}`;
                                                             })()}
                                                         </span>
-                                                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
+                                                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)]">
                                                             {(() => {
                                                                 return `Rp. ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(service.price)}`;
                                                             })()}

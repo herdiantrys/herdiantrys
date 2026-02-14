@@ -18,6 +18,8 @@ interface ActivityAreaProps {
         inventory: any[];
         equippedFrame: string | null;
         equippedBackground: string | null;
+        profileColor: string | null;
+        frameColor: string | null;
     };
     dict: any;
     isOwner: boolean;
@@ -198,6 +200,9 @@ export default function ActivityArea({
                             inventory={inventoryData?.inventory || []}
                             equippedFrame={inventoryData?.equippedFrame || null}
                             equippedBackground={inventoryData?.equippedBackground || null}
+                            profileColor={inventoryData?.profileColor || null}
+                            frameColor={inventoryData?.frameColor || null}
+                            isOwner={isOwner}
                         />
                     </div>
                 )}

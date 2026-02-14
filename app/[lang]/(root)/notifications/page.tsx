@@ -8,6 +8,7 @@ import TrendingSidebar from "@/components/Dashboard/TrendingSidebar";
 import { getTrendingPosts } from "@/lib/actions/trending.actions";
 import NotificationList from "@/components/Notification/NotificationList";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
+import { getRanks } from "@/lib/actions/rank.actions";
 
 export default async function NotificationsPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -20,10 +21,11 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
     const dict = await getDictionary((lang || 'en') as "en" | "id");
 
     // Parallel fetching
-    const [user, notifications, trendingPosts] = await Promise.all([
+    const [user, notifications, trendingPosts, ranks] = await Promise.all([
         getUserByEmail(session.user.email),
         getNotifications(session.user.id || ""),
-        getTrendingPosts()
+        getTrendingPosts(),
+        getRanks()
     ]);
 
     if (!user) redirect("/login");
@@ -36,7 +38,7 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
 
                         {/* Left Sidebar */}
                         <div className="lg:col-span-1">
-                            <DashboardSidebar user={user} dict={dict} />
+                            <DashboardSidebar user={user} dict={dict} ranks={ranks} />
                         </div>
 
                         {/* Middle - Notifications List */}

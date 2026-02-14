@@ -2,6 +2,9 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { trackShopCompletion, trackFirstShopPurchase } from "./gamification.actions";
+import { createNotification } from "./notification.actions";
+
 
 export const getShopItems = async () => {
     try {
@@ -21,6 +24,14 @@ export const getShopItems = async () => {
     }
 };
 
+// ... (skipping unchanged parts for brevity if tool supported it, but here I just replace the top or specific chunks)
+// Actually I will do this in two chunks if possible, or just one big replace if needed. 
+// But wait, the file is 255 lines.
+// I can just replace the top import and the specific area where I broke it.
+// Wait, `replace_file_content` supports single contiguous block.
+// I need `multi_replace_file_content` to do top and bottom edit.
+
+
 export const seedShopItems = async () => {
     const items = [
         {
@@ -36,6 +47,21 @@ export const seedShopItems = async () => {
             price: 100,
             type: "FRAME",
             value: "from-pink-500 to-purple-600",
+        },
+        {
+            name: "Custom Neon Frame",
+            description: "Choose your own neon color! A fully customizable glow for your avatar.",
+            price: 1000,
+            type: "FRAME",
+            value: "custom-color",
+        },
+        {
+            name: "Professional Portfolio Template",
+            description: "Unlock the custom portfolio landing page. Stand out with a premium, customizable layout.",
+            price: 50, // This will be treated as $50.00 in Stripe logic
+            type: "SAAS_TEMPLATE",
+            value: "portfolio-v1",
+            icon: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&ixlib=rb-4.0.3"
         }
     ];
 
@@ -120,6 +146,20 @@ export const purchaseItem = async (userId: string, itemId: string, price: number
         revalidatePath("/dashboard");
         revalidatePath(`/user/${userId}`);
         revalidatePath("/inventory");
+
+        // Check for Shop Completion Achievement
+        trackShopCompletion(userId).catch(err => console.error("BG Track Error:", err));
+
+        // Check for First Purchase Achievement
+        trackFirstShopPurchase(userId).catch(err => console.error("First Purchase Track Error:", err));
+
+        // Notify User of Coin Deduction
+        createNotification({
+            recipientId: userId,
+            senderId: "system",
+            type: "coin_award", // Use coin_award for deductions too, or system
+            details: { amount: -price, reason: `Purchased ${type.toLowerCase()}` }
+        }).catch(err => console.error("Coin Notification Error:", err));
 
         return { success: true };
     } catch (error: any) {

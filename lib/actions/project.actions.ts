@@ -1,6 +1,6 @@
 "use server";
 
-import { ProjectType } from "@prisma/client";
+import { ProjectType, ProjectStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -170,7 +170,7 @@ export async function bulkDeleteProjects(ids: string[]) {
     }
 }
 
-export async function bulkUpdateProjectStatus(ids: string[], status: string) {
+export async function bulkUpdateProjectStatus(ids: string[], status: ProjectStatus) {
     try {
         // Handle "ARCHIVED" as a status string or boolean flag if needed. 
         // The project schema has `status` (string) and `isArchived` (boolean).

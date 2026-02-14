@@ -15,7 +15,7 @@ const GlassHero = () => {
                         rotate: [0, 10, 0],
                     }}
                     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl"
+                    className="absolute top-1/4 left-1/4 w-64 h-64 bg-[var(--site-accent)]/30 rounded-full blur-3xl"
                 />
                 <motion.div
                     animate={{
@@ -24,7 +24,7 @@ const GlassHero = () => {
                         rotate: [0, -10, 0],
                     }}
                     transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl"
+                    className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--site-accent-next)]/20 rounded-full blur-3xl"
                 />
             </div>
 
@@ -73,7 +73,7 @@ const GlassHero = () => {
                     className="relative w-full max-w-[320px] md:max-w-[500px] aspect-square flex items-center justify-center md:flex-1"
                 >
                     {/* Decorative Circle Background */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[var(--site-accent-prev)]/20 to-[var(--site-accent-next)]/20 rounded-full blur-3xl animate-pulse" />
 
                     {/* Glass Container for Image */}
                     <motion.div
@@ -97,7 +97,7 @@ const GlassHero = () => {
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                             className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-20 glass px-4 py-2 rounded-full border border-white/20 shadow-lg flex items-center gap-2"
                         >
-                            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-green-400 animate-pulse" />
+                            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[var(--site-accent)] animate-pulse" />
                             <span className="text-xs md:text-sm font-medium text-white">Open to Work</span>
                         </motion.div>
                     </motion.div>

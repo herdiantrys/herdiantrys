@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 
 import { LEVELS, BADGES } from "@/lib/constants/gamification";
+import { getRanks } from "@/lib/actions/rank.actions"; // Import rank actions
+import { createNotification } from "./notification.actions";
+import { createActivity } from "./activity.actions";
 
 // using Prisma.TransactionClient directly
 
@@ -35,16 +38,21 @@ export async function awardXP(userId: string, amount: number, reason: string) {
 
             const newXP = (user.xp || 0) + amount;
 
-            // Calculate new level
-            let newLevel = user.level;
-            let newRoleName = LEVELS.find(l => l.level === user.level)?.name || "Visitor";
+            // Calculate new level (1 Level per 100 XP)
+            const newLevel = Math.floor(newXP / 100) + 1;
 
-            for (const tier of LEVELS) {
-                if (newXP >= tier.minXP) {
-                    newLevel = tier.level;
-                    newRoleName = tier.name;
-                }
-            }
+            // Fetch Ranks from DB
+            const dbRanks = await tx.rank.findMany({ orderBy: { minXP: 'asc' } });
+            // Fallback to constants if DB empty? Or assume seeded.
+            // If strictly using DB, no fallback needed if seeded correctly.
+
+            // Find current rank based on newXP
+            // We need to find the highest rank where minXP <= newXP
+            // Since sorted asc, we can reverse or findLast (if avail) or just iterate
+            const reversedRanks = [...dbRanks].reverse();
+            const currentRank = reversedRanks.find(r => newXP >= r.minXP) || dbRanks[0]; // Default to lowest if found none (should not happen if minXP=0 exists)
+
+            const newRoleName = currentRank?.name || "Visitor";
 
             const leveledUp = newLevel > (user.level || 1);
 
@@ -69,6 +77,14 @@ export async function awardXP(userId: string, amount: number, reason: string) {
         });
 
         if (result.success) {
+            // Notify User of XP Award (Async)
+            createNotification({
+                recipientId: userId,
+                senderId: "system",
+                type: "xp_award",
+                details: { amount, reason: reason.replace(/_/g, ' ') }
+            }).catch(e => console.error("XP Notification Error:", e));
+
             revalidatePath("/");
             revalidatePath("/dashboard");
         }
@@ -134,6 +150,28 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
             }
         });
 
+        // Award Visibility & Notifications
+        if (badgeId === "tycoon") {
+            createActivity(userId, "achievement", {
+                achievementTitle: "Tycoon",
+                description: "Unlocked every item in the shop! 👑",
+                badgeIcon: "👑"
+            }).catch(e => console.error("Tycoon Activity Error:", e));
+        } else {
+            createActivity(userId, "badge_awarded", {
+                badgeName: badgeDef.name,
+                badgeIcon: badgeDef.icon,
+                description: `Earned the ${badgeDef.name} badge!`
+            }).catch(e => console.error("Badge Activity Error:", e));
+        }
+
+        createNotification({
+            recipientId: userId,
+            senderId: "system",
+            type: "badge_awarded",
+            details: { badgeName: badgeDef.name, badgeIcon: badgeDef.icon }
+        }).catch(e => console.error("Badge Notification Error:", e));
+
         return { success: true, badge: newBadge };
 
     } catch (error) {
@@ -144,48 +182,73 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
 export async function trackProjectView(userId: string, projectId: string) {
     try {
         await prisma.$transaction(async (tx) => {
-            const user = await tx.user.findUnique({
-                where: { id: userId },
-                select: { gamificationState: true, badges: true }
+            // 1. Check if already viewed
+            const existingView = await tx.projectView.findUnique({
+                where: {
+                    userId_projectId: {
+                        userId,
+                        projectId
+                    }
+                }
             });
 
-            if (!user) return; // Silent fail inside tx
+            if (existingView) return; // Already viewed, do nothing
 
-            const state: any = user.gamificationState || { viewedProjects: [], readCaseStudies: [] };
+            // 2. Create ProjectView
+            await tx.projectView.create({
+                data: {
+                    userId,
+                    projectId
+                }
+            });
 
-            // Track Unique Views
-            if (!state.viewedProjects) state.viewedProjects = [];
-            if (!state.viewedProjects.includes(projectId)) {
-                state.viewedProjects.push(projectId);
+            // 3. Count total views for user
+            const viewCount = await tx.projectView.count({
+                where: { userId }
+            });
+
+            // 4. Check thresholds and award
+            // Observer (10 views) - 100 XP
+            if (viewCount === 10) {
+                await awardXP(userId, 100, "achievement_observer");
+                await checkAndAwardBadge(userId, "observer", tx);
             }
-
-            // Update state
+            // Scout (50 views) - 600 XP
+            else if (viewCount === 50) {
+                await awardXP(userId, 600, "achievement_scout");
+                await checkAndAwardBadge(userId, "scout", tx);
+            }
+            // Surveyor (100 views) - 1200 XP
+            else if (viewCount === 100) {
+                await awardXP(userId, 1200, "achievement_surveyor");
+                await checkAndAwardBadge(userId, "surveyor", tx);
+            }
+            // Visionary (500 views) - 6000 XP
+            else if (viewCount === 500) {
+                await awardXP(userId, 6000, "achievement_visionary");
+                await checkAndAwardBadge(userId, "visionary", tx);
+            }
+            // 5. Update gamificationState with view count for UI progress
+            const state: any = (await tx.user.findUnique({ where: { id: userId }, select: { gamificationState: true } }))?.gamificationState || {};
+            state.viewCount = viewCount;
             await tx.user.update({
                 where: { id: userId },
                 data: { gamificationState: state }
             });
-
-            // Logic for Portfolio Explorer (5 projects)
-            if (state.viewedProjects.length >= 5) {
-                // Pass the current transaction client to ensure atomicity
-                await checkAndAwardBadge(userId, "portfolio_explorer", tx);
-            }
         });
 
         return { success: true };
     } catch (e) {
         console.error("Error tracking view:", e);
+        return { success: false };
     }
 }
 
 export async function trackContactMessage(userId: string) {
     try {
-        // Simple enough to probably not need a complex transaction, 
-        // but let's be consistent if we are reading state. 
-        // Actually this one just awards a badge, so we can just call checkAndAwardBadge directly.
-        // However, if we wanted to enforce "only 1 message needed", checkAndAwardBadge handles usage check.
-        // Let's just wrap it to be safe if we add more logic later,
-        // OR just call checkAndAwardBadge which now supports tx but works without it.
+        // Award 100 XP for contacting/hiring (Limit once per day usually, or unique per message if we track message ID)
+        // For now, let's limit to once per day to prevent spamming the form for XP
+        await awardXP(userId, 100, "daily_contact_message");
 
         return await checkAndAwardBadge(userId, "connector");
 
@@ -194,9 +257,14 @@ export async function trackContactMessage(userId: string) {
     }
 }
 
-export async function trackDeepThinker(userId: string) {
+export async function trackDeepThinker(userId: string, projectId: string) {
     // Called when user scrolls to end of a "Case Study" or any project
     try {
+        // Award 25 XP for reading a case study (Once per project per day)
+        if (projectId) {
+            await awardXP(userId, 25, `read_case_study_${projectId}`);
+        }
+
         await prisma.$transaction(async (tx) => {
             const user = await tx.user.findUnique({
                 where: { id: userId },
@@ -222,12 +290,18 @@ export async function trackDeepThinker(userId: string) {
     }
 }
 
-export async function trackComment(userId: string) {
+// Track Comment (Social Butterfly)
+export async function trackComment(userId: string, projectId?: string) {
     try {
-        // limit 5 XP awards per day for commenting
-        const xpResult = await awardXP(userId, 5, "daily_comment");
+        // limit 5 XP awards per day for commenting -> Now 40 XP
+        // STRICT RULE: Award XP only for Project comments
+        // STRICT RULE: Award XP only for Project comments
+        let xpResult;
+        if (projectId) {
+            xpResult = await awardXP(userId, 40, `comment_project_${projectId}_${Date.now()}`);
+        }
 
-        // Track for badge (Social Butterfly)
+        // Track for badge (Social Butterfly) - counts all comments
         await prisma.$transaction(async (tx) => {
             const user = await tx.user.findUnique({
                 where: { id: userId },
@@ -237,6 +311,37 @@ export async function trackComment(userId: string) {
 
             const state: any = user.gamificationState || {};
             state.commentCount = (state.commentCount || 0) + 1;
+
+            // Track Unique Project Comments
+            if (projectId) {
+                if (!state.commentedProjects) state.commentedProjects = [];
+                if (!state.commentedProjects.includes(projectId)) {
+                    state.commentedProjects.push(projectId);
+                }
+
+                const uniqueComments = state.commentedProjects.length;
+
+                // Scribe (10 comments) - 150 XP
+                if (uniqueComments === 10) {
+                    await awardXP(userId, 150, "achievement_scribe");
+                    await checkAndAwardBadge(userId, "scribe", tx);
+                }
+                // Bard (50 comments) - 700 XP
+                else if (uniqueComments === 50) {
+                    await awardXP(userId, 700, "achievement_bard");
+                    await checkAndAwardBadge(userId, "bard", tx);
+                }
+                // Chronicler (100 comments) - 1500 XP
+                else if (uniqueComments === 100) {
+                    await awardXP(userId, 1500, "achievement_chronicler");
+                    await checkAndAwardBadge(userId, "chronicler", tx);
+                }
+                // Oracle (500 comments) - 7000 XP
+                else if (uniqueComments === 500) {
+                    await awardXP(userId, 7000, "achievement_oracle");
+                    await checkAndAwardBadge(userId, "oracle", tx);
+                }
+            }
 
             await tx.user.update({
                 where: { id: userId },
@@ -297,5 +402,190 @@ export async function trackNightOwl(userId: string) {
         }
     } catch (e) {
         console.error("Error tracking night owl:", e);
+    }
+}
+
+export async function trackLike(userId: string, projectId: string) {
+    try {
+        await prisma.$transaction(async (tx) => {
+            const user = await tx.user.findUnique({
+                where: { id: userId },
+                select: { gamificationState: true, badges: true }
+            });
+
+            if (!user) return;
+
+            const state: any = user.gamificationState || {};
+
+            // Track Unique Liked Projects
+            if (!state.likedProjects) state.likedProjects = [];
+            if (!state.likedProjects.includes(projectId)) {
+                state.likedProjects.push(projectId);
+            }
+
+            const uniqueLikes = state.likedProjects.length;
+
+            // Admirer (10 likes) - 125 XP
+            if (uniqueLikes === 10) {
+                await awardXP(userId, 125, "achievement_admirer");
+                await checkAndAwardBadge(userId, "admirer", tx);
+            }
+            // Fan (50 likes) - 650 XP
+            else if (uniqueLikes === 50) {
+                await awardXP(userId, 650, "achievement_fan");
+                await checkAndAwardBadge(userId, "fan", tx);
+            }
+            // Curator (100 likes) - 1300 XP
+            else if (uniqueLikes === 100) {
+                await awardXP(userId, 1300, "achievement_curator");
+                await checkAndAwardBadge(userId, "curator", tx);
+            }
+            // Patron (500 likes) - 6500 XP
+            else if (uniqueLikes === 500) {
+                await awardXP(userId, 6500, "achievement_patron");
+                await checkAndAwardBadge(userId, "patron", tx);
+            }
+
+            await tx.user.update({
+                where: { id: userId },
+                data: { gamificationState: state }
+            });
+        });
+
+        return { success: true };
+    } catch (e) {
+        console.error("Error tracking like:", e);
+        return { success: false };
+    }
+}
+
+export async function trackShopCompletion(userId: string) {
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Get total shop item count
+            const totalShopItems = await tx.shopItem.count();
+            if (totalShopItems === 0) return { success: false }; // Should not happen in prod
+
+            // 2. Get user inventory count (unique items)
+            const userInventoryCount = await tx.userInventory.count({
+                where: { userId }
+            });
+
+            // 3. Check if completed
+            if (userInventoryCount >= totalShopItems) {
+                // Award Badge
+                const badgeResult = await checkAndAwardBadge(userId, "tycoon", tx);
+
+                // Award Bonus XP for completion (e.g. 5000 XP)
+                if (badgeResult?.success) {
+                    await awardXP(userId, 5000, "achievement_tycoon");
+                    return { success: true, awarded: true };
+                }
+            }
+            return { success: true, awarded: false };
+        });
+
+        return result;
+    } catch (error) {
+        console.error("Error tracking shop completion:", error);
+        return { success: false };
+    }
+}
+
+export async function trackFirstShopPurchase(userId: string) {
+    try {
+        await prisma.$transaction(async (tx: any) => {
+            // Check if already awarded
+            const user = await tx.user.findUnique({ where: { id: userId }, select: { badges: true } });
+            const badges = (user?.badges as any[]) || [];
+            if (badges.some((b: any) => b.id === "first_purchase")) return;
+
+            // Award Badge & XP (100XP)
+            // Note: Since this is called AFTER a purchase, we assume the purchase was successful.
+            // We could verify inventory count > 0, but the caller should ensure a purchase happened.
+            await awardXP(userId, 100, "achievement_first_purchase");
+            await checkAndAwardBadge(userId, "first_purchase", tx);
+        });
+    } catch (e) {
+        console.error("Error tracking first purchase:", e);
+    }
+}
+
+export async function trackFirstBannerSetup(userId: string) {
+    try {
+        await prisma.$transaction(async (tx: any) => {
+            // Check if already awarded
+            const user = await tx.user.findUnique({ where: { id: userId }, select: { badges: true } });
+            const badges = (user?.badges as any[]) || [];
+            if (badges.some((b: any) => b.id === "first_banner")) return;
+
+            // Award Badge & XP (100XP)
+            await awardXP(userId, 100, "achievement_first_banner");
+            await checkAndAwardBadge(userId, "first_banner", tx);
+        });
+    } catch (e) {
+        console.error("Error tracking first banner:", e);
+    }
+}
+
+export async function trackProfileVisit(visitorId: string, targetUserId: string) {
+    if (visitorId === targetUserId) return; // Don't track self-visits
+
+    try {
+        await prisma.$transaction(async (tx: any) => {
+            // 1. Check/Create Visit Record
+            // We use upsert or ignore if exists. Since we need to know if it's NEW, try create.
+            const existingVisit = await tx.profileVisit.findUnique({
+                where: {
+                    visitorId_targetUserId: {
+                        visitorId,
+                        targetUserId
+                    }
+                }
+            });
+
+            if (existingVisit) return; // Already visited this profile
+
+            // Create new visit
+            await tx.profileVisit.create({
+                data: {
+                    visitorId,
+                    targetUserId
+                }
+            });
+
+            // 2. Count total unique profile visits
+            const visitCount = await tx.profileVisit.count({
+                where: { visitorId }
+            });
+
+            // 3. Check Thresholds
+            // First Visit (1 visit) - 50 XP
+            if (visitCount === 1) {
+                await awardXP(visitorId, 50, "achievement_first_visit");
+                await checkAndAwardBadge(visitorId, "first_visit", tx);
+            }
+            // Social Explorer (10 visits) - 350 XP
+            else if (visitCount === 10) {
+                await awardXP(visitorId, 350, "achievement_social_explorer");
+                await checkAndAwardBadge(visitorId, "social_explorer", tx);
+            }
+            // Community Pillar (50 visits) - 1000 XP
+            else if (visitCount === 50) {
+                await awardXP(visitorId, 1000, "achievement_community_pillar");
+                await checkAndAwardBadge(visitorId, "community_pillar", tx);
+            }
+
+            // 4. Update gamificationState for progress UI
+            const state: any = (await tx.user.findUnique({ where: { id: visitorId }, select: { gamificationState: true } }))?.gamificationState || {};
+            state.profileVisitsCount = visitCount;
+            await tx.user.update({
+                where: { id: visitorId },
+                data: { gamificationState: state }
+            });
+
+        });
+    } catch (e) {
+        console.error("Error tracking profile visit:", e);
     }
 }

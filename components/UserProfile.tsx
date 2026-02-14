@@ -131,7 +131,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
             {/* Background Elements */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -translate-y-1/2" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl translate-y-1/2" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[var(--site-accent)]/20 rounded-full blur-3xl translate-y-1/2" />
             </div>
 
             <div className="container mx-auto max-w-5xl relative z-10">
@@ -142,7 +142,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                     transition={{ duration: 0.6 }}
                     className="glass rounded-3xl overflow-hidden border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-md mb-8"
                 >
-                    <div className="h-80 md:h-[500px] bg-gradient-to-r from-purple-500/30 to-teal-500/30 relative group"
+                    <div className="h-80 md:h-[500px] bg-gradient-to-r from-purple-500/30 to-[var(--site-accent)]/30 relative group"
                         style={{ maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)' }}
                     >
                         {user.bannerImage && (
@@ -239,13 +239,13 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                             <div className="md:col-span-2 space-y-8">
                                 <div className="glass p-6 md:p-8 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)]">
                                     <h2 className="text-2xl font-bold text-[var(--glass-text)] mb-6 flex items-center gap-2">
-                                        <User size={24} className="text-teal-400" /> {dict.profile.about}
+                                        <User size={24} className="text-[var(--site-accent)]" /> {dict.profile.about}
                                     </h2>
                                     <div className="space-y-6">
                                         {user.headline && (
                                             <div>
                                                 <h3 className="text-sm font-medium text-[var(--glass-text-muted)] uppercase tracking-wider mb-2">{dict.profile.headline}</h3>
-                                                <p className="text-lg text-teal-400 font-medium">{user.headline}</p>
+                                                <p className="text-lg text-[var(--site-accent)] font-medium">{user.headline}</p>
                                             </div>
                                         )}
                                         {user.bio && (
@@ -291,7 +291,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                             className="glass p-8 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)]"
                         >
                             <h2 className="text-2xl font-bold text-[var(--glass-text)] mb-8 flex items-center gap-2">
-                                <Settings size={24} className="text-teal-400" /> Account Settings
+                                <Settings size={24} className="text-[var(--site-accent)]" /> Account Settings
                             </h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -306,7 +306,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                                 <span className="capitalize text-gray-300">{key} Notifications</span>
                                                 <button
                                                     onClick={() => toggleSetting('notifications', key)}
-                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-teal-500' : 'bg-gray-600'}`}
+                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-[var(--site-accent)]' : 'bg-gray-600'}`}
                                                 >
                                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${value ? 'left-7' : 'left-1'}`} />
                                                 </button>
@@ -326,7 +326,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                                 <span className="capitalize text-gray-300">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
                                                 <button
                                                     onClick={() => toggleSetting('privacy', key)}
-                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-teal-500' : 'bg-gray-600'}`}
+                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-[var(--site-accent)]' : 'bg-gray-600'}`}
                                                 >
                                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${value ? 'left-7' : 'left-1'}`} />
                                                 </button>
@@ -346,7 +346,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                                 <span className="capitalize text-gray-300">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
                                                 <button
                                                     onClick={() => toggleSetting('appearance', key)}
-                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-teal-500' : 'bg-gray-600'}`}
+                                                    className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-[var(--site-accent)]' : 'bg-gray-600'}`}
                                                 >
                                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${value ? 'left-7' : 'left-1'}`} />
                                                 </button>
@@ -426,7 +426,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                         type="text"
                                         value={formData.fullName}
                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal-500 transition-colors"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[var(--site-accent)] transition-colors"
                                     />
                                 </div>
                                 <div>
@@ -435,7 +435,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                         type="text"
                                         value={formData.headline}
                                         onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal-500 transition-colors"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[var(--site-accent)] transition-colors"
                                         placeholder="e.g. Creative Developer"
                                     />
                                 </div>
@@ -445,7 +445,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                         value={formData.bio}
                                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                         rows={4}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal-500 transition-colors resize-none"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[var(--site-accent)] transition-colors resize-none"
                                         placeholder="Tell us about yourself..."
                                     />
                                 </div>
@@ -455,7 +455,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-teal-500 transition-colors"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[var(--site-accent)] transition-colors"
                                         placeholder="e.g. New York, NY"
                                     />
                                 </div>
@@ -471,7 +471,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] text-white font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
                                 >
                                     {isSaving ? "Saving..." : (
                                         <>

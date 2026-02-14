@@ -10,8 +10,8 @@ type ShopItemProps = {
     item: any;
     userPoints: number;
     isOwned: boolean;
-    userId?: string;
-    username?: string;
+    userId?: string | null;
+    username?: string | null;
 };
 
 export default function ShopItemCard({ item, userPoints, isOwned, userId, username }: ShopItemProps) {
@@ -33,6 +33,20 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
 
         setIsLoading(true);
         try {
+            // Check if it's a Real Money Item (Stripe)
+            if (item.type === 'SAAS_TEMPLATE') {
+                const { createCheckoutSession } = await import("@/lib/actions/stripe.actions");
+                const result = await createCheckoutSession(item._id, userId, pathname || '/shop');
+
+                if (result.url) {
+                    window.location.href = result.url;
+                    return;
+                } else {
+                    throw new Error(result.error || "Failed to create checkout session");
+                }
+            }
+
+            // Standard Point Purchase
             const result = await purchaseItem(userId, item._id, item.price, item.type, item.value);
 
             if (result.success) {
@@ -45,20 +59,20 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             } else {
                 toast.error("Purchase failed", { description: result.error });
             }
-        } catch (error) {
-            toast.error("An error occurred");
+        } catch (error: any) {
+            toast.error("An error occurred", { description: error.message });
         } finally {
             setIsLoading(false);
         }
     };
 
-    const canAfford = userPoints >= item.price;
+    const canAfford = item.type === 'SAAS_TEMPLATE' || userPoints >= item.price;
 
     return (
         <div
             className={`glass-liquid p-6 flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 group relative overflow-hidden
             ${optimisticOwned
-                    ? "bg-gradient-to-br from-teal-500/5 to-emerald-500/5 border-teal-500/30"
+                    ? "bg-gradient-to-br from-[var(--site-accent-prev)]/5 to-[var(--site-accent-next)]/5 border-[var(--site-accent)]/30"
                     : "border-white/5 hover:border-purple-500/30"
                 }`}>
 
@@ -67,7 +81,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
 
             <div className={`aspect-square rounded-2xl bg-black/40 mb-6 relative overflow-hidden flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors`}>
                 {/* Effect Preview */}
-                <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${item.value || 'from-gray-500 to-gray-700'} opacity-80 blur-md group-hover:opacity-100 group-hover:blur-xl transition-all duration-500 scale-90 group-hover:scale-100`}></div>
+                <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${item.value === 'custom-color' ? 'from-pink-500 via-purple-500 to-cyan-500' : (item.value || 'from-gray-500 to-gray-700')} opacity-80 blur-md group-hover:opacity-100 group-hover:blur-xl transition-all duration-500 scale-90 group-hover:scale-100`}></div>
 
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className={`w-24 h-24 bg-[#121212] rounded-full border-4 flex items-center justify-center transition-all duration-300 relative overflow-hidden
@@ -84,7 +98,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                 </div>
 
                 {optimisticOwned && (
-                    <div className="absolute top-3 right-3 bg-teal-500/20 text-teal-400 p-1.5 rounded-full backdrop-blur-md border border-teal-500/20 shadow-lg animate-in fade-in zoom-in duration-300 z-20">
+                    <div className="absolute top-3 right-3 bg-[var(--site-accent)]/20 text-[var(--site-accent)] p-1.5 rounded-full backdrop-blur-md border border-[var(--site-accent)]/20 shadow-lg animate-in fade-in zoom-in duration-300 z-20">
                         <Check size={14} strokeWidth={3} />
                     </div>
                 )}
@@ -96,14 +110,21 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             </div>
 
             <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-3 relative z-20">
-                <div className={`flex items-center gap-1.5 font-bold shrink-0 transition-colors duration-300 ${optimisticOwned ? 'text-teal-400' : 'text-amber-400'}`}>
-                    {optimisticOwned ? <ShieldCheck size={18} /> : <Coins size={18} className="drop-shadow-md" />}
-                    <span className="text-lg">{optimisticOwned ? "Owned" : item.price}</span>
+                <div className={`flex items-center gap-1.5 font-bold shrink-0 transition-colors duration-300 ${optimisticOwned ? 'text-[var(--site-accent)]' : (item.type === 'SAAS_TEMPLATE' ? 'text-green-400' : 'text-amber-400')}`}>
+                    {optimisticOwned ? <ShieldCheck size={18} /> : (item.type === 'SAAS_TEMPLATE' ? 'Rp' : <Coins size={18} className="drop-shadow-md" />)}
+                    <span className="text-lg">
+                        {optimisticOwned
+                            ? "Owned"
+                            : (item.type === 'SAAS_TEMPLATE'
+                                ? new Intl.NumberFormat('id-ID').format(item.price)
+                                : item.price)
+                        }
+                    </span>
                 </div>
 
                 {optimisticOwned ? (
                     <div className="relative group/btn">
-                        <div className="px-5 py-2.5 rounded-xl bg-teal-500/10 text-teal-500 text-xs font-bold border border-teal-500/10 cursor-default flex items-center justify-center gap-2 group-hover/btn:opacity-0 transition-opacity absolute inset-0">
+                        <div className="px-5 py-2.5 rounded-xl bg-[var(--site-accent)]/10 text-[var(--site-accent)] text-xs font-bold border border-[var(--site-accent)]/10 cursor-default flex items-center justify-center gap-2 group-hover/btn:opacity-0 transition-opacity absolute inset-0">
                             <Check size={14} />
                             <span>In Inventory</span>
                         </div>
@@ -120,7 +141,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                                 console.log("ShopItemCard Click:", { username, targetUrl });
                                 router.push(targetUrl);
                             }}
-                            className="px-5 py-2.5 rounded-xl bg-teal-500 text-white text-xs font-bold border border-teal-500 cursor-pointer flex items-center justify-center gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity relative z-10 hover:bg-teal-600"
+                            className="px-5 py-2.5 rounded-xl bg-[var(--site-accent)] text-white text-xs font-bold border border-[var(--site-accent)] cursor-pointer flex items-center justify-center gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity relative z-10 hover:brightness-110"
                         >
                             <span>Go to Inventory</span>
                         </button>
@@ -128,9 +149,9 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                 ) : (
                     <button
                         onClick={handleBuy}
-                        disabled={!canAfford || isLoading}
+                        disabled={(!canAfford && item.type !== 'SAAS_TEMPLATE') || isLoading}
                         className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 border flex items-center justify-center gap-2 transform active:scale-95 shadow-lg
-                            ${canAfford
+                            ${canAfford || item.type === 'SAAS_TEMPLATE'
                                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-transparent shadow-purple-900/20 hover:shadow-purple-500/40"
                                 : "bg-white/5 text-gray-500 border-white/5 cursor-not-allowed"
                             }`}

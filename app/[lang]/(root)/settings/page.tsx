@@ -7,6 +7,7 @@ import { defineQuery } from "next-sanity";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import SettingsForm from "@/components/Settings/SettingsForm";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
+import { getRanks } from "@/lib/actions/rank.actions";
 
 export default async function SettingsPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -38,7 +39,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
         }
     `);
 
-    const user = await client.withConfig({ useCdn: false }).fetch(USER_QUERY, { email: session.user.email }, { cache: 'no-store' });
+    const [user, ranks] = await Promise.all([
+        client.withConfig({ useCdn: false }).fetch(USER_QUERY, { email: session.user.email }, { cache: 'no-store' }),
+        getRanks()
+    ]);
 
     return (
         <ProfileColorProvider initialColor={user.profileColor || null}>
@@ -48,7 +52,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
 
                         {/* Left Sidebar */}
                         <div className="lg:col-span-1">
-                            <DashboardSidebar user={user} />
+                            <DashboardSidebar user={user} ranks={ranks} />
                         </div>
 
                         {/* Middle - Settings Form */}

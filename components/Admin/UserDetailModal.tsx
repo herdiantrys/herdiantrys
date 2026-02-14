@@ -39,7 +39,7 @@ export default function UserDetailModal({ user, currentUser, isOpen, onClose }: 
         const res = await updateUserPoints(user.id, coins);
         setIsSavingCoins(false);
         if (res.success) {
-            toast.success("Coins updated successfully");
+            toast.success("Runes updated successfully");
             setIsEditingCoins(false);
             // Optimization: Update local user object if parent doesn't auto-refresh completely
             // But usually we rely on revalidatePath in action
@@ -205,7 +205,7 @@ export default function UserDetailModal({ user, currentUser, isOpen, onClose }: 
                                     )}
 
                                     <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">
-                                        Coins
+                                        Runes
                                     </div>
                                     {isSuperAdmin && !isEditingCoins && (
                                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

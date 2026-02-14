@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // reactCompiler: true,
+  reactCompiler: true,
+  poweredByHeader: false,
+  compress: true,
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
@@ -30,10 +32,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ui-avatars.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // strict mode enabled by default in latest next.js, but we ensure no ignoreBuildErrors
+    ignoreBuildErrors: false,
   },
 };
 

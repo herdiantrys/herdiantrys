@@ -47,7 +47,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full glass-liquid text-teal-600 dark:text-teal-300 mb-6 font-semibold shadow-[0_0_20px_rgba(20,184,166,0.2)]"
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-full glass-liquid text-[var(--site-secondary)] dark:text-[var(--site-secondary)] mb-6 font-semibold shadow-[0_0_20px_var(--site-secondary)]"
           >
             <Sparkles size={16} className="animate-pulse" />
             <span className="text-sm font-medium tracking-wide uppercase">{dict.hero.creative_role}</span>
@@ -60,7 +60,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             className="text-5xl lg:text-7xl font-bold leading-tight mb-6"
           >
             {dict.hero.greeting} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-500 to-emerald-500 animate-gradient-x">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] via-[var(--site-secondary)] to-[var(--site-secondary)] animate-gradient-x">
               {profile?.fullName || "Herdian"}
             </span>
           </motion.h1>
@@ -97,7 +97,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
           >
             <button
               onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-site-accent-prev to-site-accent-next text-white font-bold shadow-lg shadow-site-accent/30 hover:shadow-site-accent/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
               {dict.hero.view_portfolio}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -122,7 +122,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
           {/* Animated outline box behind image */}
           <motion.div
             style={{ rotate: rotateOutline }}
-            className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-cyan-400/50 bg-white/5 backdrop-blur-sm"
+            className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-[var(--site-secondary)]/50 bg-white/5 backdrop-blur-sm"
           ></motion.div>
 
           {profile?.bannerImage ? (
@@ -158,7 +158,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
       </motion.div>
 
       {/* 3/4 background */}
-      <div className="absolute top-0 bottom-0 right-0 w-[45%] bg-gradient-to-b from-teal-500/50 to-transparent rounded-l-full hidden lg:block pointer-events-none"></div>
+      <div className="absolute top-0 bottom-0 right-0 w-[45%] bg-gradient-to-b from-[var(--site-secondary)]/50 to-transparent rounded-l-full hidden lg:block pointer-events-none"></div>
 
     </section>
   );

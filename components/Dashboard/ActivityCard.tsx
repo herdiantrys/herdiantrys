@@ -2,7 +2,7 @@
 
 import { Activity } from "@/lib/actions/activity.actions";
 import { formatDistanceToNow } from "date-fns";
-import { User, FileText, Edit, MessageSquare, Heart, Share2, Bookmark, BookmarkCheck, ArchiveX, MoreHorizontal, Repeat } from "lucide-react";
+import { User, FileText, Edit, MessageSquare, Heart, Share2, Bookmark, BookmarkCheck, ArchiveX, MoreHorizontal, Repeat, Trophy } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
@@ -17,6 +17,8 @@ import {
 import { useState, useTransition } from "react";
 import { toggleBookmark } from "@/lib/actions/bookmark.actions";
 import { toggleLike } from "@/lib/actions/like.actions";
+import { toast } from "sonner";
+import { XPToast } from "@/components/Gamification/XPToast";
 import { ShareModal } from "@/components/ShareModal";
 import { ConfirmationModal } from "@/components/Dashboard/ConfirmationModal";
 import { AnimatePresence } from "framer-motion";
@@ -72,9 +74,14 @@ export default function ActivityCard({
 
         startBookmarkTransition(async () => {
             const result = await toggleBookmark(userId, targetId);
-            if (result.success && result.isBookmarked !== undefined) {
-                // Sync with server truth
-                setIsBookmarked(result.isBookmarked);
+            if (result.success) {
+                const finalIsBookmarked = result.isBookmarked ?? false;
+                setIsBookmarked(finalIsBookmarked);
+                if (finalIsBookmarked) {
+                    toast.custom((t) => <XPToast amount={10} reason="Bookmarked" />);
+                } else {
+                    toast.success("Removed from bookmarks");
+                }
             } else if (!result.success) {
                 // Revert on error
                 setIsBookmarked(previousState);
@@ -101,12 +108,12 @@ export default function ActivityCard({
             if (activity.type === 'user_post') targetType = 'post';
 
             const result = await toggleLike(targetId, targetType);
-            if (result.success && result.isLiked !== undefined) {
-                // Sync with server truth
-                setIsLiked(result.isLiked);
-                // Adjust count if server disagrees with our optimistic flip
-                if (result.isLiked !== newIsLiked) {
-                    setLikesCount(result.isLiked ? previousLikesCount + 1 : previousLikesCount);
+            if (result.success) {
+                const finalIsLiked = result.isLiked ?? false;
+                setIsLiked(finalIsLiked);
+                setLikesCount(finalIsLiked ? previousLikesCount + 1 : previousLikesCount - 1); // Update based on server's final state
+                if (finalIsLiked) {
+                    toast.custom((t) => <XPToast amount={10} reason="Liked" />);
                 }
             } else if (!result.success) {
                 // Revert completely on error
@@ -230,12 +237,15 @@ export default function ActivityCard({
                             effect={(displayActor as any).equippedEffect}
                             frame={(displayActor as any).equippedFrame}
                             background={(displayActor as any).equippedBackground}
+                            profileColor={(displayActor as any).profileColor}
+                            frameColor={(displayActor as any).frameColor}
                         />
                         <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-gray-900 border border-gray-700 text-white shadow-sm z-20">
                             {activity.type === 'new_user' && <User size={12} className="text-teal-400" />}
                             {activity.type === 'new_project' && <FileText size={12} className="text-purple-400" />}
                             {activity.type === 'project_update' && <Edit size={12} className="text-blue-400" />}
                             {activity.type === 'user_post' && <MessageSquare size={12} className="text-yellow-400" />}
+                            {(activity.type === 'achievement' || activity.type === 'badge_awarded') && <Trophy size={12} className="text-yellow-400" />}
                         </div>
                     </Link>
 
@@ -250,6 +260,8 @@ export default function ActivityCard({
                             {activity.type === 'new_user' && (t.joined_community || "joined the community")}
                             {activity.type === 'new_project' && (t.published_project || "published a new project")}
                             {activity.type === 'project_update' && (t.updated_project || "updated a project")}
+                            {activity.type === 'badge_awarded' && (activity.details.description || `earned the ${activity.details.badgeName} badge!`)}
+                            {activity.type === 'achievement' && (activity.details.description || `unlocked a new achievement!`)}
                             <span className="mx-2 text-xs">•</span>
                             {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                         </p>
@@ -306,6 +318,22 @@ export default function ActivityCard({
                                 {activity.details.description}
                             </p>
                         </Link>
+                    )}
+
+                    {(activity.type === 'achievement' || activity.type === 'badge_awarded') && (
+                        <div className="mt-2 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 rounded-xl p-6 flex flex-col items-center text-center gap-4">
+                            <div className="w-20 h-20 rounded-full bg-yellow-400/20 flex items-center justify-center text-4xl shadow-lg shadow-yellow-500/20 animate-bounce">
+                                {activity.details.badgeIcon || '🏆'}
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-yellow-500">
+                                    {activity.type === 'achievement' ? (activity.details.achievementTitle || 'Achievement Unlocked!') : (activity.details.badgeName || 'New Badge!')}
+                                </h3>
+                                <p className="text-[var(--glass-text-muted)] mt-1">
+                                    {activity.details.description}
+                                </p>
+                            </div>
+                        </div>
                     )}
 
                     {activity.type === 'user_post' && (
@@ -431,6 +459,8 @@ export default function ActivityCard({
                             currentUserEffect={currentUser?.equippedEffect}
                             currentUserFrame={currentUser?.equippedFrame}
                             currentUserBackground={currentUser?.equippedBackground}
+                            currentUserProfileColor={currentUser?.profileColor}
+                            currentUserFrameColor={currentUser?.frameColor}
                         />
                     </div>
                 )}

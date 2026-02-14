@@ -44,6 +44,7 @@ export const getNotifications = async (userId: string) => {
                 image: n.post.image
             } : null,
             read: n.read,
+            details: n.details,
             createdAt: n.createdAt.toISOString()
         }));
     } catch (error) {
@@ -81,16 +82,20 @@ export const markAllNotificationsAsRead = async (userId: string) => {
 interface CreateNotificationParams {
     recipientId: string;
     senderId: string;
-    type: 'like_post' | 'comment_post' | 'follow' | 'system';
+    type: 'like_post' | 'comment_post' | 'follow' | 'system' | 'xp_award' | 'coin_award' | 'achievement' | 'badge_awarded';
     relatedPostId?: string;
     relatedCommentId?: string;
     relatedProjectId?: string;
+    details?: any;
 }
 
-export const createNotification = async ({ recipientId, senderId, type, relatedPostId, relatedCommentId, relatedProjectId }: CreateNotificationParams) => {
+export const createNotification = async ({ recipientId, senderId, type, relatedPostId, relatedCommentId, relatedProjectId, details }: CreateNotificationParams) => {
     console.log(`[createNotification] Attempting to notify ${recipientId} from ${senderId} (type: ${type})`);
-    if (recipientId === senderId && type !== 'system') {
-        console.log("[createNotification] Self-notification skipped");
+
+    // Self-notification restricted for social actions, but allowed for gamification/system
+    const isSocialAction = ['like_post', 'comment_post', 'follow'].includes(type);
+    if (recipientId === senderId && isSocialAction) {
+        console.log("[createNotification] Self-notification for social action skipped");
         return;
     }
 
@@ -103,14 +108,15 @@ export const createNotification = async ({ recipientId, senderId, type, relatedP
                 postId: relatedPostId,
                 commentId: relatedCommentId,
                 projectId: relatedProjectId,
+                details: details as any,
                 read: false
             }
         });
         console.log("[createNotification] Notification created successfully");
+        revalidatePath("/notifications");
         return { success: true };
     } catch (error: any) {
         console.error("Error creating notification:", error);
-        console.dir(error); // Log full error details
         return { success: false };
     }
 };

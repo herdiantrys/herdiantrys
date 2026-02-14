@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "./notification.actions";
 import { auth } from "@/auth";
-import { trackLikeReceived } from "./gamification.actions";
+import { trackLikeReceived, awardXP } from "./gamification.actions";
 
 export const toggleLike = async (targetId: string, targetType: "project" | "user" | "post" = "project") => {
     try {
@@ -99,7 +99,25 @@ export const toggleLike = async (targetId: string, targetType: "project" | "user
         revalidatePath("/saved");
         revalidatePath("/notifications");
         // Also revalidate specific pages
-        if (targetType === 'project') revalidatePath(`/projects`);
+        revalidatePath("/");
+        revalidatePath("/");
+        revalidatePath("/projects");
+        revalidatePath("/works");
+        if (targetType === 'project') {
+            // Revalidate dynamic project pages if needed, though simpler is usually better
+        }
+
+        if (!isLiked) {
+            // Award 10 XP for liking (Limit once per item per day via unique reason)
+            // STRICT RULE: Only award XP for Project interactions
+            if (targetType === 'project') {
+                await awardXP(userId, 10, `like_${targetType}_${targetId}`);
+
+                // Track "Liker" Achievements (Admirer, Fan, etc.)
+                const { trackLike } = await import("./gamification.actions");
+                await trackLike(userId, targetId);
+            }
+        }
 
         return { success: true, isLiked: !isLiked };
     } catch (error) {

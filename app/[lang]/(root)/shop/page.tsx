@@ -7,17 +7,34 @@ import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
 import ShopGrid from "@/components/Shop/ShopGrid";
 
-export default async function ShopPage({ params }: { params: Promise<{ lang: string }> }) {
+export default async function ShopPage({
+    params,
+    searchParams
+}: {
+    params: Promise<{ lang: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
     const { lang: langParam } = await params;
+    const { session_id } = await searchParams;
+
+    // Verify Stripe Payment if session_id is present
+    if (session_id && typeof session_id === 'string') {
+        const { verifyStripeSession } = await import("@/lib/actions/stripe.actions");
+        await verifyStripeSession(session_id);
+    }
+
     const lang = (langParam || 'en') as "en" | "id";
     const dict = await getDictionary(lang);
     const session = await auth();
 
-    // Ensure data exists (Auto-seed) - REMOVED to prevent loop
-    // await seedShopItems();
-
-    // Fetch from Sanity
+    // Fetch from Prisma
     const effects = await getShopItems();
+
+    // Check for Shop Completion Achievement (Catch-up for legacy users)
+    if (session?.user?.id) {
+        const { trackShopCompletion } = await import("@/lib/actions/gamification.actions");
+        trackShopCompletion(session.user.id).catch(err => console.error("Recheck Error:", err));
+    }
 
     // Fetch Logged In User Data
     let user = null;
@@ -28,11 +45,6 @@ export default async function ShopPage({ params }: { params: Promise<{ lang: str
         if (dbUser) {
             user = {
                 ...dbUser,
-                // Ensure inventory is mapped if needed, though getUserByEmail includes points
-                // Inventory in prisma is a relation. getUserByEmail might not include it by default.
-                // I need to check getUserByEmail definition again or just fetch it here directly if needed.
-                // user.actions.ts: getUserByEmail DOES NOT include 'inventory' by default in the 'include' block.
-                // I should check user.actions.ts again.
             };
         }
     }
@@ -66,7 +78,7 @@ export default async function ShopPage({ params }: { params: Promise<{ lang: str
                 <ShopGrid
                     items={effects}
                     userPoints={user?.points || 0}
-                    userInventory={user?.inventory || []}
+                    userInventory={(user as any)?.inventory || []}
                     userId={user?._id}
                     username={user?.username}
                 />

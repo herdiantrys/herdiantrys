@@ -75,18 +75,14 @@ export const getTrendingProjects = async (): Promise<TrendingProject[]> => {
 
 export const getTrendingPosts = async (): Promise<TrendingPost[]> => {
     try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-        const posts = await prisma.post.findMany({
+        // 1. Fetch recent posts (last 90 days)
+        const recentPosts = await prisma.post.findMany({
             where: {
-                createdAt: {
-                    gte: sevenDaysAgo
-                },
+                createdAt: { gte: ninetyDaysAgo },
                 isArchived: false,
-                // Ensure we filter out any 'system' or automated posts if identifiable.
-                // For now, assuming all posts in 'Post' are valid user content.
-                // We could filter by length or image existence if needed.
             },
             include: {
                 author: {
@@ -103,24 +99,20 @@ export const getTrendingPosts = async (): Promise<TrendingPost[]> => {
                         comments: true
                     }
                 }
-            }
+            },
+            take: 100 // Limit to prevent overload, assuming 100 is enough to find "trending"
         });
 
-        const trends = posts.map((p) => {
+        // 2. Map and Score
+        const mappedRecent = recentPosts.map((p) => {
             const likes = p._count.likedBy || 0;
             const comments = p._count.comments || 0;
-            // Simple scoring: Likes (1pt) + Comments (2pts)
-            const score = likes + (comments * 2);
-
             return {
                 id: p.id,
-                excerpt: p.text.substring(0, 60), // Snippet of the post
+                excerpt: p.text ? p.text.substring(0, 60) : (p.image ? "Image Post" : "Post"),
                 image: p.image,
-                stats: {
-                    likes,
-                    comments
-                },
-                score,
+                stats: { likes, comments },
+                score: likes + (comments * 2),
                 author: {
                     name: p.author.name || "User",
                     username: p.author.username || "user",
@@ -130,12 +122,58 @@ export const getTrendingPosts = async (): Promise<TrendingPost[]> => {
             };
         });
 
-        // Filter out posts with 0 engagement? Maybe keep them if list is short.
-        // User asked for "terbanyak", implies sorting.
+        // 3. Sort by Score
+        let topPosts = mappedRecent.sort((a, b) => b.score - a.score).slice(0, 5);
 
-        return trends
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
+        // 4. Fallback: If less than 5, fetch all-time best (if simpler, just fetch latest unlimited by date but sorted by something else? 
+        // Or just fetch random recent ones?
+        // Let's just fetch all-time most liked if we don't have enough.
+        // Prisma doesn't support sorting by related count easily in `findMany` yet without aggregations or raw query.
+        // So we just fetch more recent posts if we didn't fill the quota? 
+        // Actually, if we scraped 100 recent posts and didn't find 5, the site is very empty.
+        // But if filtering by 90 days returned 0 posts, we need to go back further.
+
+        if (topPosts.length < 5) {
+            const existingIds = topPosts.map(p => p.id);
+            const olderPosts = await prisma.post.findMany({
+                where: {
+                    id: { notIn: existingIds },
+                    isArchived: false,
+                },
+                include: {
+                    author: { select: { name: true, username: true, image: true, imageURL: true } },
+                    _count: { select: { likedBy: true, comments: true } }
+                },
+                orderBy: { createdAt: 'desc' }, // Just get latest if not enough trending
+                take: 10 // Get some candidates
+            });
+
+            const mappedOlder = olderPosts.map((p) => {
+                const likes = p._count.likedBy || 0;
+                const comments = p._count.comments || 0;
+                return {
+                    id: p.id,
+                    excerpt: p.text ? p.text.substring(0, 60) : (p.image ? "Image Post" : "Post"),
+                    image: p.image,
+                    stats: { likes, comments },
+                    score: likes + (comments * 2),
+                    author: {
+                        name: p.author.name || "User",
+                        username: p.author.username || "user",
+                        image: p.author.image || p.author.imageURL
+                    },
+                    createdAt: p.createdAt
+                };
+            });
+
+            // Sort older ones too just in case
+            const sortedOlder = mappedOlder.sort((a, b) => b.score - a.score);
+
+            // Merge
+            topPosts = [...topPosts, ...sortedOlder].slice(0, 5);
+        }
+
+        return topPosts;
 
     } catch (e) {
         console.error("Error getTrendingPosts:", e);

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 export type Activity = {
     id: string;
-    type: "new_user" | "new_project" | "project_update" | "user_post";
+    type: "new_user" | "new_project" | "project_update" | "user_post" | "achievement" | "badge_awarded";
     timestamp: string;
     actor: {
         name: string;
@@ -14,6 +14,8 @@ export type Activity = {
         equippedEffect?: string;
         equippedFrame?: string;
         equippedBackground?: string;
+        profileColor?: string;
+        frameColor?: string;
     };
     details: {
         title?: string;
@@ -21,6 +23,9 @@ export type Activity = {
         description?: string;
         image?: any;
         video?: string | null;
+        badgeName?: string;
+        badgeIcon?: string;
+        achievementTitle?: string;
     };
     likesCount: number;
     isLiked: boolean;
@@ -30,40 +35,108 @@ export type Activity = {
     originalPost?: any;
 };
 
+export const createActivity = async (userId: string, type: string, details: any) => {
+    try {
+        await prisma.activity.create({
+            data: {
+                userId,
+                type,
+                details: details as any
+            }
+        });
+        revalidatePath("/");
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error("Error creating activity:", error);
+        return { success: false };
+    }
+}
+
 export const getRecentActivities = async (currentUserId?: string): Promise<Activity[]> => {
+    const activities: Activity[] = [];
     try {
         // 1. Fetch New Users
-        const users = await prisma.user.findMany({
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-        });
+        let users: any[] = [];
+        try {
+            users = await prisma.user.findMany({
+                take: 5,
+                orderBy: { createdAt: 'desc' },
+            });
+        } catch (e) {
+            console.error("Error fetching users for activities:", e);
+        }
 
         // 2. Fetch New Projects
-        const projects = await prisma.project.findMany({
-            take: 10,
-            where: { status: "PUBLISHED" },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                _count: { select: { likedBy: true, comments: true } },
-                likedBy: currentUserId ? { where: { id: currentUserId } } : false
-            }
-        });
+        let projects: any[] = [];
+        try {
+            projects = await prisma.project.findMany({
+                take: 10,
+                where: { status: "PUBLISHED" },
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    _count: { select: { likedBy: true, comments: true } },
+                    likedBy: currentUserId ? { where: { id: currentUserId } } : false
+                }
+            });
+        } catch (e) {
+            console.error("Error fetching projects for activities:", e);
+        }
 
         // 3. Fetch New Posts
-        const posts = await prisma.post.findMany({
-            take: 10,
-            where: { isArchived: false },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                author: true,
-                originalPost: { include: { author: true } } as any,
-                _count: { select: { likedBy: true, comments: true, reposts: true } as any },
-                likedBy: currentUserId ? { where: { id: currentUserId } } : false,
-                reposts: currentUserId ? { where: { authorId: currentUserId } } : false
-            }
-        });
+        let posts: any[] = [];
+        try {
+            posts = await prisma.post.findMany({
+                take: 10,
+                where: { isArchived: false },
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    author: true,
+                    originalPost: { include: { author: true } } as any,
+                    _count: { select: { likedBy: true, comments: true, reposts: true } as any },
+                    likedBy: currentUserId ? { where: { id: currentUserId } } : false,
+                    reposts: currentUserId ? { where: { authorId: currentUserId } } : false
+                }
+            });
+        } catch (e) {
+            console.error("Error fetching posts for activities:", e);
+        }
 
-        const activities: Activity[] = [];
+        // 4. Fetch Custom Activities (Achievements etc)
+        let customActivities: any[] = [];
+        try {
+            // Check if activity model exists in prisma before calling
+            if ((prisma as any).activity) {
+                customActivities = await (prisma as any).activity.findMany({
+                    take: 15,
+                    orderBy: { createdAt: 'desc' },
+                    include: { user: true }
+                });
+            } else {
+                console.warn("Prisma 'activity' model not found in client. Schema sync might be needed.");
+            }
+        } catch (e) {
+            console.error("Error fetching custom activities:", e);
+        }
+
+        // Map Achievements
+        customActivities.forEach((act) => {
+            activities.push({
+                id: `act-${act.id}`,
+                type: act.type as any,
+                timestamp: act.createdAt.toISOString(),
+                actor: {
+                    name: act.user.name || "User",
+                    username: act.user.username || "user",
+                    image: act.user.imageURL || act.user.image,
+                    equippedFrame: (act.user as any).equippedFrame || undefined,
+                    frameColor: (act.user as any).frameColor || undefined
+                },
+                details: act.details as any,
+                likesCount: 0,
+                isLiked: false
+            });
+        });
 
         // Map Users
         users.forEach((user) => {
@@ -77,7 +150,9 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
                     image: user.imageURL || user.image,
                     equippedEffect: (user as any).equippedEffect || undefined,
                     equippedFrame: (user as any).equippedFrame || undefined,
-                    equippedBackground: (user as any).equippedBackground || undefined
+                    equippedBackground: (user as any).equippedBackground || undefined,
+                    profileColor: (user as any).profileColor || undefined,
+                    frameColor: (user as any).frameColor || undefined
                 },
                 details: {
                     description: "joined the community"
@@ -126,7 +201,9 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
                     image: post.author.imageURL || post.author.image,
                     equippedEffect: (post.author as any).equippedEffect || undefined,
                     equippedFrame: (post.author as any).equippedFrame || undefined,
-                    equippedBackground: (post.author as any).equippedBackground || undefined
+                    equippedBackground: (post.author as any).equippedBackground || undefined,
+                    profileColor: (post.author as any).profileColor || undefined,
+                    frameColor: (post.author as any).frameColor || undefined
                 },
                 details: {
                     title: isRepost ? (original?.text || "") : post.text,
@@ -147,7 +224,9 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
                         image: original.author.imageURL || original.author.image,
                         equippedEffect: (original.author as any).equippedEffect || undefined,
                         equippedFrame: (original.author as any).equippedFrame || undefined,
-                        equippedBackground: (original.author as any).equippedBackground || undefined
+                        equippedBackground: (original.author as any).equippedBackground || undefined,
+                        profileColor: (original.author as any).profileColor || undefined,
+                        frameColor: (original.author as any).frameColor || undefined
                     },
                     text: original.text,
                     image: original.image,
@@ -166,6 +245,7 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
 };
 
 export const getUserActivities = async (username: string, currentUserId?: string): Promise<Activity[]> => {
+    const activities: Activity[] = [];
     try {
         const targetUser = await prisma.user.findUnique({
             where: { username }
@@ -173,36 +253,71 @@ export const getUserActivities = async (username: string, currentUserId?: string
 
         if (!targetUser) return [];
 
-        // 1. User Joined
-        const userEvent = targetUser;
+        // 1. User Posts
+        let posts: any[] = [];
+        try {
+            posts = await prisma.post.findMany({
+                where: { authorId: targetUser.id, isArchived: false },
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    author: true,
+                    originalPost: { include: { author: true } } as any,
+                    _count: { select: { likedBy: true, comments: true, reposts: true } as any },
+                    likedBy: currentUserId ? { where: { id: currentUserId } } : false,
+                    reposts: currentUserId ? { where: { authorId: currentUserId } } : false
+                }
+            });
+        } catch (e) {
+            console.error("Error fetching user posts:", e);
+        }
 
-        // 2. User Posts
-        const posts = await prisma.post.findMany({
-            where: { authorId: targetUser.id, isArchived: false },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                author: true,
-                originalPost: { include: { author: true } } as any,
-                _count: { select: { likedBy: true, comments: true, reposts: true } as any },
-                likedBy: currentUserId ? { where: { id: currentUserId } } : false,
-                reposts: currentUserId ? { where: { authorId: currentUserId } } : false
+        // 2. User Custom Activities
+        let customActivities: any[] = [];
+        try {
+            if ((prisma as any).activity) {
+                customActivities = await (prisma as any).activity.findMany({
+                    where: { userId: targetUser.id },
+                    orderBy: { createdAt: 'desc' },
+                    take: 20
+                });
             }
+        } catch (e) {
+            console.error("Error fetching user custom activities:", e);
+        }
+
+        // Map Achievements
+        customActivities.forEach((act) => {
+            activities.push({
+                id: `act-${act.id}`,
+                type: act.type as any,
+                timestamp: act.createdAt.toISOString(),
+                actor: {
+                    name: targetUser.name || "User",
+                    username: targetUser.username || "user",
+                    image: targetUser.imageURL || targetUser.image,
+                    equippedFrame: (targetUser as any).equippedFrame || undefined,
+                    frameColor: (targetUser as any).frameColor || undefined
+                },
+                details: act.details as any,
+                likesCount: 0,
+                isLiked: false
+            });
         });
 
-        const activities: Activity[] = [];
-
-        if (userEvent) {
+        if (targetUser) {
             activities.push({
-                id: `user-${userEvent.id}`,
+                id: `user-${targetUser.id}`,
                 type: "new_user",
-                timestamp: userEvent.createdAt.toISOString(),
+                timestamp: targetUser.createdAt.toISOString(),
                 actor: {
-                    name: userEvent.name || "User",
-                    username: userEvent.username || "user",
-                    image: userEvent.imageURL || userEvent.image,
-                    equippedEffect: (userEvent as any).equippedEffect || undefined,
-                    equippedFrame: (userEvent as any).equippedFrame || undefined,
-                    equippedBackground: (userEvent as any).equippedBackground || undefined
+                    name: targetUser.name || "User",
+                    username: targetUser.username || "user",
+                    image: targetUser.imageURL || targetUser.image,
+                    equippedEffect: (targetUser as any).equippedEffect || undefined,
+                    equippedFrame: (targetUser as any).equippedFrame || undefined,
+                    equippedBackground: (targetUser as any).equippedBackground || undefined,
+                    profileColor: (targetUser as any).profileColor || undefined,
+                    frameColor: (targetUser as any).frameColor || undefined
                 },
                 details: { description: "joined the community" },
                 likesCount: 0,
@@ -225,7 +340,9 @@ export const getUserActivities = async (username: string, currentUserId?: string
                     image: post.author.imageURL || post.author.image,
                     equippedEffect: (post.author as any).equippedEffect || undefined,
                     equippedFrame: (post.author as any).equippedFrame || undefined,
-                    equippedBackground: (post.author as any).equippedBackground || undefined
+                    equippedBackground: (post.author as any).equippedBackground || undefined,
+                    profileColor: (post.author as any).profileColor || undefined,
+                    frameColor: (post.author as any).frameColor || undefined
                 },
                 details: {
                     title: isRepost ? (original?.text || "") : post.text,
@@ -246,7 +363,9 @@ export const getUserActivities = async (username: string, currentUserId?: string
                         image: original.author.imageURL || original.author.image,
                         equippedEffect: (original.author as any).equippedEffect || undefined,
                         equippedFrame: (original.author as any).equippedFrame || undefined,
-                        equippedBackground: (original.author as any).equippedBackground || undefined
+                        equippedBackground: (original.author as any).equippedBackground || undefined,
+                        profileColor: (original.author as any).profileColor || undefined,
+                        frameColor: (original.author as any).frameColor || undefined
                     },
                     text: original.text,
                     image: original.image,

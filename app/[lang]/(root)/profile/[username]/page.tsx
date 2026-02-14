@@ -15,6 +15,10 @@ import ActivityArea from "@/components/Dashboard/ActivityArea";
 import { getUserInventory } from "@/lib/actions/inventory.actions";
 import { getDictionary } from "@/get-dictionary";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
+import { getRanks } from "@/lib/actions/rank.actions";
+import { getPortfolioConfig } from "@/lib/actions/portfolio.actions";
+import PortfolioLandingPage from "@/components/Portfolio/PortfolioLandingPage";
+import PortfolioWidget from "@/components/Dashboard/PortfolioWidget";
 
 
 export default async function UserProfilePage({ params }: { params: Promise<{ lang: string; username: string }> }) {
@@ -22,9 +26,10 @@ export default async function UserProfilePage({ params }: { params: Promise<{ la
     const session = await auth();
     const dict = await getDictionary((lang || 'en') as "en" | "id");
 
-    const [user, trendingPosts] = await Promise.all([
+    const [user, trendingPosts, ranks] = await Promise.all([
         getUserByUsername(username),
-        getTrendingPosts()
+        getTrendingPosts(),
+        getRanks()
     ]);
 
     if (!user) {
@@ -39,9 +44,29 @@ export default async function UserProfilePage({ params }: { params: Promise<{ la
         loggedInUserId = loggedInUser?._id || "";
     }
 
-    const isOwner = session?.user?.email === user.email || (loggedInUserId && loggedInUserId === user._id);
+    // Verify ownership for sensitive data
+    const isOwner = session?.user?.email === user.email || (loggedInUserId !== "" && loggedInUserId === user._id);
 
-    // Fetch activities and inventory in parallel
+    // SaaS Portfolio Check
+    const portfolioConfig = await getPortfolioConfig(user.id);
+
+    if (portfolioConfig?.isEnabled) {
+        // Fetch projects for the portfolio
+        // The user object might already have projects.
+        // If not, we need to fetch them.
+        // generic-ish approach:
+        const projects = user.projects || []; // Assuming included
+
+        return (
+            <PortfolioLandingPage
+                user={user}
+                config={portfolioConfig}
+                projects={projects}
+            />
+        );
+    }
+
+    // Fetch activities and inventory in parallel for standard profile
     const [activities, inventoryData] = await Promise.all([
         getUserActivities(username, loggedInUserId),
         getUserInventory(user._id)
@@ -66,7 +91,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ la
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Left Sidebar - Profile Info */}
                         <div className="lg:col-span-1">
-                            <DashboardSidebar user={user} isPublic={!isOwner} dict={dict} />
+                            <DashboardSidebar user={user} isPublic={!isOwner} dict={dict} showNavigation={false} ranks={ranks} />
                         </div>
 
                         {/* Middle - User Activity Feed Area with Tabs */}
@@ -84,6 +109,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ la
 
                         {/* Right Sidebar - Trending */}
                         <div className="hidden lg:block lg:col-span-1">
+                            {isOwner && <PortfolioWidget user={safeUser} dict={dict} />}
                             <TrendingSidebar posts={trendingPosts} dict={dict} />
                         </div>
                     </div>

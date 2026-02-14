@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import UserNavbar from "./UserNavbar";
-import GlobalNavbarClient from "./GlobalNavbarClient";
+import { GlobalNavbar } from "@/components/layout/Sidebar";
 
 type NavbarSwitcherProps = {
     user: any;
@@ -21,7 +21,7 @@ export default function NavbarSwitcher({ user, dict }: NavbarSwitcherProps) {
     return (
         <>
             <SessionRewardSystem userId={user.id} />
-            <GlobalNavbarClient user={user} dict={dict} />
+            <GlobalNavbar user={user} dict={dict} />
         </>
     );
 }

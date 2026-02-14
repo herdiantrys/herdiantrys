@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { awardXP } from "./gamification.actions";
 
 export const toggleBookmark = async (userId: string, targetId: string) => {
     try {
@@ -23,6 +24,9 @@ export const toggleBookmark = async (userId: string, targetId: string) => {
                     where: { id: userId },
                     data: { bookmarkedProjects: { connect: { id: targetId } } }
                 });
+            }
+            if (!isBookmarked) {
+                await awardXP(userId, 10, `bookmark_project_${targetId}`);
             }
             revalidatePath("/dashboard");
             revalidatePath("/saved");
@@ -46,6 +50,7 @@ export const toggleBookmark = async (userId: string, targetId: string) => {
                     where: { id: userId },
                     data: { bookmarkedPosts: { connect: { id: targetId } } }
                 });
+                // No XP for bookmarking posts
             }
             revalidatePath("/dashboard");
             revalidatePath("/saved");

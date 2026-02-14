@@ -17,6 +17,8 @@ export type Comment = {
         equippedEffect?: string;
         equippedFrame?: string;
         equippedBackground?: string;
+        profileColor?: string;
+        frameColor?: string;
     };
 };
 
@@ -39,7 +41,9 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
                         image: true,
                         equippedEffect: true,
                         equippedFrame: true,
-                        equippedBackground: true
+                        equippedBackground: true,
+                        profileColor: true,
+                        frameColor: true
                     }
                 }
             }
@@ -50,14 +54,16 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
             text: c.text,
             createdAt: c.createdAt.toISOString(),
             user: {
-                _id: c.user.id,
-                fullName: c.user.name || "User",
-                username: c.user.username || "user",
-                imageURL: c.user.imageURL || c.user.image || "",
-                profileImage: c.user.image ? { asset: { url: c.user.image } } : null,
-                equippedEffect: c.user.equippedEffect || undefined,
-                equippedFrame: c.user.equippedFrame || undefined,
-                equippedBackground: c.user.equippedBackground || undefined
+                _id: (c as any).user.id,
+                fullName: (c as any).user.name || "User",
+                username: (c as any).user.username || "user",
+                imageURL: (c as any).user.imageURL || (c as any).user.image || "",
+                profileImage: (c as any).user.image ? { asset: { url: (c as any).user.image } } : null,
+                equippedEffect: (c as any).user.equippedEffect || undefined,
+                equippedFrame: (c as any).user.equippedFrame || undefined,
+                equippedBackground: (c as any).user.equippedBackground || undefined,
+                profileColor: (c as any).user.profileColor || undefined,
+                frameColor: (c as any).user.frameColor || undefined
             }
         }));
     } catch (error) {
@@ -122,7 +128,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                     select: {
                         id: true, name: true, username: true,
                         imageURL: true, image: true, equippedEffect: true,
-                        equippedFrame: true, equippedBackground: true
+                        equippedFrame: true, equippedBackground: true, profileColor: true, frameColor: true
                     }
                 },
                 post: { select: { authorId: true } },
@@ -133,10 +139,10 @@ export const createComment = async (targetId: string, targetType: "project" | "p
 
         // Trigger Notification
         let recipientId = "";
-        if (targetType === 'post' && newComment.post) {
-            recipientId = newComment.post.authorId;
-        } else if (targetType === 'project' && newComment.project) {
-            recipientId = newComment.project.authorId;
+        if (targetType === 'post' && (newComment as any).post) {
+            recipientId = (newComment as any).post.authorId;
+        } else if (targetType === 'project' && (newComment as any).project) {
+            recipientId = (newComment as any).project.authorId;
         }
 
         console.log(`[createComment] Notification logic - Recipient: ${recipientId}, sender: ${userId}`);
@@ -158,7 +164,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
         try {
             console.log("[createComment] Triggering gamification hooks...");
             // 1. Track Comment (Social Butterfly)
-            await trackComment(userId);
+            await trackComment(userId, targetType === 'project' ? targetId : undefined);
 
             // 2. Track Night Owl (if active at night)
             await trackNightOwl(userId);
@@ -182,7 +188,9 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 profileImage: createdComment.user.image ? { asset: { url: createdComment.user.image } } : null,
                 equippedEffect: createdComment.user.equippedEffect || undefined,
                 equippedFrame: createdComment.user.equippedFrame || undefined,
-                equippedBackground: createdComment.user.equippedBackground || undefined
+                equippedBackground: createdComment.user.equippedBackground || undefined,
+                profileColor: createdComment.user.profileColor || undefined,
+                frameColor: createdComment.user.frameColor || undefined
             }
         };
 

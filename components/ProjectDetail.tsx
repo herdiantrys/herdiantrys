@@ -14,6 +14,8 @@ import remarkGfm from "remark-gfm";
 import { urlFor } from "@/sanity/lib/image";
 import { toggleLike, postComment } from "@/app/[lang]/(root)/projects/[slug]/actions";
 import { toggleBookmark } from "@/lib/actions/bookmark.actions";
+import { toast } from "sonner";
+import { XPToast } from "@/components/Gamification/XPToast";
 import { incrementView } from "@/actions/incrementView";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -41,19 +43,19 @@ interface ProjectDetailProps {
         image: any;
         videoFile?: any;
         content: any;
-        repoUrl?: string;
-        demoUrl?: string;
+        repoUrl?: string | null;
+        demoUrl?: string | null;
         uploadDate: string;
         views: number;
         likes: any[];
         comments: Comment[];
-        tags?: string[];
+        tags?: string[] | null;
         type?: "IMAGE" | "VIDEO";
         gallery?: {
             type: 'image' | 'video' | 'file';
             url: string;
         }[];
-        album?: string;
+        album?: string | null;
     };
     dict: any;
     initialIsBookmarked?: boolean;
@@ -159,9 +161,19 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
         setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
 
         const result = await toggleLike(project.id, getSlug());
-        if (result.error) {
+        if (result.success) {
+            const finalIsLiked = result.hasLiked ?? false;
+            setIsLiked(finalIsLiked); // Ensure state matches backend
+            if (finalIsLiked) {
+                toast.custom((t) => <XPToast amount={10} reason="Liked Project" />);
+            } else {
+                toast.success("Project unliked");
+            }
+        } else {
+            // Revert optimistic update if action fails
             setIsLiked(!newIsLiked);
             setLikeCount(prev => !newIsLiked ? prev + 1 : prev - 1);
+            toast.error(result.error || "Failed to toggle like");
         }
     };
 
@@ -174,8 +186,18 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
         setIsBookmarked(newIsBookmarked);
 
         const result = await toggleBookmark(session.user.id, project.id);
-        if (!result.success) {
+        if (result.success) {
+            const finalIsBookmarked = result.isBookmarked ?? false;
+            setIsBookmarked(finalIsBookmarked); // Ensure state matches backend
+            if (finalIsBookmarked) {
+                toast.custom((t) => <XPToast amount={10} reason="Bookmarked Project" />);
+            } else {
+                toast.success("Project removed from bookmarks");
+            }
+        } else {
+            // Revert optimistic update if action fails
             setIsBookmarked(!newIsBookmarked);
+            toast.error(result.error || "Failed to toggle bookmark");
         }
     }
 
@@ -220,7 +242,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
     // Animation Variants
     const fadeInUp = {
         hidden: { opacity: 0, y: 40 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }
     };
 
     const staggerContainer = {

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, Save, Loader2, Camera, Upload } from "lucide-react";
+import { X, Save, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Portal } from "@/components/Portal";
 import { motion, AnimatePresence } from "framer-motion";
-import { updateUserProfile, uploadBannerImage, uploadProfileImage } from "@/lib/actions/user.actions";
+import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground } from "@/lib/actions/user.actions";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
     });
 
     const hasCustomColor = user?.inventory?.some((item: any) => item.shopItem?.name === "Custom Color Background");
+    const hasCustomBgItem = user?.inventory?.some((item: any) => item.shopItem?.name === "Custom Background Image");
 
     const resolveImageUrl = (image: any, width = 600) => {
         if (!image) return null;
@@ -47,15 +48,26 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
 
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [profileFile, setProfileFile] = useState<File | null>(null);
+    const [customBgFile, setCustomBgFile] = useState<File | null>(null);
+    const [shouldResetBg, setShouldResetBg] = useState(false);
+
+
     const [previewBanner, setPreviewBanner] = useState<string | null>(resolveImageUrl(user.bannerImage, 600));
     const [previewProfile, setPreviewProfile] = useState<string | null>(resolveImageUrl(user.profileImage, 200) || user.imageURL || null);
 
+    // Check preferences for existing custom background URL
+    const [previewCustomBg, setPreviewCustomBg] = useState<string | null>(
+        user?.preferences?.customBackgroundUrl ||
+        (user?.equippedBackground?.startsWith('http') ? user.equippedBackground : null)
+    );
+
     // Cropping State
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
-    const [cropType, setCropType] = useState<'banner' | 'profile' | null>(null);
+    const [cropType, setCropType] = useState<'banner' | 'profile' | 'customBg' | null>(null);
 
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const profileInputRef = useRef<HTMLInputElement>(null);
+    const customBgInputRef = useRef<HTMLInputElement>(null);
 
     if (!isOpen) return null;
 
@@ -81,7 +93,7 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'profile') => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'profile' | 'customBg') => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -90,10 +102,15 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                     // Open cropper for banner
                     setCropImageSrc(event.target?.result as string);
                     setCropType('banner');
-                } else {
+                } else if (type === 'profile') {
                     // Profile image direct update (or could crop too)
                     setProfileFile(file);
                     setPreviewProfile(event.target?.result as string);
+                } else if (type === 'customBg') {
+                    // Custom Background direct update
+                    setCustomBgFile(file);
+                    setPreviewCustomBg(event.target?.result as string);
+                    setShouldResetBg(false);
                 }
             };
             reader.readAsDataURL(file);
@@ -141,6 +158,14 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                 const profileFormData = new FormData();
                 profileFormData.append("image", profileFile);
                 await uploadProfileImage(user._id, profileFormData);
+            }
+
+            if (shouldResetBg) {
+                await removeCustomBackground(user._id);
+            } else if (customBgFile) {
+                const bgFormData = new FormData();
+                bgFormData.append("image", customBgFile);
+                await uploadCustomBackground(user._id, bgFormData);
             }
 
             // Update text data
@@ -349,6 +374,67 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                                     </div>
                                     <p className="text-xs text-[var(--glass-text-muted)] mt-1 ml-1">
                                         This color will apply to your profile header and single page view.
+                                    </p>
+                                </div>
+                            )}
+
+                            {hasCustomBgItem && (
+                                <div className="mt-6 border-t border-gray-100 dark:border-white/5 pt-4">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-[var(--glass-text-muted)] mb-3 ml-1">
+                                        Custom Profile Background
+                                    </label>
+
+                                    <div className="relative w-full h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-black/40 border-2 border-dashed border-gray-300 dark:border-white/10 group hover:border-teal-500/50 transition-colors">
+                                        {previewCustomBg ? (
+                                            <>
+                                                <Image
+                                                    src={previewCustomBg}
+                                                    alt="Custom Background"
+                                                    fill
+                                                    className="object-cover opacity-80"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex flex-col gap-2 scale-90 group-hover:scale-100 transition-transform">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => customBgInputRef.current?.click()}
+                                                            className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg text-white text-sm font-medium border border-white/20 hover:bg-white/20"
+                                                        >
+                                                            Change Image
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setPreviewCustomBg(null);
+                                                                setCustomBgFile(null);
+                                                                setShouldResetBg(true);
+                                                            }}
+                                                            className="px-4 py-2 bg-red-500/20 backdrop-blur-md rounded-lg text-red-400 text-sm font-medium border border-red-500/30 hover:bg-red-500/40"
+                                                        >
+                                                            Remove Background
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div
+                                                className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer text-gray-400 dark:text-gray-500 hover:text-teal-500 transition-colors"
+                                                onClick={() => customBgInputRef.current?.click()}
+                                            >
+                                                <ImageIcon size={24} className="mb-2" />
+                                                <span className="text-xs font-medium">Click to upload image</span>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            ref={customBgInputRef}
+                                            onChange={(e) => handleFileChange(e, 'customBg')}
+                                            className="hidden"
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-[var(--glass-text-muted)] mt-2 ml-1">
+                                        This image will be used as your profile background when you equip the "Custom Background Image" item.
                                     </p>
                                 </div>
                             )}

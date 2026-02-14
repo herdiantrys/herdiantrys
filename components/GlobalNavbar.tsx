@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import GlobalNavbarClient from "./GlobalNavbarClient";
+import { GlobalNavbar as GlobalNavbarClient } from "@/components/layout/Sidebar";
 
 import { defineQuery } from "next-sanity";
 import { client } from "@/sanity/lib/client";

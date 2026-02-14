@@ -1,0 +1,157 @@
+﻿.next/types/validator.ts(98,39): error TS2307: Cannot find module '../../app/[lang]/(root)/inventory/page.js' or its corresponding type declarations.
+.next/types/validator.ts(161,39): error TS2307: Cannot find module '../../app/[lang]/(root)/saved/page.js' or its corresponding type declarations.
+_archive/scripts/check-inventory.ts(25,68): error TS2339: Property 'isEquipped' does not exist on type '{ shopItem: { id: string; name: string; description: string | null; price: number; type: ShopItemType; category: string | null; value: string | null; icon: string | null; }; } & { ...; }'.
+_archive/scripts/check_state.ts(6,31): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/fix_aquarium.ts(12,20): error TS2353: Object literal may only specify known properties, and 'aquariaSave' does not exist in type 'UserInclude<DefaultArgs>'.
+_archive/scripts/fix_aquarium.ts(19,18): error TS2339: Property 'aquariaSave' does not exist on type '{ password: string | null; username: string | null; id: string; email: string; name: string | null; image: string | null; imageURL: string | null; bannerImage: string | null; headline: string | null; ... 25 more ...; explorationProgress: number; }'.
+_archive/scripts/fix_aquarium.ts(21,44): error TS2339: Property 'aquariaSave' does not exist on type '{ password: string | null; username: string | null; id: string; email: string; name: string | null; image: string | null; imageURL: string | null; bannerImage: string | null; headline: string | null; ... 25 more ...; explorationProgress: number; }'.
+_archive/scripts/fix_aquarium.ts(23,45): error TS2339: Property 'aquariaSave' does not exist on type '{ password: string | null; username: string | null; id: string; email: string; name: string | null; image: string | null; imageURL: string | null; bannerImage: string | null; headline: string | null; ... 25 more ...; explorationProgress: number; }'.
+_archive/scripts/fix_aquarium.ts(42,30): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/fix_aquarium.ts(43,39): error TS2339: Property 'aquariaSave' does not exist on type '{ password: string | null; username: string | null; id: string; email: string; name: string | null; image: string | null; imageURL: string | null; bannerImage: string | null; headline: string | null; ... 25 more ...; explorationProgress: number; }'.
+_archive/scripts/fix_aquarium.ts(63,30): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/fix_aquarium.ts(64,39): error TS2339: Property 'aquariaSave' does not exist on type '{ password: string | null; username: string | null; id: string; email: string; name: string | null; image: string | null; imageURL: string | null; bannerImage: string | null; headline: string | null; ... 25 more ...; explorationProgress: number; }'.
+_archive/scripts/grant-final.ts(32,39): error TS2339: Property 'inventoryItem' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/grant-final.ts(39,26): error TS2339: Property 'inventoryItem' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/reset-herdiantry-v2.ts(21,26): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/reset-herdiantry-v2.ts(37,38): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/verify-booster-fix.ts(1,25): error TS2307: Cannot find module '@/lib/actions/akuaria.actions' or its corresponding type declarations.
+_archive/scripts/verify-booster-fix.ts(16,18): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+_archive/scripts/verify-fish-price.ts(1,39): error TS2307: Cannot find module '@/lib/actions/akuaria.actions' or its corresponding type declarations.
+_archive/scripts/verify-fish-price.ts(2,48): error TS2307: Cannot find module '@/lib/akuaria.shared' or its corresponding type declarations.
+_archive/scripts/verify-fish-price.ts(25,18): error TS2339: Property 'aquariaSave' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/(root)/page.tsx(40,25): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { projects: Project[]; dict: any; }, context?: any): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
+    Type 'import("C:/website/next16/lib/sanityProjects").Project[]' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project[]'.
+      Type 'import("C:/website/next16/lib/sanityProjects").Project' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project'.
+        Types of property 'videoFile' are incompatible.
+          Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+            Type 'null' is not assignable to type 'string | undefined'.
+  Overload 2 of 2, '(props: { projects: Project[]; dict: any; }): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
+    Type 'import("C:/website/next16/lib/sanityProjects").Project[]' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project[]'.
+      Type 'import("C:/website/next16/lib/sanityProjects").Project' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project'.
+        Types of property 'videoFile' are incompatible.
+          Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+            Type 'null' is not assignable to type 'string | undefined'.
+app/[lang]/(root)/profile/[username]/page.tsx(80,33): error TS2322: Type 'string | boolean' is not assignable to type 'boolean'.
+  Type 'string' is not assignable to type 'boolean'.
+app/[lang]/(root)/projects/page.tsx(31,32): error TS2322: Type 'import("C:/website/next16/lib/sanityProjects").Project[]' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project[]'.
+  Type 'import("C:/website/next16/lib/sanityProjects").Project' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project'.
+    Types of property 'videoFile' are incompatible.
+      Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.
+app/[lang]/(root)/shop/page.tsx(71,21): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+app/[lang]/(root)/works/[id]/page.tsx(42,13): error TS2741: Property 'dict' is missing in type '{ project: any; }' but required in type 'ProjectDetailProps'.
+app/[lang]/(root)/works/page.tsx(31,32): error TS2322: Type 'import("C:/website/next16/lib/sanityProjects").Project[]' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project[]'.
+  Type 'import("C:/website/next16/lib/sanityProjects").Project' is not assignable to type 'import("C:/website/next16/components/ProjectCard").Project'.
+    Types of property 'videoFile' are incompatible.
+      Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.
+app/[lang]/admin/contacts/page.tsx(8,30): error TS2740: Type '{}' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+app/[lang]/admin/page.tsx(38,17): error TS2322: Type '{ label: string; value: number; trend: string; color: string; }[] | undefined' is not assignable to type 'KPIData[]'.
+  Type 'undefined' is not assignable to type 'KPIData[]'.
+app/[lang]/admin/page.tsx(39,17): error TS2322: Type 'GrowthData[] | undefined' is not assignable to type 'GrowthData[]'.
+  Type 'undefined' is not assignable to type 'GrowthData[]'.
+app/[lang]/admin/page.tsx(40,17): error TS2322: Type 'EngagementData[] | undefined' is not assignable to type 'EngagementData[]'.
+  Type 'undefined' is not assignable to type 'EngagementData[]'.
+components/Admin/AdminClientLayout.tsx(26,14): error TS2739: Type '{ isOpen: boolean; setIsOpen: Dispatch<SetStateAction<boolean>>; }' is missing the following properties from type 'AdminSidebarProps': isCollapsed, setIsCollapsed
+components/Admin/ServiceForm.tsx(105,42): error TS2322: Type '{ type: "image" | "video"; url: string; } | { type: string; url: string; }' is not assignable to type '{ type: "image" | "video"; url: string; }'.
+  Type '{ type: string; url: string; }' is not assignable to type '{ type: "image" | "video"; url: string; }'.
+    Types of property 'type' are incompatible.
+      Type 'string' is not assignable to type '"image" | "video"'.
+components/Admin/ServiceForm.tsx(105,61): error TS2322: Type '{ type: string; url: string; }' is not assignable to type '{ type: "image" | "video"; url: string; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"image" | "video"'.
+components/Footer.tsx(62,52): error TS2339: Property 'map' does not exist on type 'string | number | boolean | JsonObject | JsonArray'.
+  Property 'map' does not exist on type 'string'.
+components/Gamification/ProjectXPHandler.tsx(20,36): error TS2339: Property 'amount' does not exist on type '{ success: boolean; limitReached: boolean; message: string; xp?: undefined; level?: undefined; leveledUp?: undefined; amount?: undefined; roleName?: undefined; } | { success: boolean; xp: number; level: number; ... 4 more ...; message?: undefined; } | { ...; }'.
+  Property 'amount' does not exist on type '{ success: boolean; error: any; }'.
+components/Gamification/ProjectXPHandler.tsx(21,39): error TS2339: Property 'amount' does not exist on type '{ success: boolean; limitReached: boolean; message: string; xp?: undefined; level?: undefined; leveledUp?: undefined; amount?: undefined; roleName?: undefined; } | { success: boolean; xp: number; level: number; ... 4 more ...; message?: undefined; } | { ...; }'.
+  Property 'amount' does not exist on type '{ success: boolean; error: any; }'.
+components/ProjectDetail.tsx(414,49): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+components/ProjectDetail.tsx(442,49): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+components/ProjectDetail.tsx(463,53): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+components/ProjectDetail.tsx(482,37): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+components/ProjectDetail.tsx(507,53): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+components/ProjectDetail.tsx(538,37): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+lib/actions/project.actions.ts(188,17): error TS2322: Type 'string' is not assignable to type 'EnumProjectStatusFieldUpdateOperationsInput | ProjectStatus | undefined'.
+lib/akuaria.assets.ts(1,26): error TS2307: Cannot find module './akuaria.shared' or its corresponding type declarations.
+lib/projects.ts(3,15): error TS2614: Module '"@/components/GlassPortfolio"' has no exported member 'Project'. Did you mean to use 'import Project from "@/components/GlassPortfolio"' instead?

@@ -8,13 +8,14 @@ export default function AdminClientLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
         <div id="admin-layout-container" className="min-h-screen flex">
             <style jsx global>{`
                 :root {
-                    --navbar-left: ${isSidebarOpen ? "256px" : "80px"};
+                    --navbar-left: ${isSidebarOpen ? (isCollapsed ? "80px" : "256px") : "0px"};
                 }
                 @media (max-width: 1024px) {
                     :root {
@@ -26,6 +27,8 @@ export default function AdminClientLayout({
             <AdminSidebar
                 isOpen={isSidebarOpen}
                 setIsOpen={setIsSidebarOpen}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
             />
 
             <main

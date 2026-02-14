@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, ExternalLink, Play, Eye, Heart, ChevronLeft, ChevronRight, MessageCircle, Share2, Loader2, User } from "lucide-react";
 import { toggleLike } from "@/lib/actions/like.actions";
-import { incrementView } from "@/lib/actions/project.actions"; // Corrected path
+import { incrementView } from "@/actions/incrementView";
 import { formatViewCount } from "@/lib/utils";
 import { ModalVideoPlayer } from "@/components/ui/ModalVideoPlayer";
 import { ZoomableImage } from "@/components/ui/ZoomableImage";

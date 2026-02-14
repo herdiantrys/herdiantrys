@@ -170,7 +170,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                   {activeSection === link.href && (
                     <motion.span
                       layoutId="activeSection"
-                      className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500"
+                      className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)]"
                       transition={{
                         type: "spring",
                         stiffness: 380,
@@ -180,7 +180,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                   )}
                   {/* Hover effect for non-active links */}
                   {activeSection !== link.href && (
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-teal-500/50 to-cyan-500/50 transition-all duration-300 group-hover:w-full" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[var(--site-accent-prev)]/50 to-[var(--site-accent-next)]/50 transition-all duration-300 group-hover:w-full" />
                   )}
                 </a>
               ))}
@@ -193,7 +193,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-[var(--glass-border)] transition-colors border border-transparent hover:border-[var(--glass-border)]"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-cyan-600 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white/10">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white/10">
                       {user.image ? (
                         <img src={user.image} alt={user.name || "User"} className="w-full h-full rounded-full object-cover" />
                       ) : (
@@ -228,7 +228,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                             onClick={() => setIsProfileOpen(false)}
                           >
-                            <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400 group-hover:bg-teal-500/20 transition-colors">
+                            <div className="p-2 rounded-lg bg-[var(--site-accent)]/10 text-[var(--site-accent)] group-hover:bg-[var(--site-accent)]/20 transition-colors">
                               <User size={18} />
                             </div>
                             {dict.nav.profile}
@@ -238,7 +238,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                             id="dropdown-item-settings"
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                           >
-                            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20 transition-colors">
+                            <div className="p-2 rounded-lg bg-[var(--site-accent-next)]/10 text-[var(--site-accent-next)] group-hover:bg-[var(--site-accent-next)]/20 transition-colors">
                               <Settings size={18} />
                             </div>
                             Settings
@@ -259,7 +259,7 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                                 e.stopPropagation(); // Prevent closing dropdown
                                 handleThemeToggle();
                               }}
-                              className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-teal-500' : 'bg-gray-600'}`}
+                              className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-[var(--site-accent)]' : 'bg-gray-600'}`}
                             >
                               <motion.div
                                 className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md"
@@ -353,8 +353,8 @@ export default function UserNavbar({ user, dict }: NavbarClientProps) {
                     href={link.href}
                     onClick={(e) => scrollToSection(e, link.href)}
                     className={`text-4xl font-bold tracking-tight transition-colors ${activeSection === link.href
-                      ? "text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500"
-                      : "text-white hover:text-teal-400"
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)]"
+                      : "text-white hover:text-[var(--site-accent)]"
                       }`}
                   >
                     {link.name}

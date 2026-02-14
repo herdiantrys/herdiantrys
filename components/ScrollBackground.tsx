@@ -140,22 +140,21 @@ export default function ScrollBackground() {
 
                 {/* 2. Parallax Elements - Z-INDEX 10 (Above colors) */}
 
-                {/* Top Right Orb */}
                 <motion.div
                     style={{ y: y1, rotate: rotate1, opacity }}
-                    className="absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-teal-500/10 to-cyan-500/5 blur-[120px] z-10"
+                    className="absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] to-[color-mix(in_srgb,var(--site-secondary),transparent_95%)] blur-[120px] z-10"
                 />
 
                 {/* Bottom Left Orb */}
                 <motion.div
                     style={{ y: y2, rotate: rotate2, opacity }}
-                    className="absolute top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full bg-gradient-to-tr from-emerald-500/5 to-teal-500/10 blur-[150px] z-10"
+                    className="absolute top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full bg-gradient-to-tr from-[color-mix(in_srgb,var(--site-secondary),transparent_95%)] to-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] blur-[150px] z-10"
                 />
 
                 {/* Floating Circle (Bottom Right) - NEW */}
                 <motion.div
                     style={{ y: y4 }}
-                    className="absolute bottom-[10%] right-[5%] w-[150px] h-[150px] rounded-full bg-gradient-to-t from-purple-500/10 to-transparent blur-[60px] z-10"
+                    className="absolute bottom-[10%] right-[5%] w-[150px] h-[150px] rounded-full bg-gradient-to-t from-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] to-transparent blur-[60px] z-10"
                 />
             </div>
 

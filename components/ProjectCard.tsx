@@ -4,8 +4,10 @@ import { useState, useEffect, useOptimistic, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Play, Eye, Heart, Video, Image as ImageIcon, MessageCircle, Bookmark } from "lucide-react";
-import { toggleLike } from "@/actions/toggleLike";
+import { toggleLike } from "@/lib/actions/like.actions";
 import { toggleBookmark } from "@/lib/actions/bookmark.actions";
+import { toast } from "sonner";
+import { XPToast } from "@/components/Gamification/XPToast";
 import { formatViewCount } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -18,10 +20,10 @@ export type Project = {
     category: string;
     thumbnail: string;
     image: string;
-    videoFile?: string; // Added videoFile
+    videoFile?: string | null; // Added videoFile
     description: string;
     type: "image" | "video";
-    album?: string;
+    album?: string | null;
     uploadDate?: string;
     views?: number;
     likes?: number;
@@ -67,10 +69,17 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
         });
 
         const result = await toggleLike(String(project.id));
-
-        if (!result.success) {
+        if (result.success) {
+            // The optimistic update already handled the state change,
+            // but we can use the result for toasts or further actions.
+            if (result.isLiked) {
+                toast.custom((t) => <XPToast amount={10} reason="Liked Project" />);
+            }
+        } else {
             if (result.error === "Failed to toggle like") {
                 // alert("Please login to like projects");
+                // Optionally revert optimistic update if server failed
+                addOptimisticProject({ likes: optimisticProject.likes || 0, isLiked: !!optimisticProject.isLiked });
             }
         }
     };
@@ -86,8 +95,16 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
 
         if (session.user?.id) {
             const result = await toggleBookmark(session.user.id, String(project.id));
-            if (!result.success) {
-                setIsBookmarked(!newIsBookmarked);
+            if (result.success) {
+                const finalIsBookmarked = result.isBookmarked ?? false;
+                setIsBookmarked(finalIsBookmarked); // Confirm state with server response
+                if (finalIsBookmarked) {
+                    toast.custom((t) => <XPToast amount={10} reason="Bookmarked Project" />);
+                } else {
+                    toast.success("Bookmark removed");
+                }
+            } else {
+                setIsBookmarked(!newIsBookmarked); // Revert if API call failed
             }
         }
     };
@@ -113,10 +130,10 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
     const allMedia = [
         // Main Media
         {
-            type: project.type,
+            type: project.type as "image" | "video",
             url: project.type === 'video' && project.videoFile ? project.videoFile : (project.thumbnail || project.image || project.videoFile || "")
         },
-        ...(project.gallery || []).map(item => ({ type: item.type, url: item.url }))
+        ...(project.gallery || []).map(item => ({ type: item.type as "image" | "video", url: item.url }))
     ];
 
     const showVideoPreview = isHovered && project.type === 'video' && project.videoFile;
@@ -190,7 +207,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 {((activeMedia.type === "video" && activeMedia.url) || (showVideoPreview && project.videoFile)) && (
                     <div className="absolute inset-0 z-10 bg-black">
                         <video
-                            src={activeMedia.type === 'video' ? activeMedia.url : project.videoFile}
+                            src={activeMedia.type === 'video' ? activeMedia.url : (project.videoFile || undefined)}
                             autoPlay
                             muted
                             loop

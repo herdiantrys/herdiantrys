@@ -19,23 +19,45 @@ import {
     Mail,
     Layout,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Trophy
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/lib/actions/contact.actions";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const menuItems = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Portfolio", href: "/admin/content", icon: Layout },
-    { name: "Users", href: "/admin/users", icon: Users },
-    { name: "Projects", href: "/admin/projects", icon: FolderOpen },
-    { name: "Posts", href: "/admin/posts", icon: FileText },
-    { name: "Services", href: "/admin/services", icon: Briefcase },
-    { name: "Partners", href: "/admin/partners", icon: Handshake },
-    { name: "Testimonials", href: "/admin/testimonials", icon: Star },
-    { name: "Shop", href: "/admin/shop", icon: ShoppingBag },
-    { name: "Contacts", href: "/admin/contacts", icon: Mail },
+const menuGroups = [
+    {
+        label: "Main",
+        items: [
+            { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+        ]
+    },
+    {
+        label: "Management",
+        items: [
+            { name: "Users", href: "/admin/users", icon: Users },
+            { name: "Ranks", href: "/admin/ranks", icon: Trophy },
+            { name: "Shop", href: "/admin/shop", icon: ShoppingBag },
+        ]
+    },
+    {
+        label: "Content",
+        items: [
+            { name: "Projects", href: "/admin/projects", icon: FolderOpen },
+            { name: "Posts", href: "/admin/posts", icon: FileText },
+            { name: "Portfolio", href: "/admin/content", icon: Layout },
+            { name: "Services", href: "/admin/services", icon: Briefcase },
+        ]
+    },
+    {
+        label: "Engagement",
+        items: [
+            { name: "Partners", href: "/admin/partners", icon: Handshake },
+            { name: "Testimonials", href: "/admin/testimonials", icon: Star },
+            { name: "Contacts", href: "/admin/contacts", icon: Mail },
+        ]
+    },
 ];
 
 type AdminSidebarProps = {
@@ -84,7 +106,7 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                     ${!isCollapsed ? "lg:w-64" : "lg:w-20"}
                 `}
             >
-                <div className="flex flex-col h-full bg-white/50 dark:bg-black/20 backdrop-blur-2xl border-r border-white/20 dark:border-white/5 relative">
+                <div className="flex flex-col h-full bg-white/10 dark:bg-black/20 backdrop-blur-3xl border-r border-white/20 dark:border-white/5 relative">
 
                     {/* Liquid Shine Overlay */}
                     <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
@@ -104,79 +126,93 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                             transition-all duration-300 ease-out z-[150] group
                         `}
                     >
-                        <div className="absolute inset-x-0 inset-y-2 bg-teal-500/0 group-hover:bg-teal-500/10 rounded-lg transition-colors" />
+                        <div className="absolute inset-x-0 inset-y-2 bg-[var(--site-secondary)]/0 group-hover:bg-[var(--site-secondary)]/10 rounded-lg transition-colors" />
                         <div className={`
                             transform transition-all duration-500 group-hover:scale-110
                             ${!isCollapsed ? "rotate-0" : "rotate-180"}
                         `}>
                             <ChevronLeft
                                 size={14}
-                                className="text-white/40 group-hover:text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.4)]"
+                                className="text-white/40 group-hover:text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]"
                             />
                         </div>
 
                         {/* Interactive Shine Edge */}
-                        <div className="absolute inset-y-2 left-0 w-[1.5px] bg-gradient-to-b from-transparent via-teal-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-y-2 left-0 w-[1.5px] bg-gradient-to-b from-transparent via-[var(--site-secondary)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
 
                     {/* Header */}
                     <div className="h-[74px] flex items-center px-6 border-b border-white/5 transition-all duration-300 overflow-hidden shrink-0">
-                        <span className={`text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500 whitespace-nowrap transition-all duration-500 ${isCollapsed ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"}`}>
+                        <span className={`text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] whitespace-nowrap transition-all duration-500 ${isCollapsed ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"}`}>
                             Admin<span className="text-foreground/80 font-medium">Panel</span>
                         </span>
                         {isCollapsed && (
                             <div className="absolute inset-x-0 flex justify-center">
-                                <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500">A</span>
+                                <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)]">A</span>
                             </div>
                         )}
                     </div>
 
                     {/* Menu */}
-                    <nav className="flex-1 overflow-y-auto py-6 space-y-1 overflow-x-hidden custom-scrollbar">
-                        {menuItems.map((item) => {
-                            const isActive = normalizedPath === item.href || (item.href !== "/admin" && normalizedPath.startsWith(item.href));
-                            const Icon = item.icon;
+                    <nav className="flex-1 overflow-y-auto py-6 space-y-6 overflow-x-hidden custom-scrollbar">
+                        {menuGroups.map((group, groupIndex) => (
+                            <div key={group.label}>
+                                {/* Group Label (Only if not collapsed, or handle differently if needed) */}
+                                <div className={`px-6 mb-2 text-xs font-bold uppercase tracking-wider text-gray-400/60 transition-all duration-300 ${isCollapsed ? "opacity-0 h-0 overflow-hidden mb-0" : "opacity-100"}`}>
+                                    {group.label}
+                                </div>
+                                {isCollapsed && groupIndex > 0 && (
+                                    <div className="w-8 mx-auto h-[1px] bg-white/10 my-2" />
+                                )}
 
-                            return (
-                                <Link
-                                    key={item.href}
-                                    id={`admin-nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                    href={item.href}
-                                    title={isCollapsed ? item.name : ""}
-                                    className={`
-                                        flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
-                                        ${isActive
-                                            ? "text-teal-400 font-bold"
-                                            : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
-                                        }
-                                    `}
-                                >
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="admin-active-bg"
-                                            className="absolute inset-0 rounded-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(45,212,191,0.15)] backdrop-blur-md -z-10"
-                                            transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
-                                        />
-                                    )}
+                                <div className="space-y-1">
+                                    {group.items.map((item) => {
+                                        const isActive = normalizedPath === item.href || (item.href !== "/admin" && normalizedPath.startsWith(item.href));
+                                        const Icon = item.icon;
 
-                                    <div className="relative">
-                                        <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]" : "opacity-70 group-hover:opacity-100"}`} />
-                                        {item.name === "Contacts" && unreadCount > 0 && (
-                                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">
-                                                {unreadCount > 99 ? "99+" : unreadCount}
-                                            </span>
-                                        )}
-                                    </div>
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                id={`admin-nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                                href={item.href}
+                                                title={isCollapsed ? item.name : ""}
+                                                className={`
+                                                    flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
+                                                    ${isActive
+                                                        ? "text-[var(--site-secondary)] font-bold"
+                                                        : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
+                                                    }
+                                                `}
+                                            >
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="admin-active-bg"
+                                                        className="absolute inset-0 rounded-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_var(--site-secondary)]/15 backdrop-blur-md -z-10"
+                                                        transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
+                                                    />
+                                                )}
 
-                                    <span
-                                        className={`ml-3 text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${isCollapsed ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}
-                                    >
-                                        {item.name}
-                                    </span>
-                                </Link>
+                                                <div className="relative">
+                                                    <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
+                                                    {item.name === "Contacts" && unreadCount > 0 && (
+                                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">
+                                                            {unreadCount > 99 ? "99+" : unreadCount}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                            );
-                        })}
+                                                <span
+                                                    className={`ml-3 text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${isCollapsed ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}
+                                                >
+                                                    {item.name}
+                                                </span>
+                                            </Link>
+
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
                     </nav>
 
 

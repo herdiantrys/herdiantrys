@@ -111,13 +111,13 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
 
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-xs group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors" size={18} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
                             <input
                                 type="text"
                                 placeholder={dict.portfolio?.search_placeholder || "Search..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-teal-500/30 rounded-full py-2.5 pl-11 pr-8 text-sm text-gray-800 dark:text-white focus:outline-none focus:bg-white/50 dark:focus:bg-white/10 transition-all placeholder:text-gray-500"
+                                className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-[var(--site-accent)]/30 rounded-full py-2.5 pl-11 pr-8 text-sm text-gray-800 dark:text-white focus:outline-none focus:bg-white/50 dark:focus:bg-white/10 transition-all placeholder:text-gray-500"
                             />
                             {searchQuery && (
                                 <button
@@ -137,7 +137,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                         key={category as string}
                                         onClick={() => setActiveCategory(category)}
                                         className={`px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-all whitespace-nowrap border ${activeCategory === category
-                                            ? "bg-teal-500 text-white border-teal-400 shadow-lg shadow-teal-500/20"
+                                            ? "bg-[var(--site-accent)] text-white border-[var(--site-accent)] shadow-lg shadow-[var(--site-accent)]/20"
                                             : "bg-transparent text-gray-600 dark:text-gray-400 border-transparent hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
                                             }`}
                                     >
@@ -167,7 +167,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                             <button
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                                 className={`p-2.5 rounded-xl border transition-all ${isFilterOpen || activeTags.length > 0
-                                    ? "bg-teal-500 text-white border-teal-400 shadow-md"
+                                    ? "bg-[var(--site-accent)] text-white border-[var(--site-accent)] shadow-md"
                                     : "bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-transparent hover:bg-black/10 dark:hover:bg-white/10"
                                     }`}
                                 title="Filter by Tags"
@@ -193,8 +193,8 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                                 key={tag}
                                                 onClick={() => toggleTag(tag)}
                                                 className={`px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider font-bold transition-all border ${activeTags.includes(tag)
-                                                    ? "bg-teal-500 text-white border-teal-400"
-                                                    : "bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-transparent hover:border-teal-500/30 hover:text-teal-500"
+                                                    ? "bg-[var(--site-accent)] text-white border-[var(--site-accent)]"
+                                                    : "bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-transparent hover:border-[var(--site-accent)]/30 hover:text-[var(--site-accent)]"
                                                     }`}
                                             >
                                                 {tag}
@@ -236,7 +236,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                 {/* Loading Trigger / Sentinel */}
                 <div ref={observerTarget} className="h-20 flex items-center justify-center w-full mt-8">
                     {hasMore && (
-                        <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin"></div>
+                        <div className="w-8 h-8 border-2 border-[var(--site-accent)]/30 border-t-[var(--site-accent)] rounded-full animate-spin"></div>
                     )}
                 </div>
 

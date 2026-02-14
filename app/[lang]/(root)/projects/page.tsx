@@ -7,12 +7,12 @@ import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
 
 
-export default async function WorksPage({ params }: { params: Promise<{ lang: string }> }) {
+export default async function ProjectsPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang: langParam } = await params;
-    const projects = await getSanityProjects(undefined, false);
+    const session = await auth();
+    const projects = await getSanityProjects(session?.user?.id, false);
     const lang = (langParam || 'en') as "en" | "id";
     const dict = await getDictionary(lang);
-    const session = await auth();
 
     // Fetch user bookmarks for grid state
     let bookmarkedIds: string[] = [];
@@ -28,7 +28,7 @@ export default async function WorksPage({ params }: { params: Promise<{ lang: st
             <WorksHero dict={dict} projectCount={projects.length} />
 
             <div className="pb-12 container mx-auto px-0 relative z-10 w-full max-w-none">
-                <WorksExplorer projects={projects} dict={dict} initialBookmarkedIds={bookmarkedIds} />
+                <WorksExplorer projects={projects as any[]} dict={dict} initialBookmarkedIds={bookmarkedIds} />
             </div>
         </main>
     );

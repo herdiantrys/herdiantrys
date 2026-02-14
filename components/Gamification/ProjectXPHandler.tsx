@@ -3,29 +3,30 @@
 import { useEffect, useRef } from "react";
 import { awardXP, trackProjectView } from "@/lib/actions/gamification.actions";
 import { toast } from "sonner";
+import { XPToast } from "./XPToast";
 
 export default function ProjectXPHandler({ userId, projectId }: { userId: string, projectId: string }) {
-    const hasAwarded = useRef(false);
+    const hasTracked = useRef(false);
 
     useEffect(() => {
-        if (hasAwarded.current) return;
-        hasAwarded.current = true;
+        if (!hasTracked.current) {
+            hasTracked.current = true;
 
-        const triggerXP = async () => {
-            // Delay slightly to ensure they didn't just bounce immediately? 
-            // Or just award on mount as requested.
-            await new Promise(r => setTimeout(r, 2000)); // 2s delay
+            const triggerXP = async () => {
+                // 1. Award small XP for viewing (Daily limited likely)
+                const res = await awardXP(userId, 5, `view_project_${projectId}`);
+                if (res.success && (res as any).amount) {
+                    toast.custom((t) => (
+                        <XPToast amount={(res as any).amount} reason="Project Explorer!" />
+                    ));
+                }
 
-            const res = await awardXP(userId, 20, `view_project_${projectId}`);
-            if (res.success && res.amount) {
-                toast.success(`+${res.amount} XP: Project Explorer!`);
-            }
+                // 2. Track View for Milestones (Observer, Scout, etc.)
+                await trackProjectView(userId, projectId);
+            };
 
-            // Track Badge Progress (Viewed Projects)
-            await trackProjectView(userId, projectId);
-        };
-
-        triggerXP();
+            triggerXP();
+        }
     }, [userId, projectId]);
 
     return null;

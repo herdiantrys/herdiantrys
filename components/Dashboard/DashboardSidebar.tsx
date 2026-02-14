@@ -1,17 +1,29 @@
 "use client";
 
 import ProfileCard from "./ProfileCard";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Home, Bell, Bookmark, Settings, LogOut, ShieldCheck, LayoutDashboard, ShoppingBag, Search, Briefcase } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LEVELS } from "@/lib/constants/gamification";
 import { useState } from "react";
+import GamificationModal from "../Gamification/GamificationModal";
+import PixelBadge from "../Gamification/PixelBadge";
 
-export default function DashboardSidebar({ user, isPublic = false, dict }: { user: any; isPublic?: boolean; dict?: any }) {
+interface Rank {
+    id: string;
+    name: string;
+    subtitle?: string | null;
+    minXP: number;
+    description: string | null;
+    image: string | null;
+}
+
+export default function DashboardSidebar({ user, isPublic = false, dict, showNavigation = true, ranks = [] }: { user: any; isPublic?: boolean; dict?: any; showNavigation?: boolean; ranks?: Rank[] }) {
     const pathname = usePathname() || "/";
     const normalizedPath = pathname?.replace(/^\/[a-z]{2}/, "") || "/";
+    const [isGamificationModalOpen, setIsGamificationModalOpen] = useState(false);
 
 
     if (!user) return null;
@@ -20,18 +32,23 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
     const t = dict?.dashboard || {};
 
     // Calculate Level Progress
+    // Calculate Level Progress (1 Level per 100 XP)
     const currentXP = user.xp || 0;
-    const currentLevel = user.level || 1;
-    const currentLevelData = LEVELS.find(l => l.level === currentLevel);
-    const nextLevelData = LEVELS.find(l => l.level === currentLevel + 1);
+    const currentLevel = Math.floor(currentXP / 100) + 1;
 
-    const currentLevelMinXP = currentLevelData?.minXP || 0;
-    const nextLevelMinXP = nextLevelData?.minXP || (currentLevelMinXP + 1000); // Default step if max level
+    // Progress within current level (0-99)
+    const xpInLevel = currentXP % 100;
+    const xpRequiredForLevel = 100; // Fixed 100 XP per level
+    const levelProgress = xpInLevel; // Since req is 100, xp is directly percentage
 
-    // Progress within current level
-    const xpInLevel = Math.max(0, currentXP - currentLevelMinXP);
-    const xpRequiredForLevel = nextLevelMinXP - currentLevelMinXP;
-    const levelProgress = Math.min(100, (xpInLevel / xpRequiredForLevel) * 100);
+    // Calculate Rank
+    // Fallback to empty array if ranks not provided, though it should be
+    const sortedRanks = [...ranks].sort((a, b) => a.minXP - b.minXP);
+    const currentRank = [...sortedRanks].reverse().find(r => currentXP >= r.minXP) || sortedRanks[0] || { name: "Visitor", minXP: 0, description: "Welcome!", image: null };
+
+    // Next Rank Logic
+    const nextRankIndex = sortedRanks.findIndex(r => r.name === currentRank.name) + 1;
+    const nextRank = sortedRanks[nextRankIndex];
 
     return (
         <aside className="sticky top-28 space-y-6">
@@ -43,7 +60,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
                 <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0">
                     <Link
                         href="/admin"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 border border-teal-500/20 group"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm bg-[var(--site-accent)]/10 text-[var(--site-accent)] hover:bg-[var(--site-accent)]/20 border border-[var(--site-accent)]/20 group"
                     >
                         <ShieldCheck size={18} className="group-hover:scale-110 transition-transform" />
                         Admin Management
@@ -52,9 +69,12 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
             )}
 
             {/* Quick Navigation Menu */}
-            {!isPublic && (
-                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0">
-                    <div className="px-4 pt-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-teal-500/40">
+            {!isPublic && showNavigation && (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0 relative overflow-hidden">
+                    {/* Liquid Shine Suggestion (optional subtle effect) */}
+                    <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
+
+                    <div className="px-4 pt-3 pb-2 text-xs font-bold uppercase tracking-wider text-gray-400/60 transition-all duration-300">
                         Navigation
                     </div>
                     <div className="space-y-1 py-1">
@@ -68,39 +88,64 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
                             // Add Admin Panel link directly in menu for admins
                             ...(['admin', 'superadmin'].includes(user.role?.toLowerCase() || '')
                                 ? [{ name: "Admin Panel", href: "/admin", icon: ShieldCheck }]
+                                : []),
+                            // Add Portfolio Editor link if user owns the template
+                            ...(user.inventory?.some((item: any) => item.shopItem?.type === 'SAAS_TEMPLATE')
+                                ? [{ name: "Portfolio", href: "/dashboard/portfolio", icon: LayoutDashboard }]
                                 : [])
                         ].map((item) => {
-                            const isActive = normalizedPath === item.href || (item.href !== "/dashboard" && normalizedPath.startsWith(item.href));
+                            const searchParams = useSearchParams();
+                            const currentTab = searchParams?.get("tab");
+                            const isActive = (() => {
+                                if (item.href.includes('?')) {
+                                    const [path, query] = item.href.split('?');
+                                    const params = new URLSearchParams(query);
+                                    const tab = params.get('tab');
+                                    if (tab) {
+                                        return normalizedPath === path && currentTab === tab;
+                                    }
+                                }
+
+                                // Home should not be active if a tab is present on the same path
+                                if (item.href === '/dashboard') {
+                                    return normalizedPath === '/dashboard' && !currentTab;
+                                }
+
+                                return normalizedPath === item.href || (item.href !== "/dashboard" && normalizedPath.startsWith(item.href));
+                            })();
                             const Icon = item.icon;
 
                             return (
                                 <Link
                                     key={item.href}
+                                    id={`dashboard-nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                                     href={item.href}
                                     className={`
-                                        flex items-center px-4 py-3 rounded-xl transition-all group relative duration-300
-                                        ${isActive ? "text-teal-400 font-bold" : "text-[var(--glass-text-muted)] hover:text-white"}
+                                        flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
+                                        ${isActive
+                                            ? "text-teal-400 font-bold"
+                                            : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
+                                        }
                                     `}
                                 >
                                     {isActive && (
                                         <motion.div
                                             layoutId="dashboard-nav-active-bg"
-                                            className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 shadow-[0_4px_16px_rgba(255,255,255,0.05)] backdrop-blur-sm -z-10"
+                                            className="absolute inset-0 rounded-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(45,212,191,0.15)] backdrop-blur-md -z-10"
                                             transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
                                         />
                                     )}
 
                                     <div className="relative">
-                                        <Icon size={18} className={`min-w-[18px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.4)]" : "opacity-70 group-hover:opacity-100"}`} />
+                                        <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]" : "opacity-70 group-hover:opacity-100"}`} />
                                     </div>
 
                                     <span className="ml-3 text-sm tracking-tight whitespace-nowrap">
                                         {item.name}
                                     </span>
 
-                                    {isActive && (
-                                        <div className="absolute left-0 top-1/4 bottom-1/4 w-[2.5px] bg-teal-500 rounded-full shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
-                                    )}
+                                    {/* Interactive Shine Edge (Optional, removed strict horizontal bar from previous design to match Admin sidebar which doesn't have it on vertical items usually) */}
+                                    {/* Admin uses bg-white/10 active background instead of sidebar accent bar */}
                                 </Link>
                             );
                         })}
@@ -108,80 +153,105 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
                 </div>
             )}
 
-            {/* Gamification Stats */}
-            <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl space-y-6 overflow-hidden relative group">
-                {/* Liquid Shine Edge */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+            {/* Gamification Stats - RPG Fantasy Design */}
+            {/* Gamification Stats - RPG Fantasy Design */}
+            <div
+                onClick={() => setIsGamificationModalOpen(true)}
+                className="relative group overflow-hidden rounded-2xl border border-amber-500/20 bg-black/80 shadow-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] hover:border-amber-500/40 cursor-pointer"
+            >
 
-                {/* Level & XP */}
-                <div>
-                    <div className="flex justify-between items-end mb-2">
-                        <div>
-                            <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block">Level {user.level || 1}</span>
-                            <span className="text-sm font-bold text-[var(--glass-text)]">{currentLevelData?.name || "Visitor"}</span>
+                {/* Background Atmosphere */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/60 to-black/95 z-10" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150 z-0 mix-blend-overlay pointer-events-none"></div>
+
+                {/* Rank Illustration Background */}
+                <div className="absolute top-0 left-0 w-full h-[65%] z-0 overflow-hidden">
+                    <img
+                        src={(currentRank as any).image || "/images/ranks/RANK 1_Wanderer.png"}
+                        alt={currentRank.name}
+                        className="w-full h-full object-cover opacity-90 transition-transform duration-[2s] ease-in-out group-hover:scale-110"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            ((e.target as HTMLImageElement).parentNode as HTMLElement).style.background = 'linear-gradient(45deg, #0f172a, #1e293b)';
+                        }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
+                </div>
+
+                {/* Content Container */}
+                <div className="relative z-20 p-5 mt-40 flex flex-col justify-end min-h-[160px]">
+
+                    {/* Rank Title & Level Badge */}
+                    <div className="flex items-end justify-between mb-3">
+                        <div className="flex-1 drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">
+                            <h3 className="text-2xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-200 to-amber-500 tracking-wide leading-tight">
+                                {currentRank.name.split(' (')[0]}
+                            </h3>
+                            <div className="text-[10px] uppercase tracking-[0.2em] text-amber-500/90 font-bold mb-1 shadow-black drop-shadow-md">
+                                {currentRank.subtitle || currentRank.name.split('(')[1]?.replace(')', '') || "Adventurer"}
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <span className="text-xs text-teal-400 font-mono block">{user.xp || 0} XP</span>
-                            <span className="text-[10px] text-[var(--glass-text-muted)]">Next: {nextLevelMinXP} XP</span>
+
+                        {/* Level Badge */}
+                        <div className="relative flex items-center justify-center w-14 h-14 bg-gradient-to-b from-slate-800 to-black border-2 border-amber-500/50 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 ml-2 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                            <div className="absolute inset-0 bg-amber-500/10 rounded-xl animate-pulse" />
+                            <div className="text-center z-10">
+                                <div className="text-[9px] text-amber-500/80 uppercase font-black tracking-widest leading-none mb-0.5">LVL</div>
+                                <div className="text-2xl font-black text-white leading-none font-serif">{currentLevel}</div>
+                            </div>
                         </div>
                     </div>
-                    <div className="h-3 w-full bg-black/20 dark:bg-white/5 rounded-full overflow-hidden relative">
-                        <div
-                            className="h-full bg-gradient-to-r from-teal-500 to-cyan-400 rounded-full transition-all duration-1000 ease-out relative"
-                            style={{ width: `${Math.min(levelProgress, 100)}%` }}
-                        >
-                            <div className="absolute inset-0 bg-white/20 animate-pulse" />
+
+                    {/* Description */}
+                    <p className="text-xs text-slate-300 italic font-medium mb-5 pl-3 border-l-2 border-amber-500/40 leading-relaxed bg-black/40 p-2 rounded-r-lg backdrop-blur-sm">
+                        "{currentRank.description}"
+                    </p>
+
+                    {/* XP Progress Bar */}
+                    <div className="relative mb-2">
+                        <div className="flex justify-between text-[10px] font-bold tracking-wider text-slate-400 mb-1.5 uppercase">
+                            <span className="text-amber-500/80">Next Rank Progress</span>
+                            <span className="text-white">{xpInLevel} <span className="text-slate-600">/</span> 100 XP</span>
+                        </div>
+
+                        <div className="h-3 w-full bg-slate-900/80 rounded-full p-[2px] border border-white/10 shadow-inner relative overflow-hidden backdrop-blur-sm">
+                            {/* Active Bar */}
+                            <div
+                                className="h-full bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-300 rounded-full relative shadow-[0_0_15px_rgba(245,158,11,0.6)]"
+                                style={{ width: `${Math.min(levelProgress, 100)}%` }}
+                            >
+                                <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-30 mix-blend-overlay" />
+                                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-white/40 to-transparent opacity-50" />
+                            </div>
+                        </div>
+                        <div className="text-right mt-1.5">
+                            <span className="text-[9px] text-slate-500 font-mono tracking-widest">TOTAL XP: <span className="text-slate-300">{currentXP.toLocaleString()}</span></span>
                         </div>
                     </div>
                 </div>
 
-                {/* Exploration Progress */}
-                <div>
-                    <div className="flex justify-between items-end mb-2">
-                        <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider">Exploration</span>
-                        <span className="text-xs text-purple-400 font-mono">{user.explorationProgress || 0}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-black/20 dark:bg-white/5 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${user.explorationProgress || 0}%` }}
-                        />
-                    </div>
-                </div>
-
-                {/* Badges */}
-                {user.badges && Array.isArray(user.badges) && user.badges.length > 0 ? (
-                    <div>
-                        <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block mb-3">Badges ({user.badges.length})</span>
-                        <div className="flex flex-wrap gap-3">
-                            {user.badges.map((badge: any, idx: number) => (
-                                <div
-                                    key={idx}
-                                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 shadow-sm flex items-center justify-center text-xl relative group cursor-help transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_20px_rgba(0,0,0,0.2)] hover:border-teal-500/30"
-                                    title={badge.name || "Badge"}
-                                >
-                                    {/* Render emoji/icon based on content */}
-                                    {badge.icon && (badge.icon.startsWith('/') || badge.icon.startsWith('http')) ? (
-                                        <img src={badge.icon} alt={badge.name} className="w-full h-full object-cover rounded-xl" />
-                                    ) : (
-                                        <span className="drop-shadow-md filter">{badge.icon || (badge.name?.[0] || "B")}</span>
-                                    )}
-
-                                    {/* Tooltip on hover */}
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/80 backdrop-blur-md text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                                        {badge.name}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div>
-                        <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block mb-2">Badges</span>
-                        <div className="text-xs text-[var(--glass-text-muted)] italic">No badges earned yet. Start exploring!</div>
-                    </div>
-                )}
+                {/* Decorative Borders */}
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent opacity-80" />
+                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent opacity-50" />
             </div>
+
+            {/* Badges Section */}
+            {/* Badges Section */}
+            {user.badges && Array.isArray(user.badges) && user.badges.length > 0 ? (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl space-y-4">
+                    <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block font-mono">Badges ({user.badges.length})</span>
+                    <div className="flex flex-wrap gap-3">
+                        {user.badges.map((badge: any, idx: number) => (
+                            <PixelBadge key={idx} badge={badge} size="sm" />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl">
+                    <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block mb-2 font-mono">Badges</span>
+                    <div className="text-xs text-[var(--glass-text-muted)] italic font-mono">No badges yet...</div>
+                </div>
+            )}
 
             {/* If public, maybe details? */}
             {isPublic && user.bio && (
@@ -192,9 +262,18 @@ export default function DashboardSidebar({ user, isPublic = false, dict }: { use
                     </p>
                 </div>
             )}
+
+            {/* Gamification Modal */}
+            <GamificationModal
+                isOpen={isGamificationModalOpen}
+                onClose={() => setIsGamificationModalOpen(false)}
+                user={user}
+                ranks={sortedRanks}
+            />
         </aside>
     );
 }
+
 
 function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any; label: string; active?: boolean }) {
     return (

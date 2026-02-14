@@ -17,9 +17,11 @@ interface CommentSectionProps {
     currentUserEffect?: string;
     currentUserFrame?: string;
     currentUserBackground?: string;
+    currentUserProfileColor?: string;
+    currentUserFrameColor?: string;
 }
 
-export default function CommentSection({ targetId, targetType, userId, currentUserImage, currentUserEffect, currentUserFrame, currentUserBackground }: CommentSectionProps) {
+export default function CommentSection({ targetId, targetType, userId, currentUserImage, currentUserEffect, currentUserFrame, currentUserBackground, currentUserProfileColor, currentUserFrameColor }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
@@ -52,7 +54,9 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                 profileImage: currentUserImage,
                 equippedEffect: currentUserEffect,
                 equippedFrame: currentUserFrame,
-                equippedBackground: currentUserBackground
+                equippedBackground: currentUserBackground,
+                profileColor: currentUserProfileColor,
+                frameColor: currentUserFrameColor
             }
         };
 
@@ -94,6 +98,8 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                         effect={currentUserEffect}
                         frame={currentUserFrame}
                         background={currentUserBackground}
+                        profileColor={currentUserProfileColor}
+                        frameColor={currentUserFrameColor}
                     />
                 </div>
                 <div className="flex-1 relative">
@@ -145,6 +151,8 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                                         effect={comment.user.equippedEffect}
                                         frame={comment.user.equippedFrame}
                                         background={comment.user.equippedBackground}
+                                        profileColor={(comment.user as any).profileColor}
+                                        frameColor={(comment.user as any).frameColor}
                                     />
                                 </Link>
                                 <div className="flex-1">

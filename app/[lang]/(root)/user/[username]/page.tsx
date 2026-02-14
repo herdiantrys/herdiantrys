@@ -18,17 +18,20 @@ import UserBanner from "@/components/UserBanner";
 import ActivityArea from "@/components/Dashboard/ActivityArea";
 import { getBookmarkedProjects } from "@/lib/actions/bookmark.actions";
 import { Activity } from "@/lib/actions/activity.actions";
+import { trackProfileVisit } from "@/lib/actions/gamification.actions";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
 import ProfilePageWrapper from "@/components/Profile/ProfilePageWrapper";
+import { getRanks } from "@/lib/actions/rank.actions";
 
 export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params;
     const session = await auth();
 
     // Fetch User Profile Data using centralized helper to ensure Stats and Points are included
-    const [user, trendingPosts] = await Promise.all([
+    const [user, trendingPosts, ranks] = await Promise.all([
         getUserByUsername(username),
-        getTrendingPosts()
+        getTrendingPosts(),
+        getRanks()
     ]);
 
     if (!user) {
@@ -44,10 +47,15 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
     }
 
     // Determine ownership
-    const isOwner = session?.user?.email === user.email || (loggedInUserId && loggedInUserId === user._id);
+    const isOwner = session?.user?.email === user.email || (loggedInUserId !== "" && loggedInUserId === user._id);
 
     // Fetch user activities
     const activities = await getUserActivities(username, loggedInUserId);
+
+    // Track Profile Visit if not owner and user is logged in
+    if (!isOwner && loggedInUserId && user.id) {
+        trackProfileVisit(loggedInUserId, user.id).catch(err => console.error("Profile Visit Track Error:", err));
+    }
 
     // Fetch Inventory
     // Note: getUserInventory expects userId, checking if we can fetch for 'user._id' (profile user)
@@ -132,7 +140,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Left Sidebar - Profile Info */}
                         <div className="lg:col-span-1">
-                            <DashboardSidebar user={user} isPublic={!isOwner} />
+                            <DashboardSidebar user={user} isPublic={!isOwner} showNavigation={false} ranks={ranks} />
                         </div>
 
                         {/* Middle - User Activity Feed Area */}
@@ -146,6 +154,17 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
                                     dict={{}} // Pass empty if no dict avail on public profile, or fetch dict if needed
                                     isOwner={!!isOwner}
                                     dbUserId={session?.user?.id}
+                                    inventoryData={{
+                                        inventory: (user.inventory || []).map((item: any) => ({
+                                            ...item.shopItem,
+                                            acquiredAt: item.acquiredAt,
+                                            inventoryId: item.id
+                                        })),
+                                        equippedFrame: user.equippedFrame,
+                                        equippedBackground: user.equippedBackground,
+                                        profileColor: user.profileColor,
+                                        frameColor: user.frameColor
+                                    }}
                                 />
                             </Suspense>
                         </div>

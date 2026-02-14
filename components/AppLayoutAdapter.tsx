@@ -50,6 +50,8 @@ export default async function AppLayoutAdapter({
                     equippedEffect: userData?.equippedEffect,
                     equippedFrame: userData?.equippedFrame,
                     equippedBackground: userData?.equippedBackground,
+                    profileColor: userData?.profileColor,
+                    frameColor: userData?.frameColor,
                     id: userData?._id || session.user.id,
                     points: userData?.points || 0,
                     role: (userData?.role || session.user.role || "user").toLowerCase()

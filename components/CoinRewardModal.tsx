@@ -97,7 +97,7 @@ export const CoinRewardModal = ({ isOpen, onClose, amount }: CoinRewardModalProp
                                         transition={{ delay: 0.3 }}
                                         className="text-gray-400 text-sm"
                                     >
-                                        You've earned <span className="text-yellow-400 font-bold text-lg">+{amount} Coins</span><br /> for staying active!
+                                        You've earned <span className="text-yellow-400 font-bold text-lg">+{amount} Runes</span><br /> for staying active!
                                     </motion.p>
 
                                     <motion.button

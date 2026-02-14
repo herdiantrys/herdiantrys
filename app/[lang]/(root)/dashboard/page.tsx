@@ -13,10 +13,12 @@ import CreatePost from "@/components/Dashboard/CreatePost";
 import { getTrendingPosts } from "@/lib/actions/trending.actions";
 import { urlFor } from "@/sanity/lib/image";
 import ActivityArea from "@/components/Dashboard/ActivityArea";
+import PortfolioWidget from "@/components/Dashboard/PortfolioWidget";
 import { getBookmarkedProjects } from "@/lib/actions/bookmark.actions";
 import { Activity } from "@/lib/actions/activity.actions";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
 import { getUserInventory } from "@/lib/actions/inventory.actions";
+import { getRanks } from "@/lib/actions/rank.actions";
 
 export default async function DashboardPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -29,11 +31,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
     const dict = await getDictionary((lang || 'en') as "en" | "id");
 
     // Parallel fetching for performance
-    const [user, activities, trendingPosts, inventoryData] = await Promise.all([
+    const [user, activities, trendingPosts, inventoryData, ranks] = await Promise.all([
         getUserByEmail(session.user.email),
         getRecentActivities(session.user.id),
         getTrendingPosts(),
-        session.user.id ? getUserInventory(session.user.id) : null
+        session.user.id ? getUserInventory(session.user.id) : null,
+        getRanks()
     ]);
 
     if (!user) {
@@ -98,7 +101,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
 
                         {/* Left Sidebar - User Profile & Nav */}
                         <div className="lg:col-span-1">
-                            <DashboardSidebar user={safeUser} dict={dict} />
+                            <DashboardSidebar user={safeUser} dict={dict} showNavigation={false} ranks={ranks} />
                         </div>
 
                         {/* Middle - Activity Feed Area with Tabs */}
@@ -116,6 +119,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
 
                         {/* Right Sidebar - Trending / Suggestions */}
                         <div className="hidden lg:block lg:col-span-1">
+                            <PortfolioWidget user={safeUser} dict={dict} />
                             <TrendingSidebar posts={safeTrendingPosts} dict={dict} />
                         </div>
                     </div>

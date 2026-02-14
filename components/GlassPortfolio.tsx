@@ -131,8 +131,8 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
                                         className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${currentPage === page
-                                            ? "bg-gradient-to-r from-teal-500 to-cyan-600 text-white shadow-lg"
-                                            : "glass text-gray-400 hover:text-white hover:bg-white/10"
+                                            ? "bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-secondary)]/30"
+                                            : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/10"
                                             }`}
                                     >
                                         {page}

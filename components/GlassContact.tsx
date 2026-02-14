@@ -26,7 +26,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
             case "instagram": return "hover:text-pink-500";
             case "linkedin": return "hover:text-blue-600";
             case "dribbble": return "hover:text-pink-400";
-            default: return "hover:text-teal-400";
+            default: return "hover:text-[var(--site-secondary)]";
         }
     };
 
@@ -58,7 +58,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                             <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">{dict.contact.contact_info}</h3>
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4 group">
-                                    <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300">
+                                    <div className="w-12 h-12 rounded-xl bg-[var(--site-secondary)]/10 flex items-center justify-center text-[var(--site-secondary)] group-hover:bg-[var(--site-secondary)] group-hover:text-[var(--site-button-text)] transition-all duration-300">
                                         <Mail size={20} />
                                     </div>
                                     <div>
@@ -68,7 +68,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                 </div>
 
                                 <div className="flex items-center gap-4 group">
-                                    <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300">
+                                    <div className="w-12 h-12 rounded-xl bg-[var(--site-secondary)]/10 flex items-center justify-center text-[var(--site-secondary)] group-hover:bg-[var(--site-secondary)] group-hover:text-[var(--site-button-text)] transition-all duration-300">
                                         <Phone size={20} />
                                     </div>
                                     <div>
@@ -78,7 +78,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                 </div>
 
                                 <div className="flex items-center gap-4 group">
-                                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                                    <div className="w-12 h-12 rounded-xl bg-[var(--site-secondary)]/10 flex items-center justify-center text-[var(--site-secondary)] group-hover:bg-[var(--site-secondary)] group-hover:text-[var(--site-button-text)] transition-all duration-300">
                                         <MapPin size={20} />
                                     </div>
                                     <div>
@@ -191,7 +191,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg hover:shadow-teal-500/25 disabled:opacity-50"
+                                className="w-full bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] text-[var(--site-button-text)] font-bold py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-[var(--site-secondary)]/25 disabled:opacity-50"
                             >
                                 {isLoading ? (
                                     <span>{dict.contact.form.sending}</span>

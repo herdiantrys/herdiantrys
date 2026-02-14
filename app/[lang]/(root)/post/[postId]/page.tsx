@@ -5,6 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import { getUserByEmail } from "@/lib/actions/user.actions";
 import { getPostById } from "@/lib/actions/post.actions";
 import { getTrendingPosts } from "@/lib/actions/trending.actions";
+import { getRanks } from "@/lib/actions/rank.actions";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import TrendingSidebar from "@/components/Dashboard/TrendingSidebar";
 import ActivityCard from "@/components/Dashboard/ActivityCard";
@@ -25,10 +26,11 @@ export default async function SinglePostPage({ params }: { params: Promise<{ lan
     const t = dict?.dashboard || {};
 
     // Fetch data in parallel
-    const [user, post, trendingPosts] = await Promise.all([
+    const [user, post, trendingPosts, ranks] = await Promise.all([
         getUserByEmail(session.user.email),
         getPostById(postId, session.user.id),
-        getTrendingPosts()
+        getTrendingPosts(),
+        getRanks()
     ]);
 
     if (!user) {
@@ -83,7 +85,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ lan
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Left Sidebar */}
                         <div className="hidden lg:block lg:col-span-1">
-                            <DashboardSidebar user={safeUser} dict={dict} />
+                            <DashboardSidebar user={safeUser} dict={dict} ranks={ranks} />
                         </div>
 
                         {/* Middle Content */}
