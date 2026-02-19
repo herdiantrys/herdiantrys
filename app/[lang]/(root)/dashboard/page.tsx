@@ -19,6 +19,8 @@ import { Activity } from "@/lib/actions/activity.actions";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
 import { getUserInventory } from "@/lib/actions/inventory.actions";
 import { getRanks } from "@/lib/actions/rank.actions";
+import { serializeForClient } from "@/lib/utils";
+import BadgesSidebar from "@/components/Dashboard/BadgesSidebar";
 
 export default async function DashboardPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -90,8 +92,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
     const uniqueSavedActivities = Array.from(new Map(savedActivities.map((item: any) => [item.id, item])).values());
 
     // Sanitize data to prevent serialization errors
-    const safeUser = JSON.parse(JSON.stringify(user));
-    const safeTrendingPosts = JSON.parse(JSON.stringify(trendingPosts));
+    const safeUser = serializeForClient(user);
+    const safeTrendingPosts = serializeForClient(trendingPosts);
 
     return (
         <ProfileColorProvider initialColor={safeUser.profileColor}>
@@ -100,8 +102,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
                         {/* Left Sidebar - User Profile & Nav */}
-                        <div className="lg:col-span-1">
-                            <DashboardSidebar user={safeUser} dict={dict} showNavigation={false} ranks={ranks} />
+                        <div className="hidden lg:block lg:col-span-1">
+                            <DashboardSidebar user={safeUser} dict={dict} ranks={ranks} />
                         </div>
 
                         {/* Middle - Activity Feed Area with Tabs */}
@@ -119,8 +121,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ lang
 
                         {/* Right Sidebar - Trending / Suggestions */}
                         <div className="hidden lg:block lg:col-span-1">
-                            <PortfolioWidget user={safeUser} dict={dict} />
-                            <TrendingSidebar posts={safeTrendingPosts} dict={dict} />
+                            <div className="space-y-6">
+                                <BadgesSidebar user={safeUser} isOwner={true} dict={dict} />
+                                <PortfolioWidget user={safeUser} dict={dict} />
+                                <TrendingSidebar posts={safeTrendingPosts} dict={dict} />
+                            </div>
                         </div>
                     </div>
                 </div>

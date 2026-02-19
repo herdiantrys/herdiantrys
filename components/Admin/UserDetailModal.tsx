@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner"; // Assuming sonner is available
 import { updateUserPoints } from "@/lib/actions/admin.actions";
+import { formatNumber, formatDate } from "@/lib/utils";
 
 type UserDetailModalProps = {
     user: any;
@@ -23,15 +24,18 @@ export default function UserDetailModal({ user, currentUser, isOpen, onClose }: 
 
     useEffect(() => {
         setMounted(true);
-        if (user) {
-            setCoins(user.points || 0);
-        }
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
         };
         document.addEventListener("keydown", handleEscape);
         return () => document.removeEventListener("keydown", handleEscape);
-    }, [onClose, user]);
+    }, [onClose]);
+
+    useEffect(() => {
+        if (user) {
+            setCoins(user.points || 0);
+        }
+    }, [user?.points]);
 
     const handleSaveCoins = async () => {
         if (!user) return;
@@ -200,7 +204,7 @@ export default function UserDetailModal({ user, currentUser, isOpen, onClose }: 
                                             onClick={() => isSuperAdmin && setIsEditingCoins(true)}
                                             title={isSuperAdmin ? "Click to edit coins" : ""}
                                         >
-                                            {coins.toLocaleString()}
+                                            {formatNumber(coins)}
                                         </div>
                                     )}
 
@@ -235,14 +239,7 @@ export default function UserDetailModal({ user, currentUser, isOpen, onClose }: 
                                         </a>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-3 text-sm text-gray-300 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                    <Calendar size={18} className="text-gray-500" />
-                                    <span>Joined {new Date(user.createdAt).toLocaleDateString(undefined, {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}</span>
-                                </div>
+                                <span>Joined {formatDate(user.createdAt)}</span>
                             </div>
 
                         </div>

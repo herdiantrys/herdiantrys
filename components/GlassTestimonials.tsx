@@ -47,7 +47,19 @@ const GlassTestimonials = ({ testimonials = [], dict }: { testimonials: Testimon
             transition: { duration: 0.5, ease: "easeInOut" },
         });
 
-        setCurrentIndex(index);
+        const N = testimonials.length;
+        let finalIndex = index;
+
+        // Wrap around logic
+        if (index >= N * 2) {
+            finalIndex = index - N;
+            controls.set({ x: `-${finalIndex * itemWidth}%` });
+        } else if (index < N) {
+            finalIndex = index + N;
+            controls.set({ x: `-${finalIndex * itemWidth}%` });
+        }
+
+        setCurrentIndex(finalIndex);
         setIsAnimating(false);
     };
 
@@ -80,26 +92,7 @@ const GlassTestimonials = ({ testimonials = [], dict }: { testimonials: Testimon
         controls.set({ x: `-${testimonials.length * itemWidth}%` });
     }, [controls, itemWidth, testimonials.length]);
 
-    useEffect(() => {
-        if (isAnimating) return;
 
-        // Reset to middle set if we reach the ends
-        // We have 3 sets: [0..N-1] [N..2N-1] [2N..3N-1]
-        // We want to keep index in [N..2N-1]
-        const N = testimonials.length;
-
-        if (currentIndex >= N * 2) {
-            // If we are in the 3rd set, jump back to 2nd set
-            const newIndex = currentIndex - N;
-            controls.set({ x: `-${newIndex * itemWidth}%` });
-            setCurrentIndex(newIndex);
-        } else if (currentIndex < N) {
-            // If we are in the 1st set, jump forward to 2nd set
-            const newIndex = currentIndex + N;
-            controls.set({ x: `-${newIndex * itemWidth}%` });
-            setCurrentIndex(newIndex);
-        }
-    }, [currentIndex, isAnimating, controls, itemWidth, testimonials.length]);
 
     useEffect(() => {
         const timer = setInterval(() => {

@@ -58,7 +58,7 @@ export const checkAndAwardSessionBonus = async (userId: string) => {
         });
 
         revalidatePath("/dashboard");
-        revalidatePath(`/user/${userId}`); // Revalidate profile to show points update
+        revalidatePath(`/profile/${userId}`); // Revalidate profile to show points update
 
         return { success: true, awarded: true, message: `Daily Login! You received ${BONUS_AMOUNT} coins!` };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Coins, Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { purchaseItem } from "@/lib/actions/shop.actions";
 import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
@@ -33,7 +34,6 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
 
         setIsLoading(true);
         try {
-            // Check if it's a Real Money Item (Stripe)
             if (item.type === 'SAAS_TEMPLATE') {
                 const { createCheckoutSession } = await import("@/lib/actions/stripe.actions");
                 const result = await createCheckoutSession(item._id, userId, pathname || '/shop');
@@ -46,8 +46,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                 }
             }
 
-            // Standard Point Purchase
-            const result = await purchaseItem(userId, item._id, item.price, item.type, item.value);
+            const result = (await purchaseItem(userId, item._id, item.price, item.type, item.value)) as any;
 
             if (result.success) {
                 setOptimisticOwned(true);
@@ -67,107 +66,171 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
     };
 
     const canAfford = item.type === 'SAAS_TEMPLATE' || userPoints >= item.price;
+    const itemTypeLabel = item.type?.toUpperCase() || 'ITEM';
 
     return (
-        <div
-            className={`glass-liquid p-6 flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 group relative overflow-hidden
-            ${optimisticOwned
-                    ? "bg-gradient-to-br from-[var(--site-accent-prev)]/5 to-[var(--site-accent-next)]/5 border-[var(--site-accent)]/30"
-                    : "border-white/5 hover:border-purple-500/30"
-                }`}>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5 }}
+            className={`group relative flex flex-col h-full rounded-2xl border transition-all duration-500 overflow-hidden
+                ${optimisticOwned
+                    ? "bg-white/10 border-site-secondary/30 shadow-[0_0_20px_var(--site-secondary)]/10"
+                    : "bg-white/[0.03] border-white/10 hover:border-purple-500/40 hover:bg-white/5 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+                }`}
+        >
+            {/* Glossy Reflection Effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-            {/* Glossy sheen */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            {/* Background Glow */}
+            <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 -mr-10 -mt-10 transition-all duration-500 group-hover:opacity-40
+                ${optimisticOwned ? 'bg-site-secondary' : 'bg-purple-500'}`}
+            />
 
-            <div className={`aspect-square rounded-2xl bg-black/40 mb-6 relative overflow-hidden flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors`}>
-                {/* Effect Preview */}
-                <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${item.value === 'custom-color' ? 'from-pink-500 via-purple-500 to-cyan-500' : (item.value || 'from-gray-500 to-gray-700')} opacity-80 blur-md group-hover:opacity-100 group-hover:blur-xl transition-all duration-500 scale-90 group-hover:scale-100`}></div>
-
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className={`w-24 h-24 bg-[#121212] rounded-full border-4 flex items-center justify-center transition-all duration-300 relative overflow-hidden
-                        ${optimisticOwned ? 'border-transparent' : 'border-[#1a1a1a]'}
-                    `}>
-                        {/* Border Effect Overlay (Actual CSS representation) */}
-                        <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${item.value} opacity-0 ${optimisticOwned ? 'opacity-100' : 'group-hover:opacity-100'} transition-opacity duration-300 p-1`}>
-                            <div className="w-full h-full bg-[#121212] rounded-full flex items-center justify-center">
-                                <span className="text-gray-600 text-[10px] items-center font-mono uppercase tracking-widest opacity-50">Avatar</span>
-                            </div>
-                        </div>
-                        {!optimisticOwned && <span className="text-gray-700 text-xs font-bold z-10 opacity-50 group-hover:opacity-0 transition-opacity">PREVIEW</span>}
-                    </div>
+            {/* Header: Item Type & Status */}
+            <div className="relative z-10 p-4 flex justify-between items-start">
+                <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border backdrop-blur-md
+                    ${optimisticOwned
+                        ? 'bg-site-secondary/10 border-site-secondary/20 text-site-secondary'
+                        : 'bg-white/5 border-white/10 text-[var(--glass-text-muted)] group-hover:text-purple-400 group-hover:border-purple-500/30'
+                    }`}>
+                    {itemTypeLabel}
                 </div>
 
                 {optimisticOwned && (
-                    <div className="absolute top-3 right-3 bg-[var(--site-accent)]/20 text-[var(--site-accent)] p-1.5 rounded-full backdrop-blur-md border border-[var(--site-accent)]/20 shadow-lg animate-in fade-in zoom-in duration-300 z-20">
-                        <Check size={14} strokeWidth={3} />
+                    <div className="flex items-center gap-1.5 text-site-secondary text-xs font-bold bg-site-secondary/10 px-2 py-1 rounded-lg border border-site-secondary/20">
+                        <ShieldCheck size={12} />
+                        COLLECTED
                     </div>
                 )}
             </div>
 
-            <div className="mb-4">
-                <h3 className="text-lg font-bold text-[var(--glass-text)] mb-1 group-hover:text-purple-400 transition-colors">{item.name}</h3>
-                <p className="text-xs text-[var(--glass-text-muted)] line-clamp-2 min-h-[2.5em]">{item.description || "Unlock this exclusive profile effect."}</p>
+            {/* Preview Section */}
+            <div className="relative px-6 pb-6 flex items-center justify-center">
+                <div className="w-full aspect-square relative flex items-center justify-center">
+                    {/* Inner Circle Base */}
+                    <div className="absolute w-32 h-32 rounded-full border border-white/5 bg-black/40 backdrop-blur-md shadow-inner" />
+
+                    {/* Pulse Effect */}
+                    <AnimatePresence>
+                        {!optimisticOwned && (
+                            <motion.div
+                                className="absolute w-32 h-32 rounded-full bg-purple-500/10 border border-purple-500/20"
+                                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0, 0.3] }}
+                                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* Gradient Ring (Active/Hover) */}
+                    <div className={`absolute w-[100px] h-[100px] rounded-full p-[3px] transition-all duration-500
+                        ${optimisticOwned ? 'bg-gradient-to-tr ' + item.value : 'bg-white/5 group-hover:bg-gradient-to-tr group-hover:rotate-45 ' + item.value}
+                    `}>
+                        <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
+                            {/* Avatar Silhouette */}
+                            <div className="relative z-10 flex flex-col items-center opacity-30 group-hover:opacity-50 transition-opacity">
+                                <span className="text-[10px] font-black tracking-widest text-white/50">BIO-DATA</span>
+                            </div>
+
+                            {/* Item Icon override */}
+                            {item.icon && (
+                                <img
+                                    src={item.icon}
+                                    alt=""
+                                    className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Floating Sparkles for Premium */}
+                    {item.type === 'SAAS_TEMPLATE' && (
+                        <div className="absolute inset-0 pointer-events-none">
+                            <Sparkles size={16} className="absolute top-0 right-4 text-amber-400 animate-pulse" />
+                            <Sparkles size={12} className="absolute bottom-4 left-0 text-amber-400 animate-pulse delay-75" />
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-3 relative z-20">
-                <div className={`flex items-center gap-1.5 font-bold shrink-0 transition-colors duration-300 ${optimisticOwned ? 'text-[var(--site-accent)]' : (item.type === 'SAAS_TEMPLATE' ? 'text-green-400' : 'text-amber-400')}`}>
-                    {optimisticOwned ? <ShieldCheck size={18} /> : (item.type === 'SAAS_TEMPLATE' ? 'Rp' : <Coins size={18} className="drop-shadow-md" />)}
-                    <span className="text-lg">
-                        {optimisticOwned
-                            ? "Owned"
-                            : (item.type === 'SAAS_TEMPLATE'
-                                ? new Intl.NumberFormat('id-ID').format(item.price)
-                                : item.price)
-                        }
-                    </span>
+            {/* Content Section */}
+            <div className="relative z-10 px-6 pb-6 flex flex-col flex-1">
+                <div className="mb-4">
+                    <h3 className="text-lg font-bold text-white mb-1.5 line-clamp-1 group-hover:text-purple-400 transition-colors">
+                        {item.name}
+                    </h3>
+                    <p className="text-[13px] text-[var(--glass-text-muted)] leading-relaxed line-clamp-2 h-[40px]">
+                        {item.description || "Enhance your digital identity with this exclusive artifact."}
+                    </p>
                 </div>
 
-                {optimisticOwned ? (
-                    <div className="relative group/btn">
-                        <div className="px-5 py-2.5 rounded-xl bg-[var(--site-accent)]/10 text-[var(--site-accent)] text-xs font-bold border border-[var(--site-accent)]/10 cursor-default flex items-center justify-center gap-2 group-hover/btn:opacity-0 transition-opacity absolute inset-0">
-                            <Check size={14} />
-                            <span>In Inventory</span>
+                {/* Footer: Price & Controls */}
+                <div className="mt-auto flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            {item.type === 'SAAS_TEMPLATE' ? (
+                                <div className="flex items-center gap-1.5 text-site-accent font-black">
+                                    <span className="text-sm">IDR</span>
+                                    <span className="text-lg">{new Intl.NumberFormat('id-ID').format(item.price)}</span>
+                                </div>
+                            ) : (
+                                <div className={`flex items-center gap-1.5 font-black ${optimisticOwned ? 'text-site-secondary' : 'text-amber-400'}`}>
+                                    <Coins size={18} className={!optimisticOwned ? "animate-bounce-slow" : ""} />
+                                    <span className="text-lg">{optimisticOwned ? "OWNED" : item.price}</span>
+                                </div>
+                            )}
                         </div>
+
+                        {!optimisticOwned && (
+                            <div className="text-[10px] font-bold text-white/20 tracking-tighter uppercase italic">
+                                Reward: 50 XP
+                            </div>
+                        )}
+                    </div>
+
+                    {optimisticOwned ? (
                         <button
                             onClick={() => {
-                                // Extract lang from pathname (e.g., /en/shop -> en)
                                 const currentPath = pathname || "";
                                 const segments = currentPath.split('/');
                                 const lang = (segments.length > 1 && segments[1].length === 2) ? segments[1] : 'en';
-
                                 const targetUrl = username
-                                    ? `/${lang}/user/${username}?tab=inventory`
+                                    ? `/${lang}/profile/${username}?tab=inventory`
                                     : `/${lang}/dashboard?tab=inventory`;
-                                console.log("ShopItemCard Click:", { username, targetUrl });
                                 router.push(targetUrl);
                             }}
-                            className="px-5 py-2.5 rounded-xl bg-[var(--site-accent)] text-white text-xs font-bold border border-[var(--site-accent)] cursor-pointer flex items-center justify-center gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity relative z-10 hover:brightness-110"
+                            className="group/btn relative w-full h-11 rounded-xl overflow-hidden focus:outline-none"
                         >
-                            <span>Go to Inventory</span>
+                            <div className="absolute inset-0 bg-site-secondary/10 border border-site-secondary/20 flex items-center justify-center gap-2 group-hover/btn:opacity-0 transition-opacity duration-300">
+                                <Check size={16} />
+                                <span className="text-sm font-bold">In Inventory</span>
+                            </div>
+                            <div className="absolute inset-0 bg-site-secondary flex items-center justify-center gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
+                                <span className="text-sm font-black text-black">USE NOW</span>
+                            </div>
                         </button>
-                    </div>
-                ) : (
-                    <button
-                        onClick={handleBuy}
-                        disabled={(!canAfford && item.type !== 'SAAS_TEMPLATE') || isLoading}
-                        className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 border flex items-center justify-center gap-2 transform active:scale-95 shadow-lg
-                            ${canAfford || item.type === 'SAAS_TEMPLATE'
-                                ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-transparent shadow-purple-900/20 hover:shadow-purple-500/40"
-                                : "bg-white/5 text-gray-500 border-white/5 cursor-not-allowed"
-                            }`}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 size={16} className="animate-spin" /> Wait...
-                            </>
-                        ) : (
-                            <>
-                                Buy Now
-                            </>
-                        )}
-                    </button>
-                )}
+                    ) : (
+                        <button
+                            onClick={handleBuy}
+                            disabled={(!canAfford && item.type !== 'SAAS_TEMPLATE') || isLoading}
+                            className={`relative w-full h-11 rounded-xl font-black text-sm tracking-widest overflow-hidden transition-all duration-300 active:scale-[0.98]
+                                ${(canAfford || item.type === 'SAAS_TEMPLATE')
+                                    ? "bg-white text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                                    : "bg-white/5 text-white/20 cursor-not-allowed"
+                                }`}
+                        >
+                            {isLoading ? (
+                                <Loader2 className="animate-spin mx-auto" size={20} />
+                            ) : (
+                                "ACQUIRE"
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {/* Border Sheen Hover Effect */}
+            <div className="absolute inset-0 border border-white/0 group-hover:border-purple-500/20 rounded-2xl transition-colors duration-500 pointer-events-none" />
+        </motion.div>
     );
 }

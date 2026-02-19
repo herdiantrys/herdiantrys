@@ -8,6 +8,7 @@ import { createRank, updateRank, deleteRank, uploadRankImage } from "@/lib/actio
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal"; // Assuming this exists from Posts
 import { Upload } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 interface Rank {
     id: string;
@@ -129,7 +130,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
             if (selectedFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append("image", selectedFile);
-                const uploadRes = await uploadRankImage(uploadFormData);
+                const uploadRes = (await uploadRankImage(uploadFormData)) as any;
                 if (uploadRes.success && uploadRes.imageUrl) {
                     imageUrl = uploadRes.imageUrl;
                 } else {
@@ -144,8 +145,8 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
             };
 
             const response = currentRank
-                ? await updateRank(currentRank.id, finalData)
-                : await createRank(finalData);
+                ? (await updateRank(currentRank.id, finalData)) as any
+                : (await createRank(finalData)) as any;
 
             if (response.success) {
                 toast.success(currentRank ? "Rank updated successfully" : "Rank created successfully");
@@ -166,7 +167,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
         if (!rankToDelete) return;
         setIsDeleting(true);
         try {
-            await deleteRank(rankToDelete);
+            await (deleteRank(rankToDelete) as any);
             toast.success("Rank deleted successfully");
             setRankToDelete(null);
             router.refresh();
@@ -258,7 +259,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
                                         {rank.subtitle || "-"}
                                     </td>
                                     <td className="px-6 py-4 font-mono text-teal-500 font-bold">
-                                        {rank.minXP.toLocaleString()} XP
+                                        {formatNumber(rank.minXP)} XP
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-[300px] truncate">
                                         {rank.description || "-"}

@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import { serializeForClient } from "@/lib/utils";
 
 import { LEVELS, BADGES } from "@/lib/constants/gamification";
 import { getRanks } from "@/lib/actions/rank.actions"; // Import rank actions
@@ -11,10 +12,40 @@ import { createActivity } from "./activity.actions";
 
 // using Prisma.TransactionClient directly
 
-export async function awardXP(userId: string, amount: number, reason: string) {
+/**
+ * Award Runes (Points) to a user.
+ */
+export async function awardRunes(userId: string, amount: number, reason: string, tx?: Prisma.TransactionClient) {
+    const db = tx || prisma;
     try {
-        const result = await prisma.$transaction(async (tx) => {
-            const user = await tx.user.findUnique({
+        await db.user.update({
+            where: { id: userId },
+            data: { points: { increment: amount } }
+        });
+
+        // Notify User of Runes Award (Async)
+        createNotification({
+            recipientId: userId,
+            senderId: "system",
+            type: "coin_award",
+            details: { amount, reason: reason.replace(/_/g, ' ') }
+        }).catch(e => console.error("Runes Notification Error:", e));
+
+        revalidatePath("/");
+        revalidatePath("/dashboard");
+        revalidatePath("/shop");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error awarding runes:", error);
+        return { success: false };
+    }
+}
+
+export async function awardXP(userId: string, amount: number, reason: string, tx?: Prisma.TransactionClient) {
+    try {
+        const executeUpdate = async (currentTx: Prisma.TransactionClient) => {
+            const user = await currentTx.user.findUnique({
                 where: { id: userId },
                 select: { xp: true, level: true, gamificationState: true }
             });
@@ -30,7 +61,7 @@ export async function awardXP(userId: string, amount: number, reason: string) {
 
             // Check if already awarded today for this reason
             if (state.dailyLimits[reason] === today) {
-                return { success: false, limitReached: true, message: "Daily limit reached for this action." };
+                return serializeForClient({ success: false, limitReached: true, message: "Daily limit reached for this action." });
             }
 
             // Update limit for today
@@ -42,22 +73,19 @@ export async function awardXP(userId: string, amount: number, reason: string) {
             const newLevel = Math.floor(newXP / 100) + 1;
 
             // Fetch Ranks from DB
-            const dbRanks = await tx.rank.findMany({ orderBy: { minXP: 'asc' } });
+            const dbRanks = await currentTx.rank.findMany({ orderBy: { minXP: 'asc' } });
             // Fallback to constants if DB empty? Or assume seeded.
-            // If strictly using DB, no fallback needed if seeded correctly.
 
             // Find current rank based on newXP
-            // We need to find the highest rank where minXP <= newXP
-            // Since sorted asc, we can reverse or findLast (if avail) or just iterate
             const reversedRanks = [...dbRanks].reverse();
-            const currentRank = reversedRanks.find(r => newXP >= r.minXP) || dbRanks[0]; // Default to lowest if found none (should not happen if minXP=0 exists)
+            const currentRank = reversedRanks.find(r => newXP >= r.minXP) || dbRanks[0];
 
             const newRoleName = currentRank?.name || "Visitor";
 
             const leveledUp = newLevel > (user.level || 1);
 
             // Update User
-            await tx.user.update({
+            await currentTx.user.update({
                 where: { id: userId },
                 data: {
                     xp: newXP,
@@ -66,15 +94,17 @@ export async function awardXP(userId: string, amount: number, reason: string) {
                 }
             });
 
-            return {
+            return serializeForClient({
                 success: true,
                 xp: newXP,
                 level: newLevel,
                 leveledUp,
                 amount,
                 roleName: newRoleName
-            };
-        });
+            });
+        };
+
+        const result = tx ? await executeUpdate(tx) : await prisma.$transaction(executeUpdate);
 
         if (result.success) {
             // Notify User of XP Award (Async)
@@ -93,7 +123,7 @@ export async function awardXP(userId: string, amount: number, reason: string) {
 
     } catch (error: any) {
         console.error("Error awarding XP:", error);
-        return { success: false, error: error.message || "Failed to award XP" };
+        return serializeForClient({ success: false, error: error.message || "Failed to award XP" });
     }
 }
 
@@ -101,7 +131,7 @@ export async function updateExplorationProgress(userId: string, progressToAdd: n
     try {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.findUnique({ where: { id: userId }, select: { explorationProgress: true } });
-            if (!user) return { success: false, error: "User not found" };
+            if (!user) return serializeForClient({ success: false, error: "User not found" });
 
             const current = user.explorationProgress || 0;
             if (current >= 100) return { success: true, progress: current };
@@ -113,14 +143,14 @@ export async function updateExplorationProgress(userId: string, progressToAdd: n
                 data: { explorationProgress: newProgress }
             });
 
-            return { success: true, progress: newProgress };
+            return serializeForClient({ success: true, progress: newProgress });
         });
 
         return result;
 
     } catch (error) {
         console.error("Error updating exploration:", error);
-        return { success: false };
+        return serializeForClient({ success: false });
     }
 }
 
@@ -150,6 +180,14 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
             }
         });
 
+        // Award Rewards from definition
+        if (badgeDef.xpReward) {
+            await awardXP(userId, badgeDef.xpReward, `badge_${badgeId}`, tx);
+        }
+        if ((badgeDef as any).runesReward) {
+            await awardRunes(userId, (badgeDef as any).runesReward, `badge_${badgeId}`, tx);
+        }
+
         // Award Visibility & Notifications
         if (badgeId === "tycoon") {
             createActivity(userId, "achievement", {
@@ -157,6 +195,18 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
                 description: "Unlocked every item in the shop! 👑",
                 badgeIcon: "👑"
             }).catch(e => console.error("Tycoon Activity Error:", e));
+
+            // Dedicated Achievement Notification
+            createNotification({
+                recipientId: userId,
+                senderId: "system",
+                type: "achievement",
+                details: {
+                    achievementTitle: "Tycoon",
+                    description: "Unlocked every item in the shop! 👑",
+                    icon: "👑"
+                }
+            }).catch(e => console.error("Achievement Notification Error:", e));
         } else {
             createActivity(userId, "badge_awarded", {
                 badgeName: badgeDef.name,
@@ -172,7 +222,7 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
             details: { badgeName: badgeDef.name, badgeIcon: badgeDef.icon }
         }).catch(e => console.error("Badge Notification Error:", e));
 
-        return { success: true, badge: newBadge };
+        return serializeForClient({ success: true, badge: newBadge });
 
     } catch (error) {
         console.error("Error awarding badge:", error);
@@ -181,7 +231,7 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
 
 export async function trackProjectView(userId: string, projectId: string) {
     try {
-        await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             // 1. Check if already viewed
             const existingView = await tx.projectView.findUnique({
                 where: {
@@ -207,27 +257,29 @@ export async function trackProjectView(userId: string, projectId: string) {
                 where: { userId }
             });
 
-            // 4. Check thresholds and award
-            // Observer (10 views) - 100 XP
+            // 4. Check thresholds and award (Rewards now handled inside checkAndAwardBadge)
+            let awardedBadge = null;
+            // Observer (10 views)
             if (viewCount === 10) {
-                await awardXP(userId, 100, "achievement_observer");
-                await checkAndAwardBadge(userId, "observer", tx);
+                const res = await checkAndAwardBadge(userId, "observer", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Scout (50 views) - 600 XP
+            // Scout (50 views)
             else if (viewCount === 50) {
-                await awardXP(userId, 600, "achievement_scout");
-                await checkAndAwardBadge(userId, "scout", tx);
+                const res = await checkAndAwardBadge(userId, "scout", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Surveyor (100 views) - 1200 XP
+            // Surveyor (100 views)
             else if (viewCount === 100) {
-                await awardXP(userId, 1200, "achievement_surveyor");
-                await checkAndAwardBadge(userId, "surveyor", tx);
+                const res = await checkAndAwardBadge(userId, "surveyor", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Visionary (500 views) - 6000 XP
+            // Visionary (500 views)
             else if (viewCount === 500) {
-                await awardXP(userId, 6000, "achievement_visionary");
-                await checkAndAwardBadge(userId, "visionary", tx);
+                const res = await checkAndAwardBadge(userId, "visionary", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
+
             // 5. Update gamificationState with view count for UI progress
             const state: any = (await tx.user.findUnique({ where: { id: userId }, select: { gamificationState: true } }))?.gamificationState || {};
             state.viewCount = viewCount;
@@ -235,12 +287,14 @@ export async function trackProjectView(userId: string, projectId: string) {
                 where: { id: userId },
                 data: { gamificationState: state }
             });
+
+            return { success: true, awardedBadge };
         });
 
-        return { success: true };
+        return serializeForClient(result);
     } catch (e) {
         console.error("Error tracking view:", e);
-        return { success: false };
+        return serializeForClient({ success: false });
     }
 }
 
@@ -257,7 +311,7 @@ export async function trackContactMessage(userId: string) {
     }
 }
 
-export async function trackDeepThinker(userId: string, projectId: string) {
+export async function trackDeepThinker(userId: string, projectId?: string) {
     // Called when user scrolls to end of a "Case Study" or any project
     try {
         // Award 25 XP for reading a case study (Once per project per day)
@@ -265,13 +319,14 @@ export async function trackDeepThinker(userId: string, projectId: string) {
             await awardXP(userId, 25, `read_case_study_${projectId}`);
         }
 
-        await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
+            let awardedBadge = null;
             const user = await tx.user.findUnique({
                 where: { id: userId },
                 select: { gamificationState: true }
             });
 
-            if (!user) return;
+            if (!user) return { success: false };
             const state: any = user.gamificationState || { readCount: 0 };
             state.readCount = (state.readCount || 0) + 1;
 
@@ -281,10 +336,15 @@ export async function trackDeepThinker(userId: string, projectId: string) {
                 data: { gamificationState: state }
             });
 
-            if (state.readCount >= 3) {
-                await checkAndAwardBadge(userId, "deep_thinker", tx);
+            if (state.readCount === 3) {
+                const res = await checkAndAwardBadge(userId, "deep_thinker", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
+
+            return { success: true, awardedBadge };
         });
+
+        return serializeForClient(result);
     } catch (e) {
         console.error(e);
     }
@@ -302,7 +362,8 @@ export async function trackComment(userId: string, projectId?: string) {
         }
 
         // Track for badge (Social Butterfly) - counts all comments
-        await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
+            let awardedBadge = null;
             const user = await tx.user.findUnique({
                 where: { id: userId },
                 select: { gamificationState: true }
@@ -321,25 +382,25 @@ export async function trackComment(userId: string, projectId?: string) {
 
                 const uniqueComments = state.commentedProjects.length;
 
-                // Scribe (10 comments) - 150 XP
+                // Scribe (10 comments)
                 if (uniqueComments === 10) {
-                    await awardXP(userId, 150, "achievement_scribe");
-                    await checkAndAwardBadge(userId, "scribe", tx);
+                    const res = await checkAndAwardBadge(userId, "scribe", tx);
+                    if (res?.success) awardedBadge = res.badge;
                 }
-                // Bard (50 comments) - 700 XP
+                // Bard (50 comments)
                 else if (uniqueComments === 50) {
-                    await awardXP(userId, 700, "achievement_bard");
-                    await checkAndAwardBadge(userId, "bard", tx);
+                    const res = await checkAndAwardBadge(userId, "bard", tx);
+                    if (res?.success) awardedBadge = res.badge;
                 }
-                // Chronicler (100 comments) - 1500 XP
+                // Chronicler (100 comments)
                 else if (uniqueComments === 100) {
-                    await awardXP(userId, 1500, "achievement_chronicler");
-                    await checkAndAwardBadge(userId, "chronicler", tx);
+                    const res = await checkAndAwardBadge(userId, "chronicler", tx);
+                    if (res?.success) awardedBadge = res.badge;
                 }
-                // Oracle (500 comments) - 7000 XP
+                // Oracle (500 comments)
                 else if (uniqueComments === 500) {
-                    await awardXP(userId, 7000, "achievement_oracle");
-                    await checkAndAwardBadge(userId, "oracle", tx);
+                    const res = await checkAndAwardBadge(userId, "oracle", tx);
+                    if (res?.success) awardedBadge = res.badge;
                 }
             }
 
@@ -348,12 +409,15 @@ export async function trackComment(userId: string, projectId?: string) {
                 data: { gamificationState: state }
             });
 
-            if (state.commentCount >= 5) {
-                await checkAndAwardBadge(userId, "social_butterfly", tx);
+            if (state.commentCount === 5) {
+                const res = await checkAndAwardBadge(userId, "social_butterfly", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
+
+            return { success: true, awardedBadge };
         });
 
-        return xpResult;
+        return result;
     } catch (e) {
         console.error("Error tracking comment:", e);
     }
@@ -407,13 +471,14 @@ export async function trackNightOwl(userId: string) {
 
 export async function trackLike(userId: string, projectId: string) {
     try {
-        await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
+            let awardedBadge = null;
             const user = await tx.user.findUnique({
                 where: { id: userId },
                 select: { gamificationState: true, badges: true }
             });
 
-            if (!user) return;
+            if (!user) return { success: false };
 
             const state: any = user.gamificationState || {};
 
@@ -425,34 +490,36 @@ export async function trackLike(userId: string, projectId: string) {
 
             const uniqueLikes = state.likedProjects.length;
 
-            // Admirer (10 likes) - 125 XP
+            // Admirer (10 likes)
             if (uniqueLikes === 10) {
-                await awardXP(userId, 125, "achievement_admirer");
-                await checkAndAwardBadge(userId, "admirer", tx);
+                const res = await checkAndAwardBadge(userId, "admirer", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Fan (50 likes) - 650 XP
+            // Fan (50 likes)
             else if (uniqueLikes === 50) {
-                await awardXP(userId, 650, "achievement_fan");
-                await checkAndAwardBadge(userId, "fan", tx);
+                const res = await checkAndAwardBadge(userId, "fan", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Curator (100 likes) - 1300 XP
+            // Curator (100 likes)
             else if (uniqueLikes === 100) {
-                await awardXP(userId, 1300, "achievement_curator");
-                await checkAndAwardBadge(userId, "curator", tx);
+                const res = await checkAndAwardBadge(userId, "curator", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Patron (500 likes) - 6500 XP
+            // Patron (500 likes)
             else if (uniqueLikes === 500) {
-                await awardXP(userId, 6500, "achievement_patron");
-                await checkAndAwardBadge(userId, "patron", tx);
+                const res = await checkAndAwardBadge(userId, "patron", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
 
             await tx.user.update({
                 where: { id: userId },
                 data: { gamificationState: state }
             });
+
+            return { success: true, awardedBadge };
         });
 
-        return { success: true };
+        return serializeForClient(result);
     } catch (e) {
         console.error("Error tracking like:", e);
         return { success: false };
@@ -462,6 +529,7 @@ export async function trackLike(userId: string, projectId: string) {
 export async function trackShopCompletion(userId: string) {
     try {
         const result = await prisma.$transaction(async (tx) => {
+            let awardedBadge = null;
             // 1. Get total shop item count
             const totalShopItems = await tx.shopItem.count();
             if (totalShopItems === 0) return { success: false }; // Should not happen in prod
@@ -476,36 +544,33 @@ export async function trackShopCompletion(userId: string) {
                 // Award Badge
                 const badgeResult = await checkAndAwardBadge(userId, "tycoon", tx);
 
-                // Award Bonus XP for completion (e.g. 5000 XP)
                 if (badgeResult?.success) {
-                    await awardXP(userId, 5000, "achievement_tycoon");
-                    return { success: true, awarded: true };
+                    awardedBadge = badgeResult.badge;
+                    return { success: true, awarded: true, awardedBadge };
                 }
             }
             return { success: true, awarded: false };
         });
 
-        return result;
+        return serializeForClient(result);
     } catch (error) {
         console.error("Error tracking shop completion:", error);
-        return { success: false };
+        return serializeForClient({ success: false });
     }
 }
 
 export async function trackFirstShopPurchase(userId: string) {
     try {
-        await prisma.$transaction(async (tx: any) => {
+        const result = await prisma.$transaction(async (tx: any) => {
             // Check if already awarded
             const user = await tx.user.findUnique({ where: { id: userId }, select: { badges: true } });
             const badges = (user?.badges as any[]) || [];
-            if (badges.some((b: any) => b.id === "first_purchase")) return;
+            if (badges.some((b: any) => b.id === "first_purchase")) return { success: false };
 
-            // Award Badge & XP (100XP)
-            // Note: Since this is called AFTER a purchase, we assume the purchase was successful.
-            // We could verify inventory count > 0, but the caller should ensure a purchase happened.
-            await awardXP(userId, 100, "achievement_first_purchase");
-            await checkAndAwardBadge(userId, "first_purchase", tx);
+            const res = await checkAndAwardBadge(userId, "first_purchase", tx);
+            return { success: true, awardedBadge: res?.badge };
         });
+        return serializeForClient(result);
     } catch (e) {
         console.error("Error tracking first purchase:", e);
     }
@@ -513,16 +578,16 @@ export async function trackFirstShopPurchase(userId: string) {
 
 export async function trackFirstBannerSetup(userId: string) {
     try {
-        await prisma.$transaction(async (tx: any) => {
+        const result = await prisma.$transaction(async (tx: any) => {
             // Check if already awarded
             const user = await tx.user.findUnique({ where: { id: userId }, select: { badges: true } });
             const badges = (user?.badges as any[]) || [];
-            if (badges.some((b: any) => b.id === "first_banner")) return;
+            if (badges.some((b: any) => b.id === "first_banner")) return { success: false };
 
-            // Award Badge & XP (100XP)
-            await awardXP(userId, 100, "achievement_first_banner");
-            await checkAndAwardBadge(userId, "first_banner", tx);
+            const res = await checkAndAwardBadge(userId, "first_banner", tx);
+            return { success: true, awardedBadge: res?.badge };
         });
+        return serializeForClient(result);
     } catch (e) {
         console.error("Error tracking first banner:", e);
     }
@@ -532,7 +597,8 @@ export async function trackProfileVisit(visitorId: string, targetUserId: string)
     if (visitorId === targetUserId) return; // Don't track self-visits
 
     try {
-        await prisma.$transaction(async (tx: any) => {
+        const result = await prisma.$transaction(async (tx: any) => {
+            let awardedBadge = null;
             // 1. Check/Create Visit Record
             // We use upsert or ignore if exists. Since we need to know if it's NEW, try create.
             const existingVisit = await tx.profileVisit.findUnique({
@@ -560,20 +626,20 @@ export async function trackProfileVisit(visitorId: string, targetUserId: string)
             });
 
             // 3. Check Thresholds
-            // First Visit (1 visit) - 50 XP
+            // First Visit (1 visit)
             if (visitCount === 1) {
-                await awardXP(visitorId, 50, "achievement_first_visit");
-                await checkAndAwardBadge(visitorId, "first_visit", tx);
+                const res = await checkAndAwardBadge(visitorId, "first_visit", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Social Explorer (10 visits) - 350 XP
+            // Social Explorer (10 visits)
             else if (visitCount === 10) {
-                await awardXP(visitorId, 350, "achievement_social_explorer");
-                await checkAndAwardBadge(visitorId, "social_explorer", tx);
+                const res = await checkAndAwardBadge(visitorId, "social_explorer", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
-            // Community Pillar (50 visits) - 1000 XP
+            // Community Pillar (50 visits)
             else if (visitCount === 50) {
-                await awardXP(visitorId, 1000, "achievement_community_pillar");
-                await checkAndAwardBadge(visitorId, "community_pillar", tx);
+                const res = await checkAndAwardBadge(visitorId, "community_pillar", tx);
+                if (res?.success) awardedBadge = res.badge;
             }
 
             // 4. Update gamificationState for progress UI
@@ -584,7 +650,10 @@ export async function trackProfileVisit(visitorId: string, targetUserId: string)
                 data: { gamificationState: state }
             });
 
+            return { success: true, awardedBadge };
         });
+
+        return serializeForClient(result);
     } catch (e) {
         console.error("Error tracking profile visit:", e);
     }

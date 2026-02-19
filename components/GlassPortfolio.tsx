@@ -12,27 +12,37 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 
 const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) => {
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
-    const [activeCategory, setActiveCategory] = useState(dict.portfolio.all);
+    const [activeCategory, setActiveCategory] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 15;
 
-    // Derive unique categories from projects
-    const categories = [dict.portfolio.all, ...Array.from(new Set(projects.map((p) => p.category)))];
+    // Derive unique categories from projects, excluding "all" to avoid duplicates
+    const categories = ["all", ...Array.from(new Set(projects.map((p) => p.category))).filter(c => c !== "all")];
 
-    const filteredProjects = activeCategory === dict.portfolio.all
+    const filteredProjects = activeCategory === "all"
         ? projects
         : projects.filter(project => project.category === activeCategory);
 
     const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
+
+    // Robust pagination: ensure current page is always within bounds
+    // We use effectivePage for rendering to avoid empty results during transitions
+    const effectivePage = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
+
     const paginatedProjects = filteredProjects.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
+        (effectivePage - 1) * ITEMS_PER_PAGE,
+        effectivePage * ITEMS_PER_PAGE
     );
 
-    // Reset to page 1 when category changes
+
+
+    // Ensure activeCategory stays valid if projects change
     useEffect(() => {
-        setCurrentPage(1);
-    }, [activeCategory]);
+        if (activeCategory !== "all" && !projects.some(p => p.category === activeCategory)) {
+            // Defer the update to avoid set-state-in-effect warning if possible, but here just ensure it's needed
+            setActiveCategory("all");
+        }
+    }, [projects, activeCategory]);
 
     // Handle Escape key to close modal
     useEffect(() => {
@@ -61,57 +71,56 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                     {categories.map((category) => (
                         <button
                             key={category as string}
-                            onClick={() => setActiveCategory(category)}
+                            onClick={() => {
+                                setActiveCategory(category);
+                                setCurrentPage(1);
+                            }}
                             className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
                                 ? "bg-[var(--glass-text)] text-[var(--background)] border-[var(--glass-text)] shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                                 : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] border-[var(--glass-border)] hover:border-[var(--glass-text)]"
                                 }`}
                         >
-                            {category as string}
+                            {category === "all" ? dict.portfolio.all : category as string}
                         </button>
                     ))}
                 </div>
 
-                <motion.div
-                    layout
-                    variants={{
-                        hidden: { opacity: 0 },
-                        show: {
-                            opacity: 1,
-                            transition: {
-                                staggerChildren: 0.1
-                            }
-                        }
-                    }}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
-                >
-                    <AnimatePresence mode="popLayout">
-                        {paginatedProjects.map((project) => (
-                            <motion.div
-                                key={project.id}
-                                layout
-                                variants={{
-                                    hidden: { opacity: 0, y: 50, scale: 0.9 },
-                                    show: {
-                                        opacity: 1,
-                                        y: 0,
-                                        scale: 1,
-                                        transition: { type: "spring", bounce: 0.3 }
-                                    }
-                                }}
-                                className="break-inside-avoid mb-6"
-                            >
-                                <ProjectCard
-                                    project={project}
-                                    onClick={() => setSelectedId(project.id)}
-                                />
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </motion.div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`${activeCategory}-${effectivePage}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
+                    >
+                        {paginatedProjects.length > 0 ? (
+                            paginatedProjects.map((project) => (
+                                <motion.div
+                                    key={project.id}
+                                    variants={{
+                                        hidden: { opacity: 0, y: 20 },
+                                        show: {
+                                            opacity: 1,
+                                            y: 0,
+                                            transition: { type: "spring", bounce: 0.2 }
+                                        }
+                                    }}
+                                    className="break-inside-avoid mb-6"
+                                >
+                                    <ProjectCard
+                                        project={project}
+                                        onClick={() => setSelectedId(project.id)}
+                                    />
+                                </motion.div>
+                            ))
+                        ) : (
+                            <div className="col-span-full py-20 text-center text-[var(--glass-text-muted)] italic">
+                                {dict.portfolio.no_projects || "No projects found."}
+                            </div>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
 
                 {/* Pagination Controls */}
                 {
@@ -130,7 +139,7 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                                     <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${currentPage === page
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${effectivePage === page
                                             ? "bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-secondary)]/30"
                                             : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/10"
                                             }`}

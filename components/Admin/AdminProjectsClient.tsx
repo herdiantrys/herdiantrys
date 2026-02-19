@@ -10,6 +10,7 @@ import { bulkDeleteProjects, bulkUpdateProjectStatus } from "@/lib/actions/proje
 import ProjectForm from "./ProjectForm";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatDate } from "@/lib/utils";
 
 interface Project {
     id: string;
@@ -128,7 +129,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
 
     const SortIcon = ({ columnKey }: { columnKey: string }) => {
         if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="opacity-30" />;
-        return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-teal-400" /> : <ArrowDown size={14} className="text-teal-400" />;
+        return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-[var(--site-accent)]" /> : <ArrowDown size={14} className="text-[var(--site-accent)]" />;
     };
 
     const SortHeader = ({ label, columnKey, className = "" }: { label: string, columnKey: string, className?: string }) => (
@@ -216,7 +217,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                         {/* Bulk actions removed from here */}
                         <button
                             onClick={handleCreate}
-                            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-lg shadow-teal-500/20"
+                            className="flex items-center gap-2 bg-[var(--site-button)] hover:opacity-90 text-[var(--site-button-text)] px-4 py-2 rounded-lg transition-all font-medium shadow-lg shadow-[var(--site-accent)]/20"
                         >
                             <Plus size={18} />
                             New Project
@@ -230,14 +231,14 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-teal-500 dark:group-focus-within:text-teal-400 transition-colors" size={18} />
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Search projects..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-teal-500/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -292,6 +293,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                             </th>
                             <SortHeader label="Project" columnKey="title" />
                             <SortHeader label="Category" columnKey="category" />
+                            <th className="px-6 py-4">Author</th>
                             <SortHeader label="Type" columnKey="type" />
                             <SortHeader label="Status" columnKey="status" />
                             <SortHeader label="Views" columnKey="views" />
@@ -302,9 +304,9 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedProjects.length > 0 ? (
                             paginatedProjects.map((project) => (
-                                <tr key={project.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(project.id) ? "bg-teal-50/50 dark:bg-teal-500/5" : ""}`}>
+                                <tr key={project.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(project.id) ? "bg-[var(--site-accent)]/5" : ""}`}>
                                     <td className="px-6 py-4">
-                                        <button onClick={() => toggleSelect(project.id)} className={`flex items-center ${selectedIds.includes(project.id) ? "text-teal-500 dark:text-teal-400" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"}`}>
+                                        <button onClick={() => toggleSelect(project.id)} className={`flex items-center ${selectedIds.includes(project.id) ? "text-[var(--site-accent)]" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"}`}>
                                             {selectedIds.includes(project.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                                         </button>
                                     </td>
@@ -322,7 +324,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">{project.title}</p>
+                                            <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] group-hover:text-[var(--site-accent)] transition-colors">{project.title}</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{project.slug}</p>
                                         </div>
                                     </td>
@@ -332,6 +334,18 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
+                                        <div className="flex items-center gap-2">
+                                            {project.author?.image && (
+                                                <div className="w-6 h-6 rounded-full overflow-hidden relative">
+                                                    <Image src={project.author.image} alt={project.author.name} fill className="object-cover" />
+                                                </div>
+                                            )}
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                                                {project.author?.name || "Unknown"}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1 items-start">
                                             <span className={`px-2 py-1 rounded text-xs font-bold ${project.type === 'VIDEO' ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'}`}>
                                                 {project.type}
@@ -339,7 +353,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${project.status === 'PUBLISHED' ? 'bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400' :
+                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${project.status === 'PUBLISHED' ? 'bg-[var(--site-accent)]/10 text-[var(--site-accent)]' :
                                             project.status === 'ARCHIVED' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' :
                                                 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
                                             }`}>
@@ -351,10 +365,10 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         {project.favorite && <div className="text-amber-500 font-medium">★ Favorite</div>}
                                     </td>
                                     <td className="px-6 py-4 text-sm">
-                                        {new Date(project.createdAt).toLocaleDateString()}
+                                        {formatDate(project.createdAt)}
                                     </td>
                                     <td className="px-6 py-4 flex gap-2">
-                                        <button onClick={() => handleEdit(project)} className="p-2 rounded-lg text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors" title="Edit Project">
+                                        <button onClick={() => handleEdit(project)} className="p-2 rounded-lg text-[var(--site-accent)] hover:bg-[var(--site-accent)]/10 transition-colors" title="Edit Project">
                                             <Pencil size={18} />
                                         </button>
                                     </td>
@@ -401,7 +415,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         key={p}
                                         onClick={() => setCurrentPage(p)}
                                         className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-teal-500 text-white shadow-lg shadow-teal-500/20"
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
                                             : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
                                             }`}
                                     >
@@ -495,6 +509,6 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 }

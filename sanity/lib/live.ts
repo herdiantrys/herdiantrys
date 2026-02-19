@@ -12,6 +12,6 @@ export const { sanityFetch, SanityLive } = defineLive({
     // https://github.com/sanity-io/next-sanity#live-content-api
     apiVersion: 'v2024-01-01',
   }),
-  serverToken: process.env.SANITY_API_READ_TOKEN,
-  browserToken: process.env.SANITY_API_READ_TOKEN,
+  serverToken: process.env.SANITY_API_READ_TOKEN || false,
+  browserToken: process.env.SANITY_API_READ_TOKEN || false,
 });

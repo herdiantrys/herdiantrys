@@ -40,7 +40,6 @@ export type ThemeConfig = {
     darkSidebarFg: string;
     darkSidebarBorder: string;
     darkSidebarAccent: string;
-    darkSidebarAccent: string;
     darkSidebarActive: string;
 
     // Gradient Overrides

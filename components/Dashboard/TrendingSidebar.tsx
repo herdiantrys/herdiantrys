@@ -8,7 +8,7 @@ import { urlFor } from "@/sanity/lib/image";
 export default function TrendingSidebar({ posts, dict }: { posts: TrendingPost[], dict?: any }) {
     const t = dict?.dashboard || {};
     return (
-        <div className="sticky top-28 space-y-6">
+        <div className="space-y-6">
             <div className="bg-white/5 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
                 {/* Liquid Shine Overlay */}
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />

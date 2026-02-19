@@ -32,14 +32,14 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && searchQuery.trim()) {
-            console.log("[TopBar] Search triggered:", searchQuery);
+
 
             // Extract language from current pathname (e.g., "/en/..." -> "en")
             const pathParts = pathname.split('/').filter(Boolean);
             const lang = (pathParts[0] === 'en' || pathParts[0] === 'id') ? pathParts[0] : 'en';
 
             const url = `/${lang}/search?q=${encodeURIComponent(searchQuery)}`;
-            console.log("[TopBar] Navigating to:", url);
+
             router.push(url);
         }
     };
@@ -178,7 +178,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
 
                                     <div className="space-y-1">
                                         <Link
-                                            href={user.username ? `/user/${user.username}` : "/profile"}
+                                            href={user.username ? `/profile/${user.username}` : "/profile"}
                                             className="flex items-center gap-3 px-4 py-3 text-sm rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-200 font-medium"
                                             onClick={() => setIsProfileOpen(false)}
                                         >

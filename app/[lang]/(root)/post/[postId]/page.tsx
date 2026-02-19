@@ -13,6 +13,7 @@ import { Activity } from "@/lib/actions/activity.actions";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { ProfileColorProvider } from "@/components/Profile/ProfileColorContext";
+import { serializeForClient } from "@/lib/utils";
 
 export default async function SinglePostPage({ params }: { params: Promise<{ lang: string; postId: string }> }) {
     const { lang, postId } = await params;
@@ -42,8 +43,8 @@ export default async function SinglePostPage({ params }: { params: Promise<{ lan
     }
 
     // Sanitize data to prevent serialization errors with Date objects
-    const safeUser = JSON.parse(JSON.stringify(user));
-    const safeTrendingPosts = JSON.parse(JSON.stringify(trendingPosts));
+    const safeUser = serializeForClient(user);
+    const safeTrendingPosts = serializeForClient(trendingPosts);
     // Post is used for Activity creation which handles dates manually, but safe to sanitize if needed.
     // We only pass specific fields from post to ActivityCard, so post itself doesn't need full sanitization 
     // BUT we pass `currentUser={user}` to ActivityCard, so that needs `safeUser`.

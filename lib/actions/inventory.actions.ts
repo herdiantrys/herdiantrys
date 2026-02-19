@@ -108,7 +108,7 @@ export async function toggleEquipItem(userId: string, itemValue: string, type: "
         // Revalidate user profile
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
         if (user?.username) {
-            revalidatePath(`/user/${user.username}`);
+            revalidatePath(`/profile/${user.username}`);
             revalidatePath(`/profile/${user.username}`);
         }
 
@@ -135,7 +135,7 @@ export async function updateProfileColor(userId: string, color: string) {
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
         if (user?.username) {
-            revalidatePath(`/user/${user.username}`);
+            revalidatePath(`/profile/${user.username}`);
             revalidatePath(`/profile/${user.username}`);
         }
 

@@ -3,6 +3,9 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "./notification.actions";
+import { auth } from "@/auth";
+import { trackComment, trackNightOwl } from "./gamification.actions";
+import { serializeForClient } from "@/lib/utils";
 
 export type Comment = {
     _id: string;
@@ -49,7 +52,7 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
             }
         });
 
-        return comments.map(c => ({
+        return serializeForClient(comments.map(c => ({
             _id: c.id,
             text: c.text,
             createdAt: c.createdAt.toISOString(),
@@ -65,18 +68,15 @@ export const getComments = async (targetId: string, targetType: "project" | "pos
                 profileColor: (c as any).user.profileColor || undefined,
                 frameColor: (c as any).user.frameColor || undefined
             }
-        }));
+        })));
     } catch (error) {
         console.error("Error fetching comments:", error);
         return [];
     }
 };
 
-import { auth } from "@/auth";
-import { trackComment, trackNightOwl } from "./gamification.actions";
-
 export const createComment = async (targetId: string, targetType: "project" | "post", text: string) => {
-    console.log(`[createComment] Starting comment creation for ${targetType} ${targetId}`);
+
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -84,7 +84,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             return { success: false, error: "Unauthorized" };
         }
         const userId = session.user.id;
-        console.log(`[createComment] User ${userId} authenticated`);
+
 
         // VALIDATE: Check if target exists before creating comment
         if (targetType === "project") {
@@ -96,7 +96,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 console.error(`[createComment] Project ${targetId} not found`);
                 return { success: false, error: "Project not found" };
             }
-            console.log(`[createComment] Project ${targetId} verified to exist`);
+
         } else {
             const postExists = await prisma.post.findUnique({
                 where: { id: targetId },
@@ -106,7 +106,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 console.error(`[createComment] Post ${targetId} not found`);
                 return { success: false, error: "Post not found" };
             }
-            console.log(`[createComment] Post ${targetId} verified to exist`);
+
         }
 
         const data: any = {
@@ -120,7 +120,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             data.postId = targetId;
         }
 
-        console.log("[createComment] Creating comment in DB...");
+
         const newComment = await prisma.comment.create({
             data: data,
             include: {
@@ -135,7 +135,7 @@ export const createComment = async (targetId: string, targetType: "project" | "p
                 project: { select: { authorId: true } }
             }
         });
-        console.log(`[createComment] Comment created: ${newComment.id}`);
+
 
         // Trigger Notification
         let recipientId = "";
@@ -145,30 +145,30 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             recipientId = (newComment as any).project.authorId;
         }
 
-        console.log(`[createComment] Notification logic - Recipient: ${recipientId}, sender: ${userId}`);
+
 
         if (recipientId && recipientId !== userId) {
-            console.log("[createComment] Sending notification...");
+
             await createNotification({
                 recipientId,
                 senderId: userId,
-                type: 'comment_post',
+                type: targetType === 'project' ? 'comment_project' : 'comment_post',
                 relatedPostId: targetType === 'post' ? targetId : undefined,
                 relatedProjectId: targetType === 'project' ? targetId : undefined,
                 relatedCommentId: newComment.id
             });
-            console.log("[createComment] Notification sent (or failed silently)");
+
         }
 
         // Gamification Hooks
         try {
-            console.log("[createComment] Triggering gamification hooks...");
+
             // 1. Track Comment (Social Butterfly)
             await trackComment(userId, targetType === 'project' ? targetId : undefined);
 
             // 2. Track Night Owl (if active at night)
             await trackNightOwl(userId);
-            console.log("[createComment] Gamification hooks completed");
+
         } catch (gameError) {
             console.error("[createComment] Gamification error (non-blocking):", gameError);
         }
@@ -194,11 +194,145 @@ export const createComment = async (targetId: string, targetType: "project" | "p
             }
         };
 
-        return { success: true, comment: commentObj };
+        return serializeForClient({ success: true, comment: commentObj });
     } catch (error: any) {
         console.error("Error creating comment:", error);
         // Log the full error object for better debugging
-        console.dir(error, { depth: null });
-        return { success: false, error: error.message || "Failed to create comment" };
+
+        return serializeForClient({ success: false, error: error.message || "Failed to create comment" });
+    }
+};
+
+// ADMIN ACTIONS
+
+export const getAllComments = async ({
+    page = 1,
+    limit = 10,
+    search = "",
+    targetType = "ALL"
+}: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    targetType?: "ALL" | "POST" | "PROJECT";
+} = {}) => {
+    try {
+        const session = await auth();
+        // In a real app, check for ADMIN role here
+        if (!session?.user?.id) {
+            return { comments: [], total: 0, pages: 0 };
+        }
+
+        const skip = (page - 1) * limit;
+
+        // Build where clause
+        const where: any = {};
+
+        if (search) {
+            where.OR = [
+                { text: { contains: search, mode: 'insensitive' } },
+                { user: { name: { contains: search, mode: 'insensitive' } } },
+                { user: { username: { contains: search, mode: 'insensitive' } } }
+            ];
+        }
+
+        if (targetType === "POST") {
+            where.postId = { not: null };
+        } else if (targetType === "PROJECT") {
+            where.projectId = { not: null };
+        }
+
+        // Get total count for pagination
+        const total = await prisma.comment.count({ where });
+
+        const comments = await prisma.comment.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: skip,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        image: true,
+                        imageURL: true
+                    }
+                },
+                post: {
+                    select: {
+                        id: true,
+                        title: true,
+                        text: true
+                    }
+                },
+                project: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                }
+            }
+        });
+
+        const formattedComments = comments.map(c => {
+            const comment = c as any;
+            return {
+                id: comment.id,
+                text: comment.text,
+                createdAt: comment.createdAt,
+                user: comment.user,
+                post: comment.post,
+                project: comment.project,
+                targetType: comment.postId ? 'POST' : 'PROJECT',
+                targetId: comment.postId || comment.projectId
+            };
+        });
+
+        return serializeForClient({
+            comments: formattedComments,
+            total,
+            pages: Math.ceil(total / limit)
+        });
+    } catch (error) {
+        console.error("Error fetching all comments:", error);
+        return serializeForClient({ comments: [], total: 0, pages: 0 });
+    }
+};
+
+export const deleteComment = async (commentId: string) => {
+    try {
+        const session = await auth();
+        if (!session?.user) return serializeForClient({ success: false, error: "Unauthorized" });
+
+        await prisma.comment.delete({
+            where: { id: commentId }
+        });
+
+        revalidatePath("/admin/comments");
+        return serializeForClient({ success: true });
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        return serializeForClient({ success: false, error: "Failed to delete comment" });
+    }
+};
+
+export const bulkDeleteComments = async (ids: string[]) => {
+    try {
+        const session = await auth();
+        if (!session?.user) return { success: false, error: "Unauthorized" };
+
+        await prisma.comment.deleteMany({
+            where: {
+                id: { in: ids }
+            }
+        });
+
+        revalidatePath("/admin/comments");
+        return { success: true };
+    } catch (error) {
+        console.error("Error bulk deleting comments:", error);
+        return { success: false, error: "Failed to delete comments" };
     }
 };

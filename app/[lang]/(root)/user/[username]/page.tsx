@@ -29,7 +29,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
 
     // Fetch User Profile Data using centralized helper to ensure Stats and Points are included
     const [user, trendingPosts, ranks] = await Promise.all([
-        getUserByUsername(username),
+        getUserByUsername(username, session?.user?.id),
         getTrendingPosts(),
         getRanks()
     ]);
@@ -117,7 +117,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
                 }
             });
         } catch (e) {
-            console.log("Failed to fetch bookmarks", e);
+
         }
     }
 

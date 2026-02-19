@@ -17,14 +17,21 @@
 - [x] Refine Navbar (Move Toggle, Remove Dashboard Link) <!-- id: 13 -->
 - [x] Restructure Profile Nav (Tabs, Remove Settings/Logout) <!-- id: 14 -->
 - [x] **Migrate to Local DB (SQLite/Postgres)** <!-- id: 15 -->
-    - [x] Schema & Helpers Refactored
-    - [x] Migration Script Created
-    - [x] Run `prisma generate` & `db push`
-    - [x] Run Data Migration Script
-- [x] **Refactor Server Actions (Sanity -> Prisma)** <!-- id: 16 -->
+    - [x] Fix remaining linting errors (any use, hook deps)
+  - [x] `require` to `import`
+  - [x] Fix `useEffect` state updates
+  - [x] Fix `<img>` to `<Image>`
+- [x] Remove unused `scripts` folder
+- [x] Remove `console.log` statements
+- [x] Verify build
+- [ ] **Refactor Server Actions (Sanity -> Prisma)** <!-- id: 16 -->
     - [x] Likes & Comments <!-- id: 17 -->
     - [x] Projects & Posts <!-- id: 18 -->
     - [x] Shop & Inventory <!-- id: 19 -->
+- [ ] **UI Updates** <!-- id: 26 -->
+    - [x] Update Sidebar Logo to `/logo.svg` <!-- id: 27 -->
+    - [x] Optimistic Theme Updates (Fix Slow Color Change) <!-- id: 28 -->
+    - [x] Fix Particle Wave Z-Index <!-- id: 29 -->
     - [x] Bookmarks & Activity <!-- id: 20 -->
 - [ ] **Create Admin Panel** <!-- id: 21 -->
     - [x] Auth & Layout <!-- id: 22 -->

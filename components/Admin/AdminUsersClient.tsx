@@ -12,10 +12,13 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import UserEditModal from "./UserEditModal";
+import { formatNumber, formatDate } from "@/lib/utils";
 
 export default function AdminUsersClient({ users, currentUser }: { users: any[], currentUser: any }) {
     const router = useRouter();
     const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [editingUser, setEditingUser] = useState<any>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     // Feature State
@@ -155,7 +158,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeleteUsers(selectedIds);
+                const result = (await bulkDeleteUsers(selectedIds)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} users`);
                     setSelectedIds([]);
@@ -165,7 +168,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                     toast.error(result.error);
                 }
             } else if (actionType === 'STATUS_CHANGE' && targetStatus) {
-                const result = await bulkUpdateUserStatus(selectedIds, targetStatus);
+                const result = (await bulkUpdateUserStatus(selectedIds, targetStatus)) as any;
                 if (result.success) {
                     toast.success(`Set ${selectedIds.length} users to ${targetStatus}`);
                     setSelectedIds([]);
@@ -185,7 +188,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
     };
 
     const handleSingleStatusChange = async (userId: string, status: "ACTIVE" | "LIMITED" | "BANNED" | "ARCHIVED") => {
-        const result = await updateUserStatus(userId, status);
+        const result = (await updateUserStatus(userId, status)) as any;
         if (result.success) {
             toast.success(`User set to ${status}`);
             router.refresh();
@@ -207,6 +210,13 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
     return (
         <>
             <div className="flex flex-col gap-4 mb-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold">Users</h1>
+                    <div className="flex gap-3">
+                        {/* Potential future action buttons */}
+                    </div>
+                </div>
+
                 {/* Search and Filters Card */}
                 <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
@@ -214,7 +224,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-teal-500 dark:group-focus-within:text-teal-400 transition-colors" size={18} />
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
                             </div>
                             <input
                                 id="user-search-input"
@@ -222,7 +232,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 placeholder="Search by name, email, or username..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-teal-500/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -283,7 +293,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
 
@@ -383,15 +393,15 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                             </select>
                                         </td>
                                         <td className="px-6 py-4 font-bold text-amber-500">
-                                            {user.points?.toLocaleString() || 0}
+                                            {formatNumber(user.points || 0)}
                                         </td>
                                         <td className="px-6 py-4 text-sm">{user.email}</td>
                                         <td className="px-6 py-4 text-sm">
-                                            {new Date(user.createdAt).toLocaleDateString("en-GB")}
+                                            {formatDate(user.createdAt)}
                                         </td>
                                         <td className="px-6 py-4">
                                             {isEditable && (
-                                                <UserActions user={user} currentUser={currentUser} />
+                                                <UserActions user={user} currentUser={currentUser} onEditClick={() => setEditingUser(user)} />
                                             )}
                                         </td>
                                     </tr>
@@ -500,7 +510,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 <button
                                     onClick={async () => {
                                         setIsBulkProcessing(true);
-                                        const res = await bulkUpdateUserStatus(selectedIds, 'ACTIVE');
+                                        const res = (await bulkUpdateUserStatus(selectedIds, 'ACTIVE')) as any;
                                         if (res.success) { toast.success(`Set ${selectedIds.length} users to ACTIVE`); setSelectedIds([]); router.refresh(); }
                                         else { toast.error(res.error); }
                                         setIsBulkProcessing(false);
@@ -515,7 +525,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 <button
                                     onClick={async () => {
                                         setIsBulkProcessing(true);
-                                        const res = await bulkUpdateUserStatus(selectedIds, 'LIMITED');
+                                        const res = (await bulkUpdateUserStatus(selectedIds, 'LIMITED')) as any;
                                         if (res.success) { toast.success(`Set ${selectedIds.length} users to LIMITED`); setSelectedIds([]); router.refresh(); }
                                         else { toast.error(res.error); }
                                         setIsBulkProcessing(false);
@@ -530,7 +540,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 <button
                                     onClick={async () => {
                                         setIsBulkProcessing(true);
-                                        const res = await bulkUpdateUserStatus(selectedIds, 'BANNED');
+                                        const res = (await bulkUpdateUserStatus(selectedIds, 'BANNED')) as any;
                                         if (res.success) { toast.success(`Set ${selectedIds.length} users to BANNED`); setSelectedIds([]); router.refresh(); }
                                         else { toast.error(res.error); }
                                         setIsBulkProcessing(false);
@@ -557,6 +567,14 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* User Edit Modal */}
+            <UserEditModal
+                user={editingUser}
+                isOpen={!!editingUser}
+                onClose={() => setEditingUser(null)}
+                currentUser={currentUser}
+            />
         </>
     );
 }

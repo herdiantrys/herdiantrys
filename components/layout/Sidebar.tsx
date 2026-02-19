@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     LayoutDashboard, Users, FileText, Briefcase, ShoppingBag,
@@ -8,13 +9,15 @@ import {
     Mail, Layout, ChevronLeft, ChevronRight, Home, User, ShieldCheck,
     Layers, Bell, MessageSquare, Search, Palette, Trophy, Moon, Sun, Coins
 } from "lucide-react";
-import { getUnreadMessageCount } from "@/lib/actions/contact.actions";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import NotificationDropdown from "@/components/Notification/NotificationDropdown";
 import AvatarWithEffect from "../AvatarWithEffect";
+import { getUnreadMessageCount as getDirectUnreadCount } from "@/lib/actions/message.actions";
+import { getUnreadMessageCount } from "@/lib/actions/contact.actions";
+
 
 type SidebarProps = {
     dict: any;
@@ -23,14 +26,17 @@ type SidebarProps = {
     user: any;
     isCollapsed: boolean; // Desktop collapse state
     setIsCollapsed: (value: boolean) => void;
+    setIsMessageOpen: (value: boolean) => void;
+    unreadMessages: number;
 };
 
-export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, setIsCollapsed }: SidebarProps) {
+export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, setIsCollapsed, setIsMessageOpen, unreadMessages }: SidebarProps) {
     const pathname = usePathname() || "";
     // Normalize path to ignore locale prefix (e.g. /en/dashboard -> /dashboard)
     const normalizedPath = pathname.replace(/^\/[a-z]{2}/, "") || "/";
 
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
     const isAdminSection = normalizedPath.startsWith("/admin");
 
     // Mode State: Defaults to Admin if in admin section, otherwise User. 
@@ -47,20 +53,26 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
     // AdminSidebar: isOpen=true (expanded), isOpen=false (collapsed)
     const isExpanded = !isCollapsed;
 
-    useEffect(() => {
-        if (!isAdminSection) return;
-        const fetchUnread = async () => {
-            const res = await getUnreadMessageCount();
-            if (res.success) setUnreadCount(res.count);
-        };
-        fetchUnread();
-        const interval = setInterval(fetchUnread, 30000);
-        return () => clearInterval(interval);
-    }, [isAdminSection]);
-
     // Role Check
     const userRole = user?.role?.toLowerCase() || "";
-    const isAuthorizedAdmin = userRole === 'admin' || userRole === 'super_admin';
+    const isAuthorizedAdmin = ["admin", "super_admin"].includes(userRole);
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchAllUnread = async () => {
+            // Admin Contact Messages
+            if (isAuthorizedAdmin) {
+                const res = await getUnreadMessageCount();
+                if (res.success) setUnreadCount(res.count);
+            }
+            // Direct Messages - This is now handled by the parent component and passed as a prop
+            // const dRes = await getDirectUnreadCount();
+            // if (dRes.success) setUnreadMessages(dRes.count);
+        };
+        fetchAllUnread();
+        const interval = setInterval(fetchAllUnread, 15000); // 15s polling for badges
+        return () => clearInterval(interval);
+    }, [user, isAuthorizedAdmin]);
 
     // Define Links
     const publicLinks = [
@@ -118,6 +130,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
             items: [
                 { name: "Shop", href: "/admin/shop", icon: ShoppingBag },
                 { name: "Ranks", href: "/admin/ranks", icon: Trophy },
+                { name: "Theme", href: "/admin/theme", icon: Palette },
             ]
         }
     ];
@@ -141,7 +154,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
             <button
                 id="sidebar-mobile-toggle"
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-[14px] left-4 z-[101] p-3 bg-[var(--site-sidebar-bg)]/80 backdrop-blur-xl rounded-full text-[var(--site-sidebar-fg)] hover:bg-[var(--site-sidebar-fg)]/10 shadow-xl transition-all border border-[var(--site-sidebar-border)]"
+                className={`lg:hidden fixed top-[14px] left-4 z-[101] p-3 bg-[var(--site-sidebar-bg)]/80 backdrop-blur-xl rounded-full text-[var(--site-sidebar-fg)] hover:bg-[var(--site-sidebar-fg)]/10 shadow-xl transition-all border border-[var(--site-sidebar-border)] ${isOpen ? "opacity-0 pointer-events-none scale-90" : "opacity-100 scale-100"}`}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -150,8 +163,8 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
             <aside
                 id="sidebar"
                 className={`
-                    fixed top-0 left-0 z-[100] h-screen transition-all duration-500 ease-in-out
-                    ${isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0 lg:z-40"}
+                    fixed top-0 left-0 z-[120] h-screen transition-all duration-500 ease-in-out
+                    ${isOpen ? "translate-x-0 w-full" : "-translate-x-full lg:translate-x-0 lg:z-40"}
                     ${isExpanded ? "lg:w-64" : "lg:w-20"}
                 `}
             >
@@ -164,9 +177,9 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                     {/* Mobile Close Button */}
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all z-[110]"
+                        className="lg:hidden absolute top-4 right-6 p-3 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all z-[110]"
                     >
-                        <X size={20} />
+                        <X size={24} />
                     </button>
 
                     {/* Desktop Toggle Handle */}
@@ -198,27 +211,46 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                         <div className="absolute inset-y-2 left-0 w-[1.5px] bg-gradient-to-b from-transparent via-[var(--site-secondary)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
 
-                    {/* Header */}
                     <div className="h-[74px] flex items-center px-6 border-b border-white/5 transition-all duration-500 overflow-hidden shrink-0 relative group/header">
-                        <Link href={isAdminMode ? "/admin" : "/"} onClick={() => setIsOpen(false)} className="block relative z-10 flex items-center">
-                            <span className={`text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] whitespace-nowrap transition-all duration-500 ${!isExpanded ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>
-                                {isAdminMode ? "Admin" : "Herdi"}<span className="text-foreground/80 font-medium">{isAdminMode ? "Panel" : "ant"}</span>
-                            </span>
+                        <Link href={isAdminMode ? "/admin" : "/"} onClick={() => setIsOpen(false)} className="block relative z-10 flex items-center justify-center w-full">
+                            {/* Expanded State */}
+                            <div className={`flex items-center gap-3 transition-all duration-500 ${!isExpanded ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>
+                                <Image
+                                    src="/logo.svg"
+                                    alt="Logo"
+                                    width={120}
+                                    height={40}
+                                    className="h-8 w-auto object-contain"
+                                    priority
+                                />
+                                {isAdminMode && (
+                                    <span className={`text-lg font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] whitespace-nowrap`}>
+                                        Admin<span className="text-foreground/80 font-medium">Panel</span>
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Collapsed State */}
                             {!isExpanded && (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full flex justify-center">
-                                    <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)]">
-                                        {isAdminMode ? "A" : "H"}
-                                    </span>
+                                    <Image
+                                        src="/logo.svg"
+                                        alt="Logo"
+                                        width={32}
+                                        height={32}
+                                        className="h-8 w-8 object-contain"
+                                        priority
+                                    />
                                 </div>
                             )}
                         </Link>
                     </div>
 
                     {/* Menu */}
-                    <nav className="flex-1 overflow-y-auto py-8 sm:py-4 space-y-6 sm:space-y-4 overflow-x-hidden custom-scrollbar flex flex-col items-center sm:items-stretch">
+                    <nav className="flex-1 overflow-y-auto py-8 sm:py-4 space-y-6 sm:space-y-4 overflow-x-hidden custom-scrollbar flex flex-col items-stretch">
 
                         {isAdminMode ? (
-                            <div className="space-y-1 w-full flex flex-col items-center sm:items-stretch">
+                            <div className="space-y-1 w-full flex flex-col items-stretch">
                                 {/* Admin Mode Menu */}
                                 {adminSections.map((section, idx) => (
                                     <SidebarSection key={section.title} label={section.title} isExpanded={isExpanded} show={true}>
@@ -229,6 +261,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                                 active={isActive(item.href)}
                                                 isExpanded={isExpanded}
                                                 setIsOpen={setIsOpen}
+                                                setIsCollapsed={setIsCollapsed}
                                                 unreadCount={item.name === "Contacts" ? unreadCount : 0}
                                             />
                                         ))}
@@ -251,6 +284,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                             active={isActive(item.href)}
                                             isExpanded={isExpanded}
                                             setIsOpen={setIsOpen}
+                                            setIsCollapsed={setIsCollapsed}
                                         />
                                     ))}
                                 </SidebarSection>
@@ -267,31 +301,40 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                             active={isActive(item.href)}
                                             isExpanded={isExpanded}
                                             setIsOpen={setIsOpen}
+                                            setIsCollapsed={setIsCollapsed}
                                         />
                                     ))}
                                 </SidebarSection>
 
                                 <SidebarSection label="User" isExpanded={isExpanded} show={!!user}>
                                     {[
-                                        { name: "Profile", href: `/user/${user?.username || user?.name || 'me'}`, icon: User },
+                                        { name: "Profile", href: `/profile/${user?.username || user?.id || 'me'}`, icon: User },
+                                        { name: "Messages", href: "#", icon: MessageSquare, onClick: () => setIsMessageOpen(true), unread: unreadMessages },
                                         { name: "Notifications", href: "/notifications", icon: Bell },
                                         { name: "Settings", href: "/settings", icon: Settings },
-                                    ].map((item) => (
+                                    ].map((item: any) => (
                                         <SidebarLink
-                                            key={item.href}
+                                            key={item.href || item.name}
                                             item={item}
-                                            active={isActive(item.href)}
+                                            active={item.href !== "#" && isActive(item.href)}
                                             isExpanded={isExpanded}
                                             setIsOpen={setIsOpen}
+                                            onClick={item.onClick}
+                                            unreadCount={item.unread || 0}
+                                            setIsCollapsed={setIsCollapsed}
                                         />
                                     ))}
                                 </SidebarSection>
                             </>
                         )}
+
+                        {/* Voice Channels Section Removed */}
                     </nav>
 
+                    {/* Voice Controls Removed */}
+
                     {/* Footer */}
-                    <div className="p-4 border-t border-white/5 flex flex-col items-center sm:items-stretch overflow-hidden gap-2">
+                    <div className="p-4 border-t border-white/5 flex flex-col items-stretch overflow-hidden gap-2">
 
                         {/* Admin/User Toggle Switcher */}
                         {isAuthorizedAdmin && (
@@ -305,11 +348,16 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                     }
                                 `}
                             >
-                                <div className="relative z-10 flex items-center w-full justify-center lg:justify-start">
+                                <div className="relative z-10 flex items-center w-full justify-start">
                                     {isAdminMode ? <User size={20} className="min-w-[20px]" /> : <ShieldCheck size={20} className="min-w-[20px]" />}
                                     <span className={`ml-3 font-bold text-sm whitespace-nowrap transition-all duration-500 ${!isExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
                                         {isAdminMode ? "Switch to User" : "Switch to Admin"}
                                     </span>
+                                    {unreadMessages > 0 && (
+                                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
+                                            <span className="text-[10px] font-bold text-white leading-none">{unreadMessages}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </button>
                         )}
@@ -342,20 +390,47 @@ function SidebarSection({ label, children, isExpanded, show }: { label: string, 
             {/* Added spacing div when collapsed to separate icons visually if needed */}
             {!isExpanded && <div className="w-8 mx-auto h-[1px] bg-white/10 my-2" />}
 
-            <div className="space-y-1 w-full flex flex-col items-center sm:items-stretch">
+            <div className="space-y-1 w-full flex flex-col items-stretch">
                 {children}
             </div>
         </div>
     );
 }
 
-function SidebarLink({ item, active, isExpanded, setIsOpen, unreadCount = 0, isSmall = false }: { item: any, active: boolean, isExpanded: boolean, setIsOpen: (v: boolean) => void, unreadCount?: number, isSmall?: boolean }) {
+function SidebarLink({
+    item,
+    active,
+    isExpanded,
+    setIsOpen,
+    unreadCount,
+    isSmall,
+    onClick,
+    setIsCollapsed
+}: {
+    item: any;
+    active: boolean;
+    isExpanded: boolean;
+    setIsOpen: (v: boolean) => void;
+    unreadCount?: number;
+    isSmall?: boolean;
+    onClick?: () => void;
+    setIsCollapsed?: (v: boolean) => void;
+}) {
     const Icon = item.icon;
     return (
         <Link
             href={item.href}
             title={!isExpanded ? item.name : ""}
-            onClick={() => setIsOpen(false)}
+            onClick={(e) => {
+                if (item.onClick) {
+                    e.preventDefault();
+                    item.onClick();
+                }
+                setIsOpen(false);
+                if (setIsCollapsed && !isExpanded) {
+                    setIsCollapsed(true); // Collapse sidebar if it was expanded for mobile/tablet
+                }
+            }}
             className={`
                 flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300 w-auto
                 ${active
@@ -372,21 +447,29 @@ function SidebarLink({ item, active, isExpanded, setIsOpen, unreadCount = 0, isS
                 />
             )}
 
-            <div className="relative">
-                <Icon
-                    size={20}
-                    className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${active ? "text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`}
-                />
-                {unreadCount > 0 && (
-                    <span className={`absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)] ${!isExpanded ? "lg:top-0 lg:right-0 lg:scale-75" : ""}`}>
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
+            <div className="relative flex items-center">
+                {(!isExpanded || isSmall) ? (
+                    <Icon size={20} className={`transition-all duration-300 group-hover:scale-110 ${active ? "text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
+                ) : (
+                    <Icon size={18} className={`mr-3 transition-colors duration-300 ${active ? "text-[var(--site-secondary)]" : ""}`} />
+                )}
+
+                {(unreadCount ?? 0) > 0 && (
+                    <div className={`
+                        absolute top-1 right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold border-2 border-[rgba(var(--site-primary-rgb),0.5)] shadow-lg
+                        ${!isExpanded ? "scale-75 -top-1 -right-1" : ""}
+                    `}>
+                        {unreadCount}
+                    </div>
                 )}
             </div>
-            <span className={`ml-3 text-sm tracking-tight whitespace-nowrap transition-all duration-500 ${!isExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
-                {item.name}
-            </span>
-        </Link>
+
+            {isExpanded && !isSmall && (
+                <span className={`ml-3 text-sm tracking-tight whitespace-nowrap transition-all duration-500 ${!isExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
+                    {item.name}
+                </span>
+            )}
+        </Link >
     );
 }
 
@@ -410,9 +493,11 @@ type UserLike = {
 type GlobalNavbarProps = {
     user: UserLike;
     dict: any;
+    setIsMessageOpen: (v: boolean) => void;
+    unreadMessages: number;
 };
 
-export function GlobalNavbar({ user, dict }: GlobalNavbarProps) {
+export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: GlobalNavbarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -551,17 +636,7 @@ export function GlobalNavbar({ user, dict }: GlobalNavbarProps) {
                 left: "var(--navbar-left)",
                 width: "calc(100% - var(--navbar-left))"
             }}
-            className={`
-                transition-all duration-500 ease-in-out
-                flex items-center justify-between
-                ${isFloatingNav
-                    ? "fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[95%] max-w-7xl rounded-2xl sm:rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-3xl shadow-2xl border border-white/20 z-50 px-4 sm:px-6 py-3.5 sm:py-3"
-                    : `fixed top-0 right-0 h-[74px] px-4 sm:px-6 md:px-8 z-40 ${scrolled
-                        ? "bg-white/10 dark:bg-black/20 backdrop-blur-2xl border-b border-white/5 shadow-sm"
-                        : "bg-transparent border-b border-transparent"
-                    }`
-                }
-            `}
+            className={`transition-all duration-500 ease-in-out flex items-center justify-between ${isFloatingNav ? "fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[95%] max-w-7xl rounded-2xl sm:rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-3xl shadow-2xl border border-white/20 z-50 px-4 sm:px-6 py-3.5 sm:py-3" : `fixed top-0 right-0 h-[74px] px-4 sm:px-6 md:px-8 z-40 ${scrolled ? "bg-white/10 dark:bg-black/20 backdrop-blur-2xl border-b border-white/5 shadow-sm" : "bg-transparent border-b border-transparent"}`}`}
         >
             <nav aria-label="Main Navigation" className="hidden md:flex items-center">
                 {isFloatingNav ? (
@@ -659,15 +734,7 @@ export function GlobalNavbar({ user, dict }: GlobalNavbarProps) {
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="
-                            w-64 pl-10 pr-12 py-2 rounded-full 
-                            bg-zinc-100 dark:bg-white/5 
-                            border border-transparent focus:border-[var(--site-accent)]/50 
-                            outline-none text-sm transition-all
-                            placeholder:text-muted-foreground/70
-                            focus:w-80 focus:bg-white dark:focus:bg-black
-                            focus:shadow-[0_0_20px] focus:shadow-[var(--site-accent)]/10
-                        "
+                        className="w-64 pl-10 pr-12 py-2 rounded-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-[var(--site-accent)]/50 outline-none text-sm transition-all placeholder:text-muted-foreground/70 focus:w-80 focus:bg-white dark:focus:bg-black focus:shadow-[0_0_20px] focus:shadow-[var(--site-accent)]/10"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
                         <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -679,9 +746,23 @@ export function GlobalNavbar({ user, dict }: GlobalNavbarProps) {
                 <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 hidden lg:block" />
 
                 {user && (
-                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        <Coins size={14} className="fill-amber-500/20" />
-                        <span className="text-xs font-bold font-mono">{user.points || 0}</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--site-accent)]/10 text-[var(--site-accent)] border border-[var(--site-accent)]/20 shadow-[0_0_15px_rgba(var(--site-accent-rgb),0.1)] transition-all">
+                            <Coins size={14} className="fill-[var(--site-accent)]/20" />
+                            <span className="text-xs font-bold font-mono">{user.points || 0}</span>
+                        </div>
+
+                        <button
+                            onClick={() => setIsMessageOpen(true)}
+                            className="relative p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-all group"
+                        >
+                            <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
+                            {unreadMessages > 0 && (
+                                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#111]">
+                                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                                </span>
+                            )}
+                        </button>
                     </div>
                 )}
 
@@ -756,7 +837,7 @@ export function GlobalNavbar({ user, dict }: GlobalNavbarProps) {
                                             </Link>
                                         )}
                                         <Link
-                                            href={`/user/${user.username || user.id}`}
+                                            href={`/profile/${user.username || user.id}`}
                                             onClick={() => setIsProfileOpen(false)}
                                             className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                                         >

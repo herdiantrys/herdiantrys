@@ -10,6 +10,7 @@ import { LEVELS } from "@/lib/constants/gamification";
 import { useState } from "react";
 import GamificationModal from "../Gamification/GamificationModal";
 import PixelBadge from "../Gamification/PixelBadge";
+import { formatNumber } from "@/lib/utils";
 
 interface Rank {
     id: string;
@@ -22,8 +23,11 @@ interface Rank {
 
 export default function DashboardSidebar({ user, isPublic = false, dict, showNavigation = true, ranks = [] }: { user: any; isPublic?: boolean; dict?: any; showNavigation?: boolean; ranks?: Rank[] }) {
     const pathname = usePathname() || "/";
+    const searchParams = useSearchParams();
+    const currentTab = searchParams?.get("tab");
     const normalizedPath = pathname?.replace(/^\/[a-z]{2}/, "") || "/";
     const [isGamificationModalOpen, setIsGamificationModalOpen] = useState(false);
+    const [tiltStyle, setTiltStyle] = useState({});
 
 
     if (!user) return null;
@@ -51,8 +55,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
     const nextRank = sortedRanks[nextRankIndex];
 
     return (
-        <aside className="sticky top-28 space-y-6">
-
+        <div className="space-y-6">
             <ProfileCard user={user} isPublic={isPublic} />
 
             {/* Admin Quick Access - For robust visibility */}
@@ -68,95 +71,32 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                 </div>
             )}
 
-            {/* Quick Navigation Menu */}
-            {!isPublic && showNavigation && (
-                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0 relative overflow-hidden">
-                    {/* Liquid Shine Suggestion (optional subtle effect) */}
-                    <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
-
-                    <div className="px-4 pt-3 pb-2 text-xs font-bold uppercase tracking-wider text-gray-400/60 transition-all duration-300">
-                        Navigation
-                    </div>
-                    <div className="space-y-1 py-1">
-                        {[
-                            { name: "Home", href: "/dashboard", icon: Home },
-                            { name: "Inventory", href: "/dashboard?tab=inventory", icon: ShoppingBag },
-                            { name: "Notifications", href: "/notifications", icon: Bell },
-                            { name: "Works", href: "/projects", icon: Briefcase },
-                            { name: "Search", href: "/search", icon: Search },
-                            { name: "Settings", href: "/settings", icon: Settings },
-                            // Add Admin Panel link directly in menu for admins
-                            ...(['admin', 'superadmin'].includes(user.role?.toLowerCase() || '')
-                                ? [{ name: "Admin Panel", href: "/admin", icon: ShieldCheck }]
-                                : []),
-                            // Add Portfolio Editor link if user owns the template
-                            ...(user.inventory?.some((item: any) => item.shopItem?.type === 'SAAS_TEMPLATE')
-                                ? [{ name: "Portfolio", href: "/dashboard/portfolio", icon: LayoutDashboard }]
-                                : [])
-                        ].map((item) => {
-                            const searchParams = useSearchParams();
-                            const currentTab = searchParams?.get("tab");
-                            const isActive = (() => {
-                                if (item.href.includes('?')) {
-                                    const [path, query] = item.href.split('?');
-                                    const params = new URLSearchParams(query);
-                                    const tab = params.get('tab');
-                                    if (tab) {
-                                        return normalizedPath === path && currentTab === tab;
-                                    }
-                                }
-
-                                // Home should not be active if a tab is present on the same path
-                                if (item.href === '/dashboard') {
-                                    return normalizedPath === '/dashboard' && !currentTab;
-                                }
-
-                                return normalizedPath === item.href || (item.href !== "/dashboard" && normalizedPath.startsWith(item.href));
-                            })();
-                            const Icon = item.icon;
-
-                            return (
-                                <Link
-                                    key={item.href}
-                                    id={`dashboard-nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                    href={item.href}
-                                    className={`
-                                        flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
-                                        ${isActive
-                                            ? "text-teal-400 font-bold"
-                                            : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
-                                        }
-                                    `}
-                                >
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="dashboard-nav-active-bg"
-                                            className="absolute inset-0 rounded-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(45,212,191,0.15)] backdrop-blur-md -z-10"
-                                            transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
-                                        />
-                                    )}
-
-                                    <div className="relative">
-                                        <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]" : "opacity-70 group-hover:opacity-100"}`} />
-                                    </div>
-
-                                    <span className="ml-3 text-sm tracking-tight whitespace-nowrap">
-                                        {item.name}
-                                    </span>
-
-                                    {/* Interactive Shine Edge (Optional, removed strict horizontal bar from previous design to match Admin sidebar which doesn't have it on vertical items usually) */}
-                                    {/* Admin uses bg-white/10 active background instead of sidebar accent bar */}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
 
             {/* Gamification Stats - RPG Fantasy Design */}
             {/* Gamification Stats - RPG Fantasy Design */}
             <div
                 onClick={() => setIsGamificationModalOpen(true)}
+                onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
+                    setTiltStyle({
+                        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
+                        transition: 'transform 0.1s ease-out'
+                    });
+                }}
+                onMouseLeave={() => {
+                    setTiltStyle({
+                        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+                        transition: 'transform 0.5s ease-out'
+                    });
+                }}
+                style={tiltStyle}
                 className="relative group overflow-hidden rounded-2xl border border-amber-500/20 bg-black/80 shadow-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] hover:border-amber-500/40 cursor-pointer"
             >
 
@@ -225,7 +165,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                             </div>
                         </div>
                         <div className="text-right mt-1.5">
-                            <span className="text-[9px] text-slate-500 font-mono tracking-widest">TOTAL XP: <span className="text-slate-300">{currentXP.toLocaleString()}</span></span>
+                            <span className="text-[9px] text-slate-500 font-mono tracking-widest">TOTAL XP: <span className="text-slate-300">{formatNumber(currentXP)}</span></span>
                         </div>
                     </div>
                 </div>
@@ -235,34 +175,6 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent opacity-50" />
             </div>
 
-            {/* Badges Section */}
-            {/* Badges Section */}
-            {user.badges && Array.isArray(user.badges) && user.badges.length > 0 ? (
-                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl space-y-4">
-                    <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block font-mono">Badges ({user.badges.length})</span>
-                    <div className="flex flex-wrap gap-3">
-                        {user.badges.map((badge: any, idx: number) => (
-                            <PixelBadge key={idx} badge={badge} size="sm" />
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-6 shadow-xl">
-                    <span className="text-xs font-bold text-[var(--glass-text-muted)] uppercase tracking-wider block mb-2 font-mono">Badges</span>
-                    <div className="text-xs text-[var(--glass-text-muted)] italic font-mono">No badges yet...</div>
-                </div>
-            )}
-
-            {/* If public, maybe details? */}
-            {isPublic && user.bio && (
-                <div className="bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg">
-                    <h3 className="font-bold text-[var(--glass-text)] mb-2 text-sm uppercase tracking-wider">{t.about_title || "About"}</h3>
-                    <p className="text-sm text-[var(--glass-text-muted)] leading-relaxed">
-                        {user.bio}
-                    </p>
-                </div>
-            )}
-
             {/* Gamification Modal */}
             <GamificationModal
                 isOpen={isGamificationModalOpen}
@@ -270,7 +182,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                 user={user}
                 ranks={sortedRanks}
             />
-        </aside>
+        </div>
     );
 }
 
@@ -280,7 +192,7 @@ function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any;
         <Link
             href={href}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${active
-                ? "bg-white/10 text-teal-400"
+                ? "bg-white/10 text-[var(--site-accent)]"
                 : "text-[var(--glass-text-muted)] hover:bg-white/5 hover:text-[var(--glass-text)]"
                 }`}
         >

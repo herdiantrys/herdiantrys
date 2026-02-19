@@ -38,8 +38,8 @@ export default function PortfolioLandingPage({ user, config, projects, isPreview
                     <Link href="#work" className="hover:text-white/80 transition-colors">Work</Link>
                     {showContact && <Link href="#contact" className="hover:text-white/80 transition-colors">Contact</Link>}
                     {/* Back to main site link just in case */}
-                    <Link href="/" className="text-xs opacity-50 hover:opacity-100 flex items-center gap-1">
-                        <ArrowLeft size={12} /> Akun
+                    <Link href={`/profile/${user.username}`} className="text-xs opacity-50 hover:opacity-100 flex items-center gap-1">
+                        <ArrowLeft size={12} /> Profile
                     </Link>
                 </div>
             </nav>

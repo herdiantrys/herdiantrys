@@ -33,7 +33,7 @@ export default function AdminShopEditForm({ item, userId }: { item: any, userId:
         setIsLoading(true);
 
         try {
-            const result = await updateShopItem(item.id, formData, userId);
+            const result = (await updateShopItem(item.id, formData, userId)) as any;
             if (result.success) {
                 toast.success("Item updated successfully");
                 router.push("/admin/shop");

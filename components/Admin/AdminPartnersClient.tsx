@@ -9,6 +9,7 @@ import { bulkDeletePartners } from "@/lib/actions/partner.actions";
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatDate } from "@/lib/utils";
 
 export default function AdminPartnersClient({ partners }: { partners: any[] }) {
     const router = useRouter();
@@ -115,7 +116,7 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeletePartners(selectedIds);
+                const result = (await bulkDeletePartners(selectedIds)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} partners`);
                     setSelectedIds([]);
@@ -242,7 +243,7 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
-                                        {new Date(partner.createdAt).toLocaleDateString()}
+                                        {formatDate(partner.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={`/admin/partners/${partner.id}`} className="text-sm text-teal-400 hover:text-teal-300 mr-3 font-medium transition-colors">Edit</Link>

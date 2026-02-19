@@ -138,7 +138,7 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
 
         setIsBulkProcessing(true);
         try {
-            const result = await bulkDeleteShopItems(selectedIds, currentUserId);
+            const result = (await bulkDeleteShopItems(selectedIds, currentUserId)) as any;
             if (result.success) {
                 toast.success(`Deleted ${selectedIds.length} items`);
                 setSelectedIds([]);
@@ -364,7 +364,7 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
 
                     setIsDeleting(true);
                     try {
-                        const result = await deleteShopItem(itemToDelete, currentUserId);
+                        const result = (await deleteShopItem(itemToDelete, currentUserId)) as any;
                         if (result?.success) {
                             toast.success("Item deleted successfully");
                             setItemToDelete(null);

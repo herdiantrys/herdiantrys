@@ -93,7 +93,17 @@ const en = {
             web_dev: "Web Development",
             motion_graphics: "Motion Graphics",
             brand_identity: "Brand Identity"
-        }
+        },
+        newsletter_title: "Subscribe to Newsletter",
+        newsletter_desc: "Get the latest updates, design tips, and exclusive announcements delivered to your inbox.",
+        newsletter_placeholder: "Your email address",
+        subscribe: "Subscribe",
+        exploration: "Exploration",
+        recent_works: "Recent Works",
+        top_creators: "Top Creators",
+        back_to_top: "Back to Top",
+        based_in: "Based in",
+        local_time: "Local Time"
     },
     dashboard: {
         title: "Dashboard",

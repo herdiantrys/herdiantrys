@@ -2,11 +2,12 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, CheckCircle2, Trophy, Star, ChevronLeft } from "lucide-react";
-import { RANKS } from "@/lib/constants/gamification";
+import { RANKS, BADGES } from "@/lib/constants/gamification";
 import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import PixelBadge from "./PixelBadge";
+import { formatNumber } from "@/lib/utils";
 
 interface GamificationModalProps {
     isOpen: boolean;
@@ -82,7 +83,7 @@ export default function GamificationModal({ isOpen, onClose, user, ranks = [] }:
                                         Journey of the {reversedRank.name.split(' (')[0]}
                                     </h2>
                                     <p className="text-sm text-slate-400">
-                                        Total XP: <span className="text-amber-400 font-mono">{currentXP.toLocaleString()}</span>
+                                        Total XP: <span className="text-amber-400 font-mono">{formatNumber(currentXP)}</span>
                                     </p>
                                 </div>
                                 <button
@@ -127,7 +128,7 @@ export default function GamificationModal({ isOpen, onClose, user, ranks = [] }:
                                                     {/* Rank Badge Overlay */}
                                                     <div className="absolute bottom-6 left-6 z-20">
                                                         <div className="text-amber-400 font-mono text-sm font-bold mb-1 tracking-wider uppercase">
-                                                            {selectedRank.minXP.toLocaleString()} XP Required
+                                                            {formatNumber(selectedRank.minXP)} XP Required
                                                         </div>
                                                         <h2 className="text-3xl font-bold font-serif text-white leading-none">
                                                             {selectedRank.name}
@@ -260,7 +261,7 @@ export default function GamificationModal({ isOpen, onClose, user, ranks = [] }:
                                                                                 {/* XP Label Badge */}
                                                                                 <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">
                                                                                     <span className={`text-xs font-bold font-mono ${isUnlocked ? "text-amber-400" : "text-slate-500"}`}>
-                                                                                        {rank.minXP.toLocaleString()} XP
+                                                                                        {formatNumber(rank.minXP)} XP
                                                                                     </span>
                                                                                 </div>
                                                                             </div>
@@ -294,24 +295,33 @@ export default function GamificationModal({ isOpen, onClose, user, ranks = [] }:
                                                 </div>
                                             </div>
 
-                                            {/* Badges Section */}
                                             <div className="pt-8 border-t border-white/10">
                                                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 font-mono">
                                                     <Trophy className="text-yellow-500" />
-                                                    Active Badges
+                                                    Achievements & Badges
                                                 </h3>
 
-                                                {user.badges && user.badges.length > 0 ? (
-                                                    <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                                                        {user.badges.map((badge: any, idx: number) => (
-                                                            <PixelBadge key={idx} badge={badge} size="lg" />
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <div className="bg-slate-900/30 border border-white/5 rounded-xl p-8 text-center text-slate-500 italic font-mono">
-                                                        No badges earned yet. Keep exploring to unlock 8-bit achievements!
-                                                    </div>
-                                                )}
+                                                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                                                    {BADGES.map((badgeDef: any, idx: number) => {
+                                                        const userBadge = user.badges?.find((b: any) => b.id === badgeDef.id);
+                                                        const isEarned = !!userBadge;
+
+                                                        // Merge data: precedence to userBadge for awardedAt, but constants for rewards
+                                                        const mergedBadge = {
+                                                            ...badgeDef,
+                                                            ...userBadge,
+                                                            // Ensure rewards from constants are kept
+                                                            xpReward: badgeDef.xpReward,
+                                                            runeReward: badgeDef.runeReward
+                                                        };
+
+                                                        return (
+                                                            <div key={badgeDef.id} className={isEarned ? "" : "opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"}>
+                                                                <PixelBadge badge={mergedBadge} size="lg" />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         </motion.div>
                                     )}

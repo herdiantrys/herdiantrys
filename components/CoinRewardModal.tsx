@@ -11,6 +11,31 @@ interface CoinRewardModalProps {
     amount: number;
 }
 
+const SparkleItem = () => {
+    const [randomValues] = useState(() => ({
+        x: (Math.random() - 0.5) * 200,
+        y: (Math.random() - 0.5) * 200,
+        rotate: Math.random() * 360,
+        size: 16 + Math.random() * 10
+    }));
+
+    return (
+        <motion.div
+            initial={{ opacity: 1, x: 0, y: 0 }}
+            animate={{
+                opacity: 0,
+                x: randomValues.x,
+                y: randomValues.y,
+                rotate: randomValues.rotate
+            }}
+            transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+            className="absolute top-1/2 left-1/2 text-yellow-300"
+        >
+            <Sparkles size={randomValues.size} />
+        </motion.div>
+    );
+};
+
 export const CoinRewardModal = ({ isOpen, onClose, amount }: CoinRewardModalProps) => {
     // Auto-close after 5 seconds
     useEffect(() => {
@@ -64,20 +89,7 @@ export const CoinRewardModal = ({ isOpen, onClose, amount }: CoinRewardModalProp
                                     {/* Confetti / Sparkles */}
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
                                         {[...Array(6)].map((_, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 1, x: 0, y: 0 }}
-                                                animate={{
-                                                    opacity: 0,
-                                                    x: (Math.random() - 0.5) * 200,
-                                                    y: (Math.random() - 0.5) * 200,
-                                                    rotate: Math.random() * 360
-                                                }}
-                                                transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                                                className="absolute top-1/2 left-1/2 text-yellow-300"
-                                            >
-                                                <Sparkles size={16 + Math.random() * 10} />
-                                            </motion.div>
+                                            <SparkleItem key={i} />
                                         ))}
                                     </div>
 
@@ -97,7 +109,7 @@ export const CoinRewardModal = ({ isOpen, onClose, amount }: CoinRewardModalProp
                                         transition={{ delay: 0.3 }}
                                         className="text-gray-400 text-sm"
                                     >
-                                        You've earned <span className="text-yellow-400 font-bold text-lg">+{amount} Runes</span><br /> for staying active!
+                                        You&apos;ve earned <span className="text-yellow-400 font-bold text-lg">+{amount} Runes</span><br /> for staying active!
                                     </motion.p>
 
                                     <motion.button
@@ -117,3 +129,5 @@ export const CoinRewardModal = ({ isOpen, onClose, amount }: CoinRewardModalProp
         </Portal>
     );
 };
+
+

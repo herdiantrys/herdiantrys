@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { serializeForClient } from "@/lib/utils";
 
 import { ThemeConfig, DEFAULT_THEME } from "@/lib/types/theme";
 
@@ -16,7 +17,7 @@ export const getGlobalTheme = async (): Promise<ThemeConfig> => {
             return DEFAULT_THEME;
         }
 
-        return setting.theme as ThemeConfig;
+        return serializeForClient(setting.theme as ThemeConfig);
     } catch (error) {
         console.error("Error fetching theme:", error);
         return DEFAULT_THEME;

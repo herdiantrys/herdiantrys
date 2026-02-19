@@ -39,28 +39,20 @@ export default async function AppLayoutAdapter({
     }
 
     const user = session?.user
-        ? (() => {
-            try {
-                // Convert to JSON-safe object
-                return JSON.parse(JSON.stringify({
-                    name: session.user.name,
-                    email: session.user.email,
-                    image: resolvedImage,
-                    username: userData?.username,
-                    equippedEffect: userData?.equippedEffect,
-                    equippedFrame: userData?.equippedFrame,
-                    equippedBackground: userData?.equippedBackground,
-                    profileColor: userData?.profileColor,
-                    frameColor: userData?.frameColor,
-                    id: userData?._id || session.user.id,
-                    points: userData?.points || 0,
-                    role: (userData?.role || session.user.role || "user").toLowerCase()
-                }));
-            } catch (e) {
-                console.error("JSON Parse Error in AppLayoutAdapter:", e);
-                return null;
-            }
-        })()
+        ? {
+            name: session.user.name,
+            email: session.user.email,
+            image: resolvedImage,
+            username: userData?.username,
+            equippedEffect: userData?.equippedEffect,
+            equippedFrame: userData?.equippedFrame,
+            equippedBackground: userData?.equippedBackground,
+            profileColor: userData?.profileColor,
+            frameColor: userData?.frameColor,
+            id: userData?._id || session.user.id,
+            points: userData?.points || 0,
+            role: (userData?.role || session.user.role || "user").toLowerCase()
+        }
         : null;
 
     return (

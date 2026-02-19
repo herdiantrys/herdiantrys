@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { serializeForClient } from "@/lib/utils";
 
 export const getSiteContent = async () => {
     try {
@@ -39,7 +40,7 @@ export const getSiteContent = async () => {
             });
         }
 
-        return content;
+        return serializeForClient(content);
     } catch (error) {
         console.error("Error fetching site content:", error);
         return null;
@@ -49,7 +50,7 @@ export const getSiteContent = async () => {
 export const updateSiteContent = async (data: any) => {
     try {
         // Clean data similar to user profile
-        const cleanData = JSON.parse(JSON.stringify({
+        const cleanData = serializeForClient({
             fullName: data.fullName,
             headline: data.headline,
             bio: data.bio,
@@ -63,7 +64,7 @@ export const updateSiteContent = async (data: any) => {
             // Add image fields if they are passed as strings (URLs)
             // But usually images are uploaded separately or handled via state, 
             // if passed here they are likely just strings.
-        }));
+        });
 
         await prisma.siteContent.update({
             where: { id: "main" },

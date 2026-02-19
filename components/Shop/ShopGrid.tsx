@@ -64,7 +64,7 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeShopTab"
-                                        className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-xl"
+                                        className="absolute inset-0 bg-site-secondary rounded-xl shadow-[0_0_15px_rgba(var(--site-secondary-rgb),0.3)]"
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                     />
                                 )}

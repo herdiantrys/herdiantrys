@@ -2,9 +2,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Lock, Check } from "lucide-react";
+import { Lock, Check, Sparkles, Coins } from "lucide-react";
 import { BADGES } from "@/lib/constants/gamification";
 import PixelBadge from "./PixelBadge";
+import { formatDate } from "@/lib/utils";
 
 interface AchievementsListProps {
     user: any;
@@ -73,7 +74,7 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`relative p-4 font-mono select-none group flex flex-col h-full
+                        className={`relative p-4 font-mono select-none flex flex-col h-full
                             ${isUnlocked ? "opacity-100" : "opacity-60 grayscale"}
                         `}
                         style={{
@@ -115,7 +116,7 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                                     <PixelBadge badge={badge} size="sm" />
                                 </div>
                                 <div className="leading-tight">
-                                    <h3 className={`font-bold text-sm tracking-wide uppercase ${isUnlocked ? "text-yellow-400 drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-500"}`}>
+                                    <h3 className={`font-bold text-sm tracking-wide uppercase ${isUnlocked ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-500"}`}>
                                         {badge.name}
                                     </h3>
                                     <div className="text-[10px] uppercase mt-1 inline-block px-1.5 py-0.5 bg-black text-white">
@@ -129,6 +130,22 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                                 <p className="text-xs text-slate-300 leading-relaxed min-h-[40px]">
                                     "{badge.description}"
                                 </p>
+
+                                {/* Rewards Display */}
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {badge.xpReward && (
+                                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded text-[9px] font-black uppercase tracking-tighter">
+                                            <Sparkles size={10} />
+                                            {badge.xpReward} XP
+                                        </div>
+                                    )}
+                                    {(badge as any).runesReward && (
+                                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded text-[9px] font-black uppercase tracking-tighter">
+                                            <Coins size={10} />
+                                            {(badge as any).runesReward} RUNES
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Progress Bar (Only if Locked/Progressable) */}
@@ -140,7 +157,7 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                                     </div>
                                     <div className="h-3 w-full bg-black relative border border-slate-700">
                                         <div
-                                            className="h-full bg-teal-500 relative transition-all duration-500"
+                                            className="h-full bg-[var(--site-secondary)] relative transition-all duration-500"
                                             style={{ width: `${percent}%` }}
                                         >
                                             {/* Shine effect on bar */}
@@ -153,8 +170,8 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                             {/* Footer: Date */}
                             <div className="pt-2 border-t border-black/40 text-[10px] text-right mt-auto">
                                 {isUnlocked ? (
-                                    <span className="text-teal-400">
-                                        ACQUIRED: {new Date(unlockedData.awardedAt).toLocaleDateString()}
+                                    <span className="text-[var(--site-secondary)]">
+                                        ACQUIRED: {formatDate(unlockedData.awardedAt)}
                                     </span>
                                 ) : (
                                     <span className="text-slate-600">

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Briefcase, GraduationCap } from "lucide-reac
 import { PortableText } from "@portabletext/react";
 import { urlFor } from "@/sanity/lib/image";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { formatDate } from "@/lib/utils";
 
 const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
     const stats = [
@@ -173,8 +174,8 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
 
                                     <div className="border-l border-[var(--glass-border)] ml-3 space-y-12">
                                         {profile?.experience?.map((exp: any, index: number) => {
-                                            const start = new Date(exp.startDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-                                            const end = exp.isCurrent ? dict.about.present : exp.endDate ? new Date(exp.endDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }) : '';
+                                            const start = formatDate(exp.startDate);
+                                            const end = exp.isCurrent ? dict.about.present : exp.endDate ? formatDate(exp.endDate) : '';
 
                                             return (
                                                 <div key={index} className="relative pl-8 group">
@@ -209,8 +210,8 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
 
                                     <div className="border-l border-[var(--glass-border)] ml-3 space-y-12">
                                         {profile?.education?.map((edu: any, index: number) => {
-                                            const start = new Date(edu.startDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-                                            const end = edu.endDate ? new Date(edu.endDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }) : dict.about.present;
+                                            const start = formatDate(edu.startDate);
+                                            const end = edu.endDate ? formatDate(edu.endDate) : dict.about.present;
 
                                             return (
                                                 <div key={index} className="relative pl-8 group">

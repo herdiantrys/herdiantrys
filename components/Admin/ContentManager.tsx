@@ -162,6 +162,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-teal-500 focus:outline-none text-[var(--glass-text)] transition-colors"
                                     placeholder="e.g. Creative Developer"
                                 />
+                                <p className="text-sm text-gray-400">Manage your &quot;About&quot; section content</p>
                                 <p className="text-xs text-gray-500 mt-1">Single string for now (will be used in Hero typer).</p>
                             </div>
                         </div>

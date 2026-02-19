@@ -4,11 +4,12 @@ import { useState, useRef } from "react";
 import { X, Save, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Portal } from "@/components/Portal";
 import { motion, AnimatePresence } from "framer-motion";
-import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground } from "@/lib/actions/user.actions";
+import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground, updateUsername } from "@/lib/actions/user.actions";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import { toast } from "sonner";
 import ImageCropper from "../ImageCropper";
+import { formatDate } from "@/lib/utils";
 
 type EditProfileModalProps = {
     isOpen: boolean;
@@ -28,8 +29,27 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         bio: user.bio || "",
         location: user.location || "",
         website: user.website || "",
-        username: user.username,
+        username: user.username || "",
         profileColor: user.profileColor || "",
+    });
+
+    // Username change state
+    const [usernameError, setUsernameError] = useState("");
+    const [usernameSuccess, setUsernameSuccess] = useState("");
+    const [isUsernameLoading, setIsUsernameLoading] = useState(false);
+    const [cooldownInfo, setCooldownInfo] = useState<{ active: boolean; daysRemaining?: number; nextDate?: string } | null>(null);
+
+    // Calculate cooldown on mount
+    useState(() => {
+        if (user.lastUsernameChange) {
+            const daysSince = Math.floor((Date.now() - new Date(user.lastUsernameChange).getTime()) / (1000 * 60 * 60 * 24));
+            if (daysSince < 30) {
+                const daysRemaining = 30 - daysSince;
+                const nextDate = new Date(user.lastUsernameChange);
+                nextDate.setDate(nextDate.getDate() + 30);
+                setCooldownInfo({ active: true, daysRemaining, nextDate: formatDate(nextDate) });
+            }
+        }
     });
 
     const hasCustomColor = user?.inventory?.some((item: any) => item.shopItem?.name === "Custom Color Background");
@@ -74,6 +94,12 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+        // Clear username errors when typing
+        if (name === 'username') {
+            setUsernameError("");
+            setUsernameSuccess("");
+        }
 
         // Live Preview for Color
         if (name === 'profileColor') {
@@ -134,6 +160,39 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         setCropImageSrc(null);
         setCropType(null);
         toast.info("Image selection cancelled");
+    };
+
+    const handleUsernameUpdate = async () => {
+        if (!formData.username || formData.username === user.username) {
+            setUsernameError("Please enter a different username");
+            return;
+        }
+
+        setIsUsernameLoading(true);
+        setUsernameError("");
+        setUsernameSuccess("");
+
+        const result = await updateUsername(user._id, formData.username);
+
+        setIsUsernameLoading(false);
+
+        if (result.success) {
+            setUsernameSuccess(result.message || "Username updated!");
+            toast.success("Username updated successfully!");
+            setTimeout(() => {
+                window.location.href = `/profile/${formData.username}`;
+            }, 1500);
+        } else {
+            setUsernameError(result.error || "Failed to update username");
+            if (result.cooldownActive) {
+                setCooldownInfo({
+                    active: true,
+                    daysRemaining: result.daysRemaining,
+                    nextDate: formatDate(result.nextChangeDate)
+                });
+            }
+            toast.error(result.error);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -294,6 +353,45 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                                     onChange={handleChange}
                                     className="w-full bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500/50 transition-all font-medium"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-[var(--glass-text-muted)] mb-1.5 ml-1">Username</label>
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            name="username"
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                            disabled={cooldownInfo?.active || isUsernameLoading}
+                                            className="flex-1 bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500/50 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleUsernameUpdate}
+                                            disabled={cooldownInfo?.active || isUsernameLoading || formData.username === user.username}
+                                            className="px-4 py-3 rounded-xl bg-[var(--site-accent)]/20 text-[var(--site-accent)] font-semibold hover:bg-[var(--site-accent)]/30 border border-[var(--site-accent)]/30 hover:border-[var(--site-accent)]/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            {isUsernameLoading ? <Loader2 size={16} className="animate-spin" /> : "Update"}
+                                        </button>
+                                    </div>
+                                    {cooldownInfo?.active && (
+                                        <p className="text-xs text-amber-500 dark:text-amber-400 ml-1 flex items-center gap-1">
+                                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                            You can change your username again in {cooldownInfo.daysRemaining} days ({cooldownInfo.nextDate})
+                                        </p>
+                                    )}
+                                    {usernameError && (
+                                        <p className="text-xs text-red-500 dark:text-red-400 ml-1">{usernameError}</p>
+                                    )}
+                                    {usernameSuccess && (
+                                        <p className="text-xs text-green-500 dark:text-green-400 ml-1">{usernameSuccess}</p>
+                                    )}
+                                    {!cooldownInfo?.active && !usernameError && !usernameSuccess && (
+                                        <p className="text-xs text-[var(--glass-text-muted)] ml-1">3-20 characters, alphanumeric and underscore only. Can be changed once every 30 days.</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
@@ -492,6 +590,6 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                     />
                 )}
             </div>
-        </Portal>
+        </Portal >
     );
 }

@@ -9,6 +9,7 @@ import { bulkDeleteTestimonials } from "@/lib/actions/testimonial.actions";
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatDate } from "@/lib/utils";
 
 export default function AdminTestimonialsClient({ testimonials }: { testimonials: any[] }) {
     const router = useRouter();
@@ -116,7 +117,7 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeleteTestimonials(selectedIds);
+                const result = (await bulkDeleteTestimonials(selectedIds)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} testimonials`);
                     setSelectedIds([]);
@@ -244,7 +245,7 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
                                         {testimonial.content}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
-                                        {new Date(testimonial.createdAt).toLocaleDateString()}
+                                        {formatDate(testimonial.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={`/admin/testimonials/${testimonial.id}`} className="text-sm text-teal-400 hover:text-teal-300 mr-3 font-medium transition-colors">Edit</Link>

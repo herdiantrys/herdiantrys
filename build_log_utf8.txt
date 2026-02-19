@@ -1,0 +1,123 @@
+﻿
+> next16@0.1.0 build
+> next build
+
+node.exe : 
+[baseline-browser-mapping] 
+The data in this module is 
+over two months old.  To 
+ensure accurate Baseline 
+data, please update: `npm 
+i baseline-browser-mapping@
+latest -D`
+At line:1 char:1
++ & 
+"C:\nvm4w\nodejs/node.exe" 
+"C:\nvm4w\nodejs/node_modul
+es/npm/bin/np ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: ([ba  
+  seline-brows...ping@la   
+ test -D`:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+   Γû▓ Next.js 16.0.1 (Turbopack)
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+ ΓÜá The "middleware" file 
+convention is deprecated. 
+Please use "proxy" 
+instead. Learn more: https:
+//nextjs.org/docs/messages/
+middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] 
+The data in this module is 
+over two months old.  To 
+ensure accurate Baseline 
+data, please update: `npm 
+i baseline-browser-mapping@
+latest -D`
+[baseline-browser-mapping] 
+The data in this module is 
+over two months old.  To 
+ensure accurate Baseline 
+data, please update: `npm 
+i baseline-browser-mapping@
+latest -D`
+Turbopack build 
+encountered 1 warnings:
+./node_modules/isomorphic-d
+ompurify
+Package jsdom can't be 
+external
+The request jsdom matches 
+serverExternalPackages (or 
+the default list).
+The package resolves to a 
+different version when 
+requested from the project 
+directory (26.1.0) 
+compared to the package 
+requested from the 
+importing module (27.3.0).
+Make sure to install the 
+same version of the 
+package in both locations.
+
+
+ Γ£ô Compiled successfully in 21.2s
+   Running TypeScript ...
+Failed to compile.
+
+.next/dev/types/validator.t
+s:161:39
+Type error: Cannot find 
+module '../../../app/[lang]
+/(root)/profile/[username]/
+portfolio/page.js' or its 
+corresponding type 
+declarations.
+
+[0m [90m 159 |[39m {
+ [90m 160 |[39m   type __
+IsExpected[33m<[39m[33mS
+pecific[39m 
+[36mextends[39m [33mAppP
+ageConfig[39m[33m<[39m[
+32m"/[lang]/profile/[userna
+me]/portfolio"[39m[33m>>
+[39m [33m=[39m 
+[33mSpecific[39m
+[31m[1m>[22m[39m[90m 
+161 |[39m   
+[36mconst[39m handler 
+[33m=[39m {} 
+[36mas[39m 
+[36mtypeof[39m [36mimpor
+t[39m([32m"../../../app/[
+lang]/(root)/profile/[usern
+ame]/portfolio/page.js"[39
+m)
+ [90m     |[39m          
+                           
+  [31m[1m^[22m[39m
+ [90m 162 |[39m   type 
+__Check [33m=[39m __IsExp
+ected[33m<[39m[36mtypeof
+[39m handler[33m>[39m
+ [90m 163 |[39m   
+[90m// @ts-ignore[39m
+ [90m 164 |[39m   type 
+__Unused [33m=[39m 
+__Check[0m
+Next.js build worker 
+exited with code: 1 and 
+signal: null

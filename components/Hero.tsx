@@ -97,7 +97,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
           >
             <button
               onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-site-accent-prev to-site-accent-next text-white font-bold shadow-lg shadow-site-accent/30 hover:shadow-site-accent/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] text-[var(--site-button-text)] font-bold shadow-lg shadow-[var(--site-accent)]/30 hover:shadow-[var(--site-accent)]/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
               {dict.hero.view_portfolio}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

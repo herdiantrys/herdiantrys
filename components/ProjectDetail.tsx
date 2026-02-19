@@ -19,7 +19,7 @@ import { XPToast } from "@/components/Gamification/XPToast";
 import { incrementView } from "@/actions/incrementView";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { formatViewCount } from "@/lib/utils";
+import { formatViewCount, formatDate } from "@/lib/utils";
 import Lightbox from "./Lightbox";
 import { ShareModal } from "@/components/ShareModal";
 
@@ -439,7 +439,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                 {typeof project.category === 'string' ? project.category : project.category?.title}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {new Date(project.uploadDate).toLocaleDateString("en-US", { year: "numeric", month: "long" })}
+                                                {formatDate(project.uploadDate)}
                                             </span>
                                         </div>
 
@@ -608,7 +608,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-semibold text-sm">{comment.user.username}</span>
-                                                        <span className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                                        <span className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</span>
                                                     </div>
                                                     <p className="text-muted-foreground/80 leading-relaxed text-sm group-hover:text-foreground transition-colors">{comment.text}</p>
                                                 </div>

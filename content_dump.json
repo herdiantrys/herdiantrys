@@ -1,0 +1,41 @@
+{
+  "id": "main",
+  "displayEmail": null,
+  "phoneNumber": null,
+  "resumeURL": null,
+  "fullName": "Herdian",
+  "headline": "Graphic Designer",
+  "bio": "I'm a graphic designer from Bandung, Indonesia.",
+  "aboutTitle": "Design with Passion & Purpose",
+  "location": "Bandung, Indonesia",
+  "website": "",
+  "profileImage": "https://cdn.sanity.io/images/wxzkwstu/production/e0e37971c89fad02c753de8a0e9a71fe4a9f4429-2603x3391.png",
+  "bannerImage": "https://cdn.sanity.io/images/wxzkwstu/production/14efec2980b997983e274c70194473b98e1490bf-1080x1275.png",
+  "socialLinks": [],
+  "skills": [
+    {
+      "name": "Adobe Apps",
+      "proficiency": 80
+    }
+  ],
+  "experience": [
+    {
+      "position": "Graphic Designer",
+      "company": "Haneul Clinic",
+      "startDate": "2023-11-01",
+      "endDate": "",
+      "description": "I manage all social media content and digital marketing.",
+      "isCurrent": true
+    }
+  ],
+  "education": [
+    {
+      "degree": "High School",
+      "institution": "SMAN 1 Rancaekek",
+      "startDate": "2013-08-15",
+      "endDate": "2016-08-15",
+      "description": "Jurusan IPA"
+    }
+  ],
+  "updatedAt": "2026-02-15T16:15:17.695Z"
+}

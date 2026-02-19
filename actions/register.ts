@@ -1,6 +1,6 @@
 "use server";
 
-import { writeClient } from "@/sanity/lib/write-client";
+import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export async function registerUser(formData: FormData) {
@@ -13,27 +13,35 @@ export async function registerUser(formData: FormData) {
     }
 
     try {
-        // Check if user already exists
-        const existingUser = await writeClient.fetch(
-            `*[_type == "user" && email == $email][0]`,
-            { email }
-        );
+        // Check if user already exists (Prisma)
+        const existingPrismaUser = await prisma.user.findUnique({
+            where: { email }
+        });
 
-        if (existingUser) {
+        if (existingPrismaUser) {
             return { error: "Email already exists" };
         }
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user in Sanity
-        await writeClient.create({
-            _type: "user",
-            fullName,
-            username: email.split("@")[0], // Default username from email
-            email,
-            password: hashedPassword,
-            imageURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`,
+        // Generate Random Default Profile Picture
+        const randomImageId = Math.floor(Math.random() * 5) + 1;
+        const defaultImage = `/images/profile-picture-${randomImageId}.png`;
+
+        // Generate unique username
+        const username = `${email.split('@')[0]}_${Math.floor(Date.now() / 1000)}`;
+
+        // Create user in Prisma
+        await prisma.user.create({
+            data: {
+                name: fullName,
+                email: email,
+                username: username,
+                password: hashedPassword,
+                image: defaultImage,
+                role: 'USER',
+            }
         });
 
         return { success: true };

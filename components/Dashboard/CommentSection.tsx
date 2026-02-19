@@ -65,7 +65,7 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
         setNewComment("");
 
         startTransition(async () => {
-            const result = await createComment(targetId, targetType, tempComment.text);
+            const result = (await createComment(targetId, targetType, tempComment.text)) as any;
             if (!result.success || !result.comment) {
                 // Revert on failure
                 setComments(prev => prev.filter(c => c._id !== tempId));
@@ -127,12 +127,12 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                     <Loader2 size={20} className="animate-spin text-[var(--glass-text-muted)]" />
                 </div>
             ) : comments.length > 0 ? (
-                <div className="space-y-4 max-h-[300px] overflow-y-auto p-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[300px] overflow-y-auto p-1 sm:p-2 custom-scrollbar">
                     {comments.map((comment) => {
                         if (!comment.user) return null;
                         return (
                             <div key={comment._id} className="flex gap-3 group">
-                                <Link href={`/user/${comment.user.username}`} className="flex-shrink-0 mt-1">
+                                <Link href={`/profile/${comment.user.username}`} className="flex-shrink-0 mt-1">
                                     <AvatarWithEffect
                                         src={(() => {
                                             if (!comment.user.profileImage) return comment.user.imageURL;
@@ -156,8 +156,8 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                                     />
                                 </Link>
                                 <div className="flex-1">
-                                    <div className="bg-white/5 rounded-2xl rounded-tl-none px-4 py-2 inline-block max-w-[90%]">
-                                        <Link href={`/user/${comment.user.username}`} className="text-xs font-bold text-[var(--glass-text)] hover:text-teal-400 mr-2">
+                                    <div className="bg-white/5 rounded-2xl rounded-tl-none px-3 sm:px-4 py-2 inline-block max-w-[95%] sm:max-w-[90%]">
+                                        <Link href={`/profile/${comment.user.username}`} className="text-xs font-bold text-[var(--glass-text)] hover:text-teal-400 mr-2">
                                             {comment.user.fullName}
                                         </Link>
                                         <span className="text-[var(--glass-text)] text-sm">{comment.text}</span>

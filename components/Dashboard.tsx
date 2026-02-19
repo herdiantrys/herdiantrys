@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Users, FileImage, Eye, Clock, Heart, Activity } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 interface DashboardProps {
     stats: {
@@ -95,7 +96,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                                     <p className="text-xs text-[var(--glass-text-muted)]">{project.category?.title}</p>
                                 </div>
                                 <span className="text-xs text-[var(--glass-text-muted)]">
-                                    {new Date(project._createdAt).toLocaleDateString()}
+                                    {formatDate(project._createdAt)}
                                 </span>
                             </div>
                         ))}
@@ -130,7 +131,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                                     <p className="text-xs text-[var(--glass-text-muted)] truncate">{user.email}</p>
                                 </div>
                                 <span className="text-xs text-[var(--glass-text-muted)]">
-                                    {new Date(user._createdAt).toLocaleDateString()}
+                                    {formatDate(user._createdAt)}
                                 </span>
                             </div>
                         ))}
@@ -192,7 +193,7 @@ export default function Dashboard({ stats, recentProjects, recentUsers, recentUp
                                     <p className="text-xs text-[var(--glass-text-muted)]">{dict.dashboard.updated}</p>
                                 </div>
                                 <span className="text-xs text-[var(--glass-text-muted)]">
-                                    {new Date(project._updatedAt).toLocaleDateString()}
+                                    {formatDate(project._updatedAt)}
                                 </span>
                             </div>
                         ))}

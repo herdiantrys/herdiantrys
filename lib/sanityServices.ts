@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { serializeForClient } from "@/lib/utils";
 
 export const getServices = async () => {
     try {
@@ -6,7 +7,7 @@ export const getServices = async () => {
             orderBy: { createdAt: 'asc' }
         });
 
-        return JSON.parse(JSON.stringify(services.map(service => ({
+        return serializeForClient(services.map(service => ({
             _id: service.id,
             title: service.title,
             description: service.description,
@@ -15,9 +16,9 @@ export const getServices = async () => {
             features: (service.features as any) || [],
             buttonText: service.buttonText,
             orderLink: service.orderLink
-        }))));
+        })));
     } catch (error) {
         console.error("Error fetching services:", error);
-        return [];
+        return serializeForClient([]);
     }
 };

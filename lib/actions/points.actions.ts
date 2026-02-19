@@ -13,7 +13,7 @@ export const addPoints = async (userId: string, amount: number, reason: string) 
         // Log transaction if we had a Transaction model (future feature)
 
         revalidatePath("/dashboard");
-        revalidatePath(`/user/${userId}`);
+        revalidatePath(`/profile/${userId}`);
         return { success: true };
     } catch (error) {
         console.error("Error adding points:", error);

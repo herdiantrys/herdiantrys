@@ -1,323 +1,575 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useForm } from "react-hook-form"; // Assuming installed or will use simple state
-// Actually better to use standard React state for simplicity if extensive deps not present
-import { motion } from "framer-motion";
-import { Save, Loader2, Layout, Type, Palette, Image as ImageIcon, Upload } from "lucide-react";
-import { updatePortfolioConfig, uploadPortfolioHeroImage } from "@/lib/actions/portfolio.actions";
+import { useState } from "react";
+import { updatePortfolioConfig, uploadPortfolioHeroImage, uploadPortfolioLogo } from "@/lib/actions/portfolio.actions";
+import { Loader2, LayoutTemplate, Image as ImageIcon, Type, Briefcase, MessageSquare, Quote, Save, Eye, Palette, UserCircle, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import PortfolioLandingPage from "./PortfolioLandingPage";
+import Image from "next/image";
+import PortfolioPreview from "./PortfolioPreview";
+import ProjectManager from "./ProjectManager";
 
 interface PortfolioEditorProps {
-    config: any;
     userId: string;
+    username: string;
+    initialConfig: any;
     user: any;
+    projects: any[];
 }
 
-export default function PortfolioEditor({ config, userId, user }: PortfolioEditorProps) {
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+const TABS = [
+    { id: "branding", label: "Branding", icon: UserCircle },
+    { id: "style", label: "Style", icon: Palette },
+    { id: "hero", label: "Hero", icon: LayoutTemplate },
+    { id: "about", label: "About", icon: Type },
+    { id: "works", label: "Works", icon: Briefcase },
+    { id: "testimony", label: "Testimony", icon: Quote },
+    { id: "contact", label: "Contact", icon: MessageSquare },
+];
 
-    const [formData, setFormData] = useState({
-        isEnabled: config?.isEnabled || false,
-        layoutType: config?.layoutType || "minimal",
-        primaryColor: config?.primaryColor || "#0ea5e9", // Sky-500 default
-        fontFamily: config?.fontFamily || "inter",
-        heroTitle: config?.heroTitle || "",
-        heroDescription: config?.heroDescription || "",
-        heroImage: config?.heroImage || "",
-        showResume: config?.showResume ?? true,
-        showContact: config?.showContact ?? true,
+export default function PortfolioEditor({ userId, username, initialConfig, user, projects }: PortfolioEditorProps) {
+    const [config, setConfig] = useState(initialConfig || {
+        showHero: true,
+        showAbout: true,
+        showWorks: true,
+        showTestimony: true,
+        showContact: true,
+        showResume: true,
+        layoutType: "minimal",
+        // Defaults for new fields
+        fontFamily: "sans",
+        heroAlign: "center",
+        gridCols: 3,
+        borderRadius: "xl",
+        glassIntensity: "medium",
+        animationStyle: "dynamic",
+        bgPattern: "mesh"
     });
+    const [activeTab, setActiveTab] = useState("hero");
+    const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const router = useRouter();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
+    const handleSave = async () => {
+        setIsSaving(true);
         try {
-            await updatePortfolioConfig(userId, formData);
-            router.refresh();
-            // Show toast success
-        } catch (error) {
-            console.error(error);
-            // Show toast error
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsUploading(true);
-        const uploadData = new FormData();
-        uploadData.append("image", file);
-
-        try {
-            const res = await uploadPortfolioHeroImage(userId, uploadData);
-            if (res.success && res.imageUrl) {
-                setFormData(prev => ({ ...prev, heroImage: res.imageUrl }));
+            const res = await updatePortfolioConfig(userId, config);
+            if (res.success) {
+                router.refresh();
+            } else {
+                alert("Failed to save: " + res.error);
             }
-        } catch (error) {
-            console.error("Upload failed", error);
-        } finally {
-            setIsUploading(false);
+        } catch (e) {
+            console.error(e);
+            alert("Error saving configuration");
         }
+        setIsSaving(false);
+    };
+
+    const handleInputChange = (field: string, value: any) => {
+        setConfig((prev: any) => ({ ...prev, [field]: value }));
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+        if (!e.target.files?.[0]) return;
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("image", e.target.files[0]);
+
+        try {
+            // Currently only have action for Hero image, might need generic or specific ones
+            if (field === "heroImage") {
+                const res = await uploadPortfolioHeroImage(userId, formData);
+                if (res.success) {
+                    handleInputChange("heroImage", res.imageUrl);
+                    router.refresh();
+                }
+            } else if (field === "logo") {
+                const res = await uploadPortfolioLogo(userId, formData);
+                if (res.success) {
+                    handleInputChange("logo", res.imageUrl);
+                    router.refresh();
+                }
+            }
+            // Implement others as needed or make generic upload action
+        } catch (e) {
+            console.error(e);
+        }
+        setIsUploading(false);
     };
 
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row">
-            {/* Editor Sidebar / Panel */}
-            <div className="w-full lg:w-[450px] bg-slate-950 border-r border-white/10 h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar p-6">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500">
-                            Editor
-                        </h1>
-                        <p className="text-xs text-slate-400">Customize your portfolio</p>
-                    </div>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-lg text-sm font-bold hover:shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all disabled:opacity-50"
-                    >
-                        {isLoading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        <span>Save</span>
-                    </button>
-                </div>
-
-                <div className="space-y-8">
-                    {/* Template */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                            <Layout size={16} className="text-teal-400" />
-                            Layout & Template
-                        </h3>
-                        <div className="space-y-2">
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Template Style</label>
-                            <select
-                                name="layoutType"
-                                value={formData.layoutType}
-                                onChange={handleChange}
-                                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-teal-500 outline-none"
+        <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-140px)]">
+            {/* Editor Panel */}
+            <div className="w-full lg:w-[45%] lg:overflow-y-auto pr-1 custom-scrollbar pb-20 lg:pb-0">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden">
+                    <div className="p-4 border-b border-white/5 flex flex-wrap gap-2">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${activeTab === tab.id
+                                    ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
+                                    : "text-[var(--glass-text-muted)] hover:bg-white/5 hover:text-[var(--glass-text)]"
+                                    }`}
                             >
-                                <option value="minimal">MinimalIST</option>
-                                <option value="creative">Creative Studio</option>
-                                <option value="professional">Enterprise</option>
-                            </select>
-                        </div>
+                                <tab.icon size={16} />
+                                {tab.label}
+                            </button>
+                        ))}
 
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                            <span className="text-sm font-medium">Enable Portfolio</span>
-                            <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                                <input
-                                    type="checkbox"
-                                    name="isEnabled"
-                                    checked={formData.isEnabled}
-                                    onChange={handleChange}
-                                    className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out"
-                                    style={{ transform: formData.isEnabled ? 'translateX(100%)' : 'translateX(0)', borderColor: formData.isEnabled ? '#14b8a6' : '#cbd5e1' }}
-                                />
-                                <label className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer ${formData.isEnabled ? 'bg-teal-400' : 'bg-slate-700'}`}></label>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Appearance */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                            <Palette size={16} className="text-purple-400" />
-                            Appearance
-                        </h3>
-
-                        <div className="space-y-2">
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Primary Color</label>
-                            <div className="flex gap-2 flex-wrap">
-                                {['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'].map(color => (
-                                    <button
-                                        key={color}
-                                        type="button"
-                                        onClick={() => setFormData(prev => ({ ...prev, primaryColor: color }))}
-                                        className={`w-6 h-6 rounded-full border-2 transition-all ${formData.primaryColor === color ? 'border-white scale-110' : 'border-transparent'}`}
-                                        style={{ backgroundColor: color }}
-                                    />
-                                ))}
-                                <input
-                                    type="color"
-                                    name="primaryColor"
-                                    value={formData.primaryColor}
-                                    onChange={handleChange}
-                                    className="w-6 h-6 bg-transparent border-0 p-0 rounded-full overflow-hidden cursor-pointer"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Font Family</label>
-                            <select
-                                name="fontFamily"
-                                value={formData.fontFamily}
-                                onChange={handleChange}
-                                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-teal-500 outline-none"
+                        <div className="ml-auto flex gap-2">
+                            <a
+                                href={`/profile/${username}/portfolio`}
+                                target="_blank"
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-[var(--glass-text)] hover:bg-white/10 transition-colors"
                             >
-                                <option value="inter">Inter (Sans)</option>
-                                <option value="serif">Playfair Display (Serif)</option>
-                                <option value="mono">JetBrains Mono (Code)</option>
-                            </select>
+                                <Eye size={16} />
+                                <span className="hidden sm:inline">Preview</span>
+                            </a>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold shadow-lg shadow-teal-500/20 hover:scale-105 transition-transform disabled:opacity-50"
+                            >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Save
+                            </button>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                            <Type size={16} className="text-teal-400" />
-                            Hero Content
-                        </h3>
-
-                        <div className="space-y-3">
-                            <div>
-                                <label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Headline</label>
-                                <input
-                                    type="text"
-                                    name="heroTitle"
-                                    value={formData.heroTitle}
-                                    onChange={handleChange}
-                                    placeholder="e.g. Creative Developer"
-                                    className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-teal-500 outline-none"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Bio / Intro</label>
-                                <textarea
-                                    name="heroDescription"
-                                    value={formData.heroDescription}
-                                    onChange={handleChange}
-                                    rows={3}
-                                    placeholder="Brief intro..."
-                                    className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-teal-500 outline-none resize-none"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">
-                                    Hero Background
-                                </label>
-                                <div className="space-y-2">
-                                    <div className="flex gap-2">
-                                        <div className="flex-1">
-                                            <input
-                                                type="text"
-                                                name="heroImage"
-                                                value={formData.heroImage}
-                                                onChange={handleChange}
-                                                placeholder="Image URL"
-                                                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-teal-500 outline-none"
-                                            />
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={isUploading}
-                                            className="px-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-                                            title="Upload Image"
-                                        >
-                                            {isUploading ? <Loader2 className="animate-spin text-teal-400" size={16} /> : <Upload size={16} className="text-slate-400" />}
-                                        </button>
-                                        <input
-                                            type="file"
-                                            ref={fileInputRef}
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                        />
+                    <div className="p-6">
+                        {/* BRANDING TAB */}
+                        {activeTab === "branding" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Publicly Visible</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Make your portfolio accessible via your public URL</p>
                                     </div>
-                                    {formData.heroImage && (
-                                        <div className="w-full h-24 rounded-lg overflow-hidden border border-white/10 relative group">
-                                            <img src={formData.heroImage} alt="Preview" className="w-full h-full object-cover" />
-                                            <button
-                                                onClick={() => setFormData(prev => ({ ...prev, heroImage: "" }))}
-                                                className="absolute top-2 right-2 p-1 bg-black/50 rounded hover:bg-red-500/80 transition-colors opacity-0 group-hover:opacity-100"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                            </button>
+                                    <button
+                                        onClick={() => handleInputChange("isEnabled", !config.isEnabled)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.isEnabled ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.isEnabled ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Display Name</label>
+                                        <input
+                                            type="text"
+                                            value={config.displayName || ""}
+                                            onChange={(e) => handleInputChange("displayName", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder={username}
+                                        />
+                                        <p className="text-xs text-[var(--glass-text-muted)] mt-1">Leave empty to use your default username.</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Logo</label>
+                                        <div className="flex items-start gap-4">
+                                            {config.logo && (
+                                                <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center">
+                                                    <Image src={config.logo} alt="Logo" width={80} height={80} className="object-contain" />
+                                                </div>
+                                            )}
+                                            <label className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl hover:bg-white/5 text-[var(--glass-text)] transition-colors">
+                                                {isUploading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
+                                                <span>Upload Logo</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "logo")} />
+                                            </label>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        )}
 
+                        {/* STYLE TAB */}
+                        {activeTab === "style" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Primary Color</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={config.primaryColor || "#0f172a"}
+                                                onChange={(e) => handleInputChange("primaryColor", e.target.value)}
+                                                className="w-12 h-12 rounded-lg bg-transparent border border-white/10 cursor-pointer"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={config.primaryColor || ""}
+                                                onChange={(e) => handleInputChange("primaryColor", e.target.value)}
+                                                className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-3 py-2 text-[var(--glass-text)] w-32"
+                                                placeholder="#0f172a"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Secondary Color</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={config.secondaryColor || "#1e293b"}
+                                                onChange={(e) => handleInputChange("secondaryColor", e.target.value)}
+                                                className="w-12 h-12 rounded-lg bg-transparent border border-white/10 cursor-pointer"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={config.secondaryColor || ""}
+                                                onChange={(e) => handleInputChange("secondaryColor", e.target.value)}
+                                                className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-3 py-2 text-[var(--glass-text)] w-32"
+                                                placeholder="#1e293b"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-[var(--glass-text-muted)] mt-1">Colors will be automatically generated based on the primary color.</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Accent Color</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={config.accentColor || "#14b8a6"}
+                                                onChange={(e) => handleInputChange("accentColor", e.target.value)}
+                                                className="w-12 h-12 rounded-lg bg-transparent border border-white/10 cursor-pointer"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={config.accentColor || ""}
+                                                onChange={(e) => handleInputChange("accentColor", e.target.value)}
+                                                className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-3 py-2 text-[var(--glass-text)] w-32"
+                                                placeholder="#14b8a6"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Text Color</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={config.textColor || "#ffffff"}
+                                                onChange={(e) => handleInputChange("textColor", e.target.value)}
+                                                className="w-12 h-12 rounded-lg bg-transparent border border-white/10 cursor-pointer"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={config.textColor || ""}
+                                                onChange={(e) => handleInputChange("textColor", e.target.value)}
+                                                className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-3 py-2 text-[var(--glass-text)] w-32"
+                                                placeholder="#ffffff"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
+                        {/* HERO TAB */}
+                        {activeTab === "hero" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Enable Hero Section</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Show the main introduction banner</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange("showHero", !config.showHero)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.showHero ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.showHero ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
-                            <Layout size={16} className="text-teal-400" />
-                            Section Visibility
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            <label className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
-                                <span className="text-xs font-medium text-slate-300">Resume</span>
-                                <input
-                                    type="checkbox"
-                                    name="showResume"
-                                    checked={formData.showResume}
-                                    onChange={handleChange}
-                                    className="accent-teal-500"
-                                />
-                            </label>
-                            <label className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
-                                <span className="text-xs font-medium text-slate-300">Contact</span>
-                                <input
-                                    type="checkbox"
-                                    name="showContact"
-                                    checked={formData.showContact}
-                                    onChange={handleChange}
-                                    className="accent-teal-500"
-                                />
-                            </label>
-                        </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Greeting / Title</label>
+                                        <input
+                                            type="text"
+                                            value={config.heroTitle || ""}
+                                            onChange={(e) => handleInputChange("heroTitle", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="Hi, I'm John Doe"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Short Description</label>
+                                        <textarea
+                                            value={config.heroDescription || ""}
+                                            onChange={(e) => handleInputChange("heroDescription", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none h-24 resize-none"
+                                            placeholder="Creative Designer & Developer based in..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Hero Image</label>
+                                        <div className="flex items-start gap-4">
+                                            {config.heroImage && (
+                                                <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-white/10">
+                                                    <Image src={config.heroImage} alt="Hero" fill className="object-cover" />
+                                                </div>
+                                            )}
+                                            <label className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl hover:bg-white/5 text-[var(--glass-text)] transition-colors">
+                                                {isUploading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
+                                                <span>Upload Image</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "heroImage")} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ABOUT TAB */}
+                        {activeTab === "about" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Enable About Section</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Show the about me information</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange("showAbout", !config.showAbout)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.showAbout ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.showAbout ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Section Title</label>
+                                        <input
+                                            type="text"
+                                            value={config.aboutTitle || ""}
+                                            onChange={(e) => handleInputChange("aboutTitle", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="About Me"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Full Bio</label>
+                                        <textarea
+                                            value={config.aboutDescription || ""}
+                                            onChange={(e) => handleInputChange("aboutDescription", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none h-40 resize-none"
+                                            placeholder="Tell your story..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* WORKS TAB */}
+                        {activeTab === "works" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Enable Works Section</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Show your projects from the CMS</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange("showWorks", !config.showWorks)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.showWorks ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.showWorks ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Section Title</label>
+                                        <input
+                                            type="text"
+                                            value={config.worksTitle || ""}
+                                            onChange={(e) => handleInputChange("worksTitle", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="Selected Works"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Description</label>
+                                        <input
+                                            type="text"
+                                            value={config.worksDescription || ""}
+                                            onChange={(e) => handleInputChange("worksDescription", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="A collection of my best projects"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-white/5">
+                                    <ProjectManager userId={userId} projects={projects} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TESTIMONY TAB */}
+                        {activeTab === "testimony" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Enable Testimony Section</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Show what others say about you</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange("showTestimony", !config.showTestimony)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.showTestimony ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.showTestimony ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Section Title</label>
+                                        <input
+                                            type="text"
+                                            value={config.testimonyTitle || ""}
+                                            onChange={(e) => handleInputChange("testimonyTitle", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="Testimonials"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CONTACT TAB */}
+                        {activeTab === "contact" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div>
+                                        <h3 className="font-bold text-[var(--glass-text)]">Enable Contact Section</h3>
+                                        <p className="text-sm text-[var(--glass-text-muted)]">Show a contact form</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange("showContact", !config.showContact)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${config.showContact ? "bg-teal-500" : "bg-white/10"}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.showContact ? "left-7" : "left-1"}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Section Title</label>
+                                        <input
+                                            type="text"
+                                            value={config.contactTitle || ""}
+                                            onChange={(e) => handleInputChange("contactTitle", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="Get in Touch"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Contact Email</label>
+                                        <input
+                                            type="email"
+                                            value={config.contactEmail || ""}
+                                            onChange={(e) => handleInputChange("contactEmail", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="your@email.com"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Location</label>
+                                        <input
+                                            type="text"
+                                            value={config.location || ""}
+                                            onChange={(e) => handleInputChange("location", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="New York, USA"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Google Maps Embed URL</label>
+                                        <input
+                                            type="text"
+                                            value={config.googleMapsUrl || ""}
+                                            onChange={(e) => handleInputChange("googleMapsUrl", e.target.value)}
+                                            className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                            placeholder="https://www.google.com/maps/embed?..."
+                                        />
+                                        <p className="text-xs text-[var(--glass-text-muted)] mt-1">Paste the 'Embed a map' HTML src URL here.</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--glass-text-muted)] mb-2">Social Media</label>
+                                        <div className="space-y-3">
+                                            {(config.socials || []).map((social: any, index: number) => (
+                                                <div key={index} className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={social.platform}
+                                                        onChange={(e) => {
+                                                            const newSocials = [...(config.socials || [])];
+                                                            newSocials[index].platform = e.target.value;
+                                                            handleInputChange("socials", newSocials);
+                                                        }}
+                                                        className="w-1/3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                                        placeholder="Platform (e.g. GitHub)"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={social.url}
+                                                        onChange={(e) => {
+                                                            const newSocials = [...(config.socials || [])];
+                                                            newSocials[index].url = e.target.value;
+                                                            handleInputChange("socials", newSocials);
+                                                        }}
+                                                        className="flex-1 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-2 text-[var(--glass-text)] focus:border-teal-500 outline-none"
+                                                        placeholder="URL"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const newSocials = (config.socials || []).filter((_: any, i: number) => i !== index);
+                                                            handleInputChange("socials", newSocials);
+                                                        }}
+                                                        className="p-2 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => {
+                                                    const newSocials = [...(config.socials || []), { platform: "", url: "" }];
+                                                    handleInputChange("socials", newSocials);
+                                                }}
+                                                className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300"
+                                            >
+                                                <Plus size={16} /> Add Social Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            id="showResume"
+                                            checked={config.showResume}
+                                            onChange={(e) => handleInputChange("showResume", e.target.checked)}
+                                            className="w-5 h-5 accent-teal-500"
+                                        />
+                                        <label htmlFor="showResume" className="text-sm text-[var(--glass-text)]">Show Download Resume Button</label>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Live Preview Area */}
-            <div className="flex-1 bg-black/90 h-[calc(100vh-6rem)] relative overflow-hidden flex flex-col">
-                <div className="bg-slate-900 border-b border-white/5 px-4 py-2 flex items-center justify-between">
-                    <span className="text-xs font-mono text-slate-500">Live Preview</span>
-                    <div className="flex gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500/20" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-                        <div className="w-3 h-3 rounded-full bg-green-500/20" />
-                    </div>
+            {/* Preview Panel - Desktop Only */}
+            <div className="hidden lg:block flex-1 bg-black/50 rounded-2xl border border-white/10 overflow-hidden relative shadow-2xl">
+                <div className="absolute top-4 right-4 z-50 px-3 py-1 bg-black/50 backdrop-blur-md rounded-full text-xs font-mono text-white/50 border border-white/10 pointer-events-none">
+                    LIVE PREVIEW
                 </div>
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 bg-dots-pattern flex justify-center items-start">
-                    <div className="w-full max-w-[1400px] h-full shadow-2xl relative">
-                        {/* Render the actual landing page with live data */}
-                        <div className="transform scale-[0.8] origin-top h-[125%] w-[125%] -ml-[12.5%] -mt-0">
-                            {/* Scale down slightly to fit more content, or just render 1:1 responsive */}
-                            {/* Actually no scale is better for "true" preview unless we simulate mobile. Let's just do 1:1 responsive */}
-                        </div>
-                        <div className="absolute inset-0">
-                            <PortfolioLandingPage
-                                user={user}
-                                config={formData}
-                                projects={user.projects || []}
-                                isPreview={true}
-                            />
-                        </div>
-                    </div>
+                {/* Transform used to contain 'fixed' elements inside the preview */}
+                <div className="w-full h-full overflow-y-auto custom-scrollbar" style={{ transform: "translateZ(0)" }}>
+                    <PortfolioPreview
+                        config={config}
+                        user={{ ...user, username }}
+                        projects={projects}
+                    />
                 </div>
             </div>
         </div>

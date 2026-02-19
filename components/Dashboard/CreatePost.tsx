@@ -112,7 +112,7 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
             try {
                 // Pass pathname to revalidate correctly
                 // Use explicit dbUserId if provided (for Prisma), fallback to user._id (for Sanity/legacy)
-                const result = await createPost(dbUserId || user._id, formData, pathname);
+                const result = (await createPost(dbUserId || user._id, formData, pathname)) as any;
                 clearInterval(progressInterval);
 
                 if (result.success) {
@@ -144,7 +144,7 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
     return (
         <div className="glass-liquid p-6 mb-8 relative overflow-hidden group">
             {/* Background Gradient Animation */}
-            <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-purple-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--site-secondary)]/5 via-[var(--site-accent)]/5 to-[var(--site-secondary)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
             <div className="relative z-10 flex gap-4">
                 <div className="hidden sm:block">
@@ -235,7 +235,7 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                                 className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden"
                             >
                                 <motion.div
-                                    className="h-full bg-gradient-to-r from-teal-400 to-cyan-500"
+                                    className="h-full bg-gradient-to-r from-[var(--site-accent)] to-[var(--site-secondary)]"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
                                     transition={{ duration: 0.3 }}
@@ -274,7 +274,7 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={status !== 'idle'}
-                                className="p-2.5 rounded-full hover:bg-teal-500/10 text-teal-500/80 hover:text-teal-500 transition-colors disabled:opacity-50"
+                                className="p-2.5 rounded-full hover:bg-[var(--site-secondary)]/10 text-[var(--site-secondary)]/80 hover:text-[var(--site-secondary)] transition-colors disabled:opacity-50"
                                 title="Add Image"
                             >
                                 <ImageIcon size={22} />
@@ -307,7 +307,7 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                             disabled={(!text.trim() && !imageFile && !videoFile) || status !== 'idle'}
                             className={`
                                 relative px-6 py-2.5 rounded-xl font-medium text-white shadow-lg transition-all overflow-hidden flex items-center gap-2
-                                ${status === 'success' ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:opacity-90'}
+                                ${status === 'success' ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-site-accent-prev to-site-accent-next hover:opacity-90'}
                                 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
                             `}
                         >

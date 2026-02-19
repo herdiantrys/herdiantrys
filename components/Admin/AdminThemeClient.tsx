@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Save, RefreshCcw, Palette, Sun, Moon, Info } from "lucide-react";
 import { updateGlobalTheme } from "@/lib/actions/settings.actions";
@@ -13,6 +13,11 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
     const router = useRouter();
     const [theme, setTheme] = useState<ThemeConfig>(initialTheme);
     const [isSaving, setIsSaving] = useState(false);
+
+    // OPTIMISTIC UPDATE: Broadcast changes to ThemeInjector immediately
+    useEffect(() => {
+        window.postMessage({ type: "THEME_PREVIEW_UPDATE", theme }, "*");
+    }, [theme]);
 
     const handleChange = (key: keyof ThemeConfig, value: string | number) => {
         setTheme(prev => ({ ...prev, [key]: value }));

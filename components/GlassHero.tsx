@@ -44,13 +44,13 @@ const GlassHero = () => {
                         <span className="text-[var(--glass-text)]">Designer</span>
                     </h1>
                     <p className="text-lg md:text-xl text-[var(--glass-text-muted)] mb-8 max-w-lg mx-auto md:mx-0 leading-relaxed">
-                        Crafting visual experiences that blend modern aesthetics with functional design.
+                        Currently, I'm focused on building accessible, human-centered products at Upstatement.ics with functional design.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="glass glass-hover px-8 py-4 rounded-full text-[var(--glass-text)] font-medium tracking-wide"
+                            className="bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] px-8 py-4 rounded-full text-[var(--site-button-text)] font-medium tracking-wide shadow-lg shadow-[var(--site-accent)]/30 transition-all duration-300"
                         >
                             View Portfolio
                         </motion.button>

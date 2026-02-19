@@ -3,26 +3,37 @@
 import prisma from "@/lib/prisma";
 import { writeClient } from "@/sanity/lib/write-client";
 import { revalidatePath } from "next/cache";
+import { serializeForClient } from "@/lib/utils";
+import { createNotification } from "./notification.actions";
 
 export const createPost = async (userId: string, formData: FormData, path: string) => {
     try {
+        const title = formData.get("title") as string | null;
         const text = formData.get("text") as string;
         const imageFile = formData.get("image") as File | null;
+        const audioFile = formData.get("audio") as File | null;
         const videoFile = formData.get("video") as File | null;
+        const authorId = formData.get("authorId") as string || userId;
 
         let imageUrl = null;
         let videoUrl = null;
+        let audioUrl = null;
 
         if (imageFile && imageFile.size > 0) {
-            // Upload image to Sanity (Asset Store)
             const asset = await writeClient.assets.upload("image", imageFile, {
                 filename: imageFile.name,
             });
             imageUrl = asset.url;
         }
 
+        if (audioFile && audioFile.size > 0) {
+            const asset = await writeClient.assets.upload("file", audioFile, {
+                filename: audioFile.name,
+            });
+            audioUrl = asset.url;
+        }
+
         if (videoFile && videoFile.size > 0) {
-            // Upload video to Sanity (Asset Store - use "file" type for videos usually, or "image" if Sanity treats them same? Sanity treats videos as "file" or "mux.video". Standard file upload is "file")
             const asset = await writeClient.assets.upload("file", videoFile, {
                 filename: videoFile.name,
             });
@@ -31,10 +42,12 @@ export const createPost = async (userId: string, formData: FormData, path: strin
 
         await prisma.post.create({
             data: {
+                title,
                 text,
                 image: imageUrl,
                 video: videoUrl,
-                authorId: userId, // Connect by ID
+                audio: audioUrl,
+                authorId: authorId,
             }
         });
 
@@ -44,10 +57,10 @@ export const createPost = async (userId: string, formData: FormData, path: strin
             revalidatePath("/dashboard");
         }
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error: any) {
         console.error("Error creating post:", error);
-        return { success: false, error: error.message || "Failed to create post" };
+        return serializeForClient({ success: false, error: error.message || "Failed to create post" });
     }
 };
 
@@ -65,7 +78,7 @@ export const toggleArchivePost = async (postId: string, userId: string, alternat
             select: { isArchived: true, authorId: true }
         });
 
-        if (!post) return { success: false, error: "Post not found" };
+        if (!post) return serializeForClient({ success: false, error: "Post not found" });
 
         // 3. Check permissions (Author OR Admin)
         // Check if author matches EITHER the primary userId (Prisma) OR the alternative (Sanity/Legacy)
@@ -74,7 +87,7 @@ export const toggleArchivePost = async (postId: string, userId: string, alternat
 
         if (!isAuthor && !isAdmin) {
             console.error("Archive Unauthorized:", { requestingUserId: userId, alternativeUserId, postAuthorId: post.authorId });
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         const newStatus = !post.isArchived;
@@ -86,10 +99,10 @@ export const toggleArchivePost = async (postId: string, userId: string, alternat
         });
 
         revalidatePath("/dashboard");
-        return { success: true, isArchived: newStatus };
+        return serializeForClient({ success: true, isArchived: newStatus });
     } catch (error) {
         console.error("Error toggling archive:", error);
-        return { success: false, error: "Failed to update post" };
+        return serializeForClient({ success: false, error: "Failed to update post" });
     }
 };
 
@@ -153,7 +166,7 @@ export const getPostById = async (postId: string, currentUserId?: string) => {
         // @ts-ignore
         const isBookmarked = currentUserId && postAny.bookmarkedBy ? postAny.bookmarkedBy.length > 0 : false;
 
-        return {
+        return serializeForClient({
             ...postAny,
             author: postAny.author,
             comments: postAny.comments.map((c: any) => ({
@@ -164,7 +177,7 @@ export const getPostById = async (postId: string, currentUserId?: string) => {
             isBookmarked,
             likesCount: postAny._count.likedBy,
             commentsCount: postAny._count.comments
-        };
+        });
 
     } catch (error) {
         console.error("Error fetching post:", error);
@@ -181,7 +194,7 @@ export const deletePost = async (postId: string, userId: string) => {
         });
 
         if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // 2. Fetch post to get image/video URL
@@ -190,7 +203,7 @@ export const deletePost = async (postId: string, userId: string) => {
             select: { image: true, video: true }
         });
 
-        if (!post) return { success: false, error: "Post not found" };
+        if (!post) return serializeForClient({ success: false, error: "Post not found" });
 
         // 3. Delete from Sanity if assets exist (Best effort)
         // Note: We skip actual Sanity deletion for now as in the image logic, 
@@ -204,10 +217,10 @@ export const deletePost = async (postId: string, userId: string) => {
         revalidatePath("/admin/posts");
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error deleting post:", error);
-        return { success: false, error: "Failed to delete post" };
+        return serializeForClient({ success: false, error: "Failed to delete post" });
     }
 };
 
@@ -220,7 +233,7 @@ export const bulkDeletePosts = async (postIds: string[], userId: string) => {
         });
 
         if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // 2. Delete posts
@@ -239,10 +252,10 @@ export const bulkDeletePosts = async (postIds: string[], userId: string) => {
         revalidatePath("/admin/posts");
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error bulk deleting posts:", error);
-        return { success: false, error: "Failed to delete posts" };
+        return serializeForClient({ success: false, error: "Failed to delete posts" });
     }
 };
 
@@ -255,7 +268,7 @@ export const bulkUpdatePostStatus = async (postIds: string[], action: 'ARCHIVE' 
         });
 
         if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // 2. Update status
@@ -273,12 +286,69 @@ export const bulkUpdatePostStatus = async (postIds: string[], action: 'ARCHIVE' 
         revalidatePath("/admin/posts");
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error bulk updating posts:", error);
-        return { success: false, error: "Failed to update posts" };
+        return serializeForClient({ success: false, error: "Failed to update posts" });
     }
 };
+
+export const updatePost = async (postId: string, formData: FormData, userId: string) => {
+    try {
+        // 1. Verify User Role
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { role: true }
+        });
+
+        if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
+            return serializeForClient({ success: false, error: "Unauthorized" });
+        }
+
+        const title = formData.get("title") as string | null;
+        const text = formData.get("text") as string;
+        const authorId = formData.get("authorId") as string;
+
+        const imageFile = formData.get("image") as File | null;
+        const audioFile = formData.get("audio") as File | null;
+        const videoFile = formData.get("video") as File | null;
+
+        const updateData: any = {
+            title,
+            text,
+            authorId
+        };
+
+        if (imageFile && imageFile.size > 0) {
+            const asset = await writeClient.assets.upload("image", imageFile, { filename: imageFile.name });
+            updateData.image = asset.url;
+        }
+
+        if (audioFile && audioFile.size > 0) {
+            const asset = await writeClient.assets.upload("file", audioFile, { filename: audioFile.name });
+            updateData.audio = asset.url;
+        }
+
+        if (videoFile && videoFile.size > 0) {
+            const asset = await writeClient.assets.upload("file", videoFile, { filename: videoFile.name });
+            updateData.video = asset.url;
+        }
+
+        // 2. Update Post
+        await prisma.post.update({
+            where: { id: postId },
+            data: updateData
+        });
+
+        revalidatePath("/admin/posts");
+        revalidatePath("/dashboard");
+
+        return serializeForClient({ success: true });
+    } catch (error) {
+        console.error("Error updating post:", error);
+        return serializeForClient({ success: false, error: "Failed to update post" });
+    }
+}
 export const repostPost = async (originalPostId: string, userId: string, path: string) => {
     try {
         if (!userId) throw new Error("Unauthorized");
@@ -309,22 +379,33 @@ export const repostPost = async (originalPostId: string, userId: string, path: s
             });
             revalidatePath(path);
             if (path !== "/dashboard") revalidatePath("/dashboard");
-            return { success: true, reposted: false };
+            return serializeForClient({ success: true, reposted: false });
         } else {
             // Create Repost
-            await prisma.post.create({
+            const newRepost = await prisma.post.create({
                 data: {
                     text: "", // Empty for simple repost
                     authorId: userId,
                     originalPostId: originalPostId
                 }
             });
+
+            // Trigger Notification for the original author
+            if (originalPost.authorId !== userId) {
+                await createNotification({
+                    recipientId: originalPost.authorId,
+                    senderId: userId,
+                    type: 'repost_post',
+                    relatedPostId: originalPostId,
+                });
+            }
+
             revalidatePath(path);
             if (path !== "/dashboard") revalidatePath("/dashboard");
-            return { success: true, reposted: true };
+            return serializeForClient({ success: true, reposted: true });
         }
     } catch (error: any) {
         console.error("Error reposting:", error);
-        return { success: false, error: error.message || "Failed to repost" };
+        return serializeForClient({ success: false, error: error.message || "Failed to repost" });
     }
 };

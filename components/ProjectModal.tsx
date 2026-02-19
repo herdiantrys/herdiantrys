@@ -7,7 +7,7 @@ import Link from "next/link";
 import { X, ExternalLink, Play, Eye, Heart, ChevronLeft, ChevronRight, MessageCircle, Share2, Loader2, User } from "lucide-react";
 import { toggleLike } from "@/lib/actions/like.actions";
 import { incrementView } from "@/actions/incrementView";
-import { formatViewCount } from "@/lib/utils";
+import { formatViewCount, formatDate } from "@/lib/utils";
 import { ModalVideoPlayer } from "@/components/ui/ModalVideoPlayer";
 import { ZoomableImage } from "@/components/ui/ZoomableImage";
 import { Project } from "@/components/ProjectCard";
@@ -260,7 +260,7 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                     <span className="flex items-center gap-1.5"><MessageCircle size={14} className="text-purple-600 dark:text-purple-500" /> {project.comments || 0}</span>
                                 </div>
                                 <span className="text-[var(--glass-text-muted)] opacity-75">
-                                    {project.uploadDate ? new Date(project.uploadDate).toLocaleDateString() : new Date().getFullYear()}
+                                    {project.uploadDate ? formatDate(project.uploadDate) : new Date().getFullYear()}
                                 </span>
                             </div>
                         </div>
@@ -303,7 +303,7 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                     <div key={comment._id} className="p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex gap-3 text-sm shadow-sm dark:shadow-none">
                                         <div className="shrink-0 relative">
                                             {comment.user.imageURL ? (
-                                                <Link href={`/user/${comment.user.username}`} onClick={(e) => e.stopPropagation()}>
+                                                <Link href={`/profile/${comment.user.username}`} onClick={(e) => e.stopPropagation()}>
                                                     <Image
                                                         src={comment.user.imageURL}
                                                         alt={comment.user.username}
@@ -320,11 +320,11 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 mb-0.5">
-                                                <Link href={`/user/${comment.user.username}`} className="font-bold text-[var(--glass-text)] hover:text-teal-500 transition-colors" onClick={(e) => e.stopPropagation()}>
+                                                <Link href={`/profile/${comment.user.username}`} className="font-bold text-[var(--glass-text)] hover:text-teal-500 transition-colors" onClick={(e) => e.stopPropagation()}>
                                                     {comment.user.fullName}
                                                 </Link>
                                                 <span className="text-[10px] text-[var(--glass-text-muted)] opacity-60">
-                                                    {new Date(comment.createdAt).toLocaleDateString()}
+                                                    {formatDate(comment.createdAt)}
                                                 </span>
                                             </div>
                                             <p className="text-[var(--glass-text-muted)] leading-snug text-xs">

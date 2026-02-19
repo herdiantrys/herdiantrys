@@ -101,11 +101,12 @@ export default function ActivityCard({
         setLikesCount(newCount);
 
         startLikeTransition(async () => {
-            const targetId = activity.id.replace("project-", "").replace("user-", "").replace("post-", "");
+            const targetId = activity.id.replace("project-", "").replace("user-", "").replace("post-", "").replace("act-", "");
 
-            let targetType: "project" | "user" | "post" = 'project';
+            let targetType: "project" | "user" | "post" | "activity" = 'project';
             if (activity.type === 'new_user') targetType = 'user';
             if (activity.type === 'user_post') targetType = 'post';
+            if (activity.type === 'achievement' || activity.type === 'badge_awarded') targetType = 'activity';
 
             const result = await toggleLike(targetId, targetType);
             if (result.success) {
@@ -175,7 +176,7 @@ export default function ActivityCard({
 
             // Pass BOTH Prisma ID (if available) and Legacy Sanity ID to handle all cases
             // signature: (postId, primaryUserId, alternativeUserId)
-            const result = await toggleArchivePost(targetId, dbUserId || userId, userId); // sending userId as alternative check
+            const result = (await toggleArchivePost(targetId, dbUserId || userId, userId)) as any; // sending userId as alternative check
 
             if (!result.success) {
                 // Revert success state if server action fails
@@ -208,7 +209,7 @@ export default function ActivityCard({
     // Determine Share URL and Title
     const shareUrl = activity.type === 'new_project' || activity.type === 'project_update'
         ? `/projects/${activity.details.slug}`
-        : `/user/${activity.actor.username}`; // Ideally anchor to post ID, but for now user profile
+        : `/profile/${activity.actor.username}`; // Ideally anchor to post ID, but for now user profile
 
     const shareTitle = activity.details.title || `Check out ${activity.actor.name}'s post`;
 
@@ -219,50 +220,48 @@ export default function ActivityCard({
 
     return (
         <>
-            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg transition-transform hover:scale-[1.01]">
+            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg transition-transform hover:scale-[1.01] overflow-hidden">
                 {/* Repost Header */}
-                {activity.originalPost && (
-                    <div className="flex items-center gap-2 mb-2 ml-12 sm:ml-16 text-xs font-semibold text-[var(--glass-text-muted)]">
-                        <Repeat size={14} />
-                        <span>{activity.actor.name} reposted</span>
-                    </div>
-                )}
+                <div className="flex items-center gap-2 mb-2 ml-14 sm:ml-20 text-[10px] sm:text-xs font-semibold text-[var(--glass-text-muted)]">
+                    <Repeat size={12} className="sm:w-3.5 sm:h-3.5" />
+                    <span>{activity.actor.name} reposted</span>
+                </div>
                 {/* Header */}
                 <div className="flex items-start gap-4 mb-4">
-                    <Link href={`/user/${displayActor.username}`} className="relative group cursor-pointer block">
+                    <Link href={`/profile/${displayActor.username}`} className="relative group cursor-pointer block shrink-0">
                         <AvatarWithEffect
                             src={typeof displayActor.image === 'string' ? displayActor.image : (displayActor.image ? urlFor(displayActor.image).url() : undefined)}
                             alt={displayActor.name || "User"}
-                            size={48}
+                            size={40}
                             effect={(displayActor as any).equippedEffect}
                             frame={(displayActor as any).equippedFrame}
                             background={(displayActor as any).equippedBackground}
                             profileColor={(displayActor as any).profileColor}
                             frameColor={(displayActor as any).frameColor}
                         />
-                        <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-gray-900 border border-gray-700 text-white shadow-sm z-20">
-                            {activity.type === 'new_user' && <User size={12} className="text-teal-400" />}
-                            {activity.type === 'new_project' && <FileText size={12} className="text-purple-400" />}
-                            {activity.type === 'project_update' && <Edit size={12} className="text-blue-400" />}
-                            {activity.type === 'user_post' && <MessageSquare size={12} className="text-yellow-400" />}
-                            {(activity.type === 'achievement' || activity.type === 'badge_awarded') && <Trophy size={12} className="text-yellow-400" />}
+                        <div className="absolute -bottom-1 -right-1 p-0.5 sm:p-1 rounded-full bg-gray-900 border border-gray-700 text-white shadow-sm z-20">
+                            {activity.type === 'new_user' && <User size={10} className="sm:w-3 sm:h-3 text-[var(--site-secondary)]" />}
+                            {activity.type === 'new_project' && <FileText size={10} className="sm:w-3 sm:h-3 text-purple-400" />}
+                            {activity.type === 'project_update' && <Edit size={10} className="sm:w-3 sm:h-3 text-blue-400" />}
+                            {activity.type === 'user_post' && <MessageSquare size={10} className="sm:w-3 sm:h-3 text-yellow-400" />}
+                            {(activity.type === 'achievement' || activity.type === 'badge_awarded') && <Trophy size={10} className="sm:w-3 sm:h-3 text-yellow-400" />}
                         </div>
                     </Link>
 
                     <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <Link href={`/user/${displayActor.username}`} className="font-bold text-[var(--glass-text)] hover:text-teal-400 transition-colors">
+                            <Link href={`/profile/${displayActor.username}`} className="font-bold text-[var(--glass-text)] hover:text-[var(--site-secondary)] transition-colors">
                                 {displayActor.name}
                             </Link>
                             <span className="text-sm text-[var(--glass-text-muted)]">@{displayActor.username}</span>
                         </div>
-                        <p className="text-sm text-[var(--glass-text-muted)]">
+                        <p className="text-[10px] sm:text-sm text-[var(--glass-text-muted)]">
                             {activity.type === 'new_user' && (t.joined_community || "joined the community")}
                             {activity.type === 'new_project' && (t.published_project || "published a new project")}
                             {activity.type === 'project_update' && (t.updated_project || "updated a project")}
                             {activity.type === 'badge_awarded' && (activity.details.description || `earned the ${activity.details.badgeName} badge!`)}
                             {activity.type === 'achievement' && (activity.details.description || `unlocked a new achievement!`)}
-                            <span className="mx-2 text-xs">•</span>
+                            <span className="mx-1 sm:mx-2 text-[8px] sm:text-xs">•</span>
                             {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                         </p>
                     </div>
@@ -282,26 +281,40 @@ export default function ActivityCard({
                                 </DropdownMenuItem>
                             )}
                             {/* Placeholder for future actions */}
-                            <DropdownMenuItem className="cursor-pointer">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => setIsShareOpen(true)}>
                                 <Share2 className="mr-2 h-4 w-4" />
-                                <span onClick={() => setIsShareOpen(true)}>Copy Link</span>
+                                <span>Copy Link</span>
                             </DropdownMenuItem>
+                            {!isOwnPost && currentUser && (
+                                <DropdownMenuItem
+                                    className="cursor-pointer"
+                                    onClick={() => {
+                                        window.dispatchEvent(new CustomEvent('open-direct-message', {
+                                            detail: { recipientId: (displayActor as any).id || (displayActor as any)._id }
+                                        }));
+                                    }}
+                                >
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    <span>Send Message</span>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
 
                 {/* Content */}
-                <div className="pl-12 sm:pl-16 mt-3 sm:mt-0">
+                <div className="mt-4 sm:pl-20">
                     {activity.details.description && activity.type === 'new_user' && (
-                        <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-500/20 rounded-xl p-4">
+                        <div className="bg-gradient-to-r from-[var(--site-secondary)]/10 to-[var(--site-accent)]/10 border border-[var(--site-secondary)]/20 rounded-xl p-4">
                             <p className="text-[var(--glass-text)] italic">{t.welcome_quote || "\"Just joined! excited to be here.\""}</p>
                         </div>
                     )}
 
+
                     {activity.type === 'new_project' && (
                         <Link href={`/projects/${activity.details.slug}`} className="mt-2 block group cursor-pointer">
                             {activity.details.image && (
-                                <div className="relative w-full h-64 rounded-xl overflow-hidden mb-4 border border-white/10">
+                                <div className="relative w-full aspect-video sm:h-64 rounded-xl overflow-hidden mb-4 border border-white/10">
                                     <Image
                                         src={urlFor(activity.details.image).width(800).url()}
                                         alt={activity.details.title || "Project Image"}
@@ -311,7 +324,7 @@ export default function ActivityCard({
                                     />
                                 </div>
                             )}
-                            <h3 className="text-xl font-bold text-[var(--glass-text)] group-hover:text-teal-400 transition-colors">
+                            <h3 className="text-lg sm:text-xl font-bold text-[var(--glass-text)] group-hover:text-[var(--site-secondary)] transition-colors">
                                 {activity.details.title}
                             </h3>
                             <p className="text-[var(--glass-text-muted)] mt-1 line-clamp-2">
@@ -339,7 +352,7 @@ export default function ActivityCard({
                     {activity.type === 'user_post' && (
                         isSinglePostView ? (
                             <div className="mt-2 text-[var(--glass-text)]">
-                                <p className="mb-3 text-lg leading-relaxed whitespace-pre-wrap">
+                                <p className="mb-3 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
                                     {activity.details.description}
                                 </p>
                                 {activity.details.video && (
@@ -365,7 +378,7 @@ export default function ActivityCard({
                             </div>
                         ) : (
                             <Link href={`/post/${targetId}`} className="mt-2 text-[var(--glass-text)] block cursor-pointer hover:opacity-90 transition-opacity">
-                                <p className="mb-3 text-lg leading-relaxed whitespace-pre-wrap">
+                                <p className="mb-3 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
                                     {activity.details.description}
                                 </p>
                                 {activity.details.video && (
@@ -397,60 +410,66 @@ export default function ActivityCard({
                 </div>
 
                 {/* Action Footer */}
-                <div className="pl-0 sm:pl-16 mt-4 flex items-center justify-between sm:justify-start gap-1 sm:gap-6 border-t border-white/5 pt-3">
+                <div className="mt-4 sm:ml-20 flex items-center justify-between sm:justify-start gap-1 sm:gap-6 border-t border-white/5 pt-3 overflow-x-auto scrollbar-hide">
                     <button
                         onClick={handleLike}
                         disabled={isLikePending}
-                        className={`flex items-center gap-2 text-sm transition-colors group/btn ${isLiked ? 'text-red-500' : 'text-[var(--glass-text-muted)] hover:text-red-400'}`}
+                        className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${isLiked ? 'text-red-500' : 'text-[var(--glass-text-muted)] hover:text-red-400'}`}
                     >
-                        <Heart size={16} className={`transition-transform ${isLiked ? 'fill-current scale-110' : 'group-hover/btn:scale-110'}`} />
-                        <span>{likesCount > 0 ? likesCount : (t.like || 'Like')}</span>
+                        <Heart size={18} className={`sm:w-4 sm:h-4 transition-transform ${isLiked ? 'fill-current scale-110' : 'group-hover/btn:scale-110'}`} />
+                        <span className="font-medium">
+                            {likesCount > 0 ? likesCount : <span className="hidden sm:inline">{t.like || 'Like'}</span>}
+                        </span>
                     </button>
                     {commentTargetType && (
                         <button
                             onClick={() => setShowComments(!showComments)}
-                            className={`flex items-center gap-2 text-sm transition-colors group/btn ${showComments ? 'text-blue-400' : 'text-[var(--glass-text-muted)] hover:text-blue-400'}`}>
-                            <MessageSquare size={16} className="group-hover/btn:scale-110 transition-transform" />
-                            <span>{activity.commentsCount && activity.commentsCount > 0 ? activity.commentsCount : (t.comment || 'Comment')}</span>
+                            className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${showComments ? 'text-blue-400' : 'text-[var(--glass-text-muted)] hover:text-blue-400'}`}>
+                            <MessageSquare size={18} className="sm:w-4 sm:h-4 group-hover/btn:scale-110 transition-transform" />
+                            <span className="font-medium">
+                                {activity.commentsCount && activity.commentsCount > 0 ? activity.commentsCount : <span className="hidden sm:inline">{t.comment || 'Comment'}</span>}
+                            </span>
                         </button>
                     )}
                     {/* Repost Button */}
                     <button
                         onClick={handleRepost}
                         disabled={isRepostPending || isOwnPost || isRepostContext}
-                        className={`flex items-center gap-2 text-sm transition-colors group/btn ${(isOwnPost || isRepostContext) ? 'opacity-50 cursor-not-allowed' : ''} ${isReposted ? 'text-green-500' : 'text-[var(--glass-text-muted)] hover:text-green-500'}`}
+                        className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${(isOwnPost || isRepostContext) ? 'opacity-50 cursor-not-allowed' : ''} ${isReposted ? 'text-green-500' : 'text-[var(--glass-text-muted)] hover:text-green-500'}`}
                         title={isOwnPost ? "Cannot repost your own post" : (isRepostContext ? "Cannot repost a repost" : undefined)}
                     >
-                        <Repeat size={16} className={`transition-transform ${isReposted ? 'rotate-180' : 'group-hover/btn:rotate-180'}`} />
-                        <span>{repostsCount > 0 ? repostsCount : (t.repost || "Repost")}</span>
+                        <Repeat size={18} className={`sm:w-4 sm:h-4 transition-transform ${isReposted ? 'rotate-180' : 'group-hover/btn:rotate-180'}`} />
+                        <span className="font-medium">
+                            {repostsCount > 0 ? repostsCount : <span className="hidden sm:inline">{t.repost || "Repost"}</span>}
+                        </span>
                     </button>
                     <button
                         onClick={() => setIsShareOpen(true)}
-                        className="flex items-center gap-2 text-sm text-[var(--glass-text-muted)] hover:text-teal-400 transition-colors group/btn md:ml-auto"
+                        className="flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm text-[var(--glass-text-muted)] hover:text-[var(--site-secondary)] transition-colors group/btn md:ml-auto"
                     >
-                        <Share2 size={16} className="group-hover/btn:scale-110 transition-transform" />
-                        <span>{t.share || "Share"}</span>
+                        <Share2 size={18} className="sm:w-4 sm:h-4 group-hover/btn:scale-110 transition-transform" />
+                        <span className="font-medium hidden sm:inline">{t.share || "Share"}</span>
                     </button>
 
                     {isBookmarkedType && (
                         <button
                             onClick={handleBookmark}
                             disabled={isBookmarkPending}
-                            className={`flex items-center gap-2 text-sm transition-colors group/btn ${isBookmarked ? 'text-yellow-400' : 'text-[var(--glass-text-muted)] hover:text-yellow-400'}`}
+                            className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${isBookmarked ? 'text-yellow-400' : 'text-[var(--glass-text-muted)] hover:text-yellow-400'}`}
                         >
                             {isBookmarked ? (
-                                <BookmarkCheck size={16} className="group-hover/btn:scale-110 transition-transform" />
+                                <BookmarkCheck size={18} className="sm:w-4 sm:h-4 group-hover/btn:scale-110 transition-transform" />
                             ) : (
-                                <Bookmark size={16} className="group-hover/btn:scale-110 transition-transform" />
+                                <Bookmark size={18} className="sm:w-4 sm:h-4 group-hover/btn:scale-110 transition-transform" />
                             )}
-                            <span>{isBookmarked ? 'Saved' : 'Save'}</span>
+                            <span className="font-medium hidden sm:inline">{isBookmarked ? 'Saved' : 'Save'}</span>
                         </button>
                     )}
                 </div>
 
                 {/* Comment Section */}
                 {showComments && commentTargetType && (
-                    <div className="pl-0 sm:pl-16 mt-4">
+                    <div className="mt-4 sm:ml-20">
                         <CommentSection
                             targetId={targetId}
                             targetType={commentTargetType}

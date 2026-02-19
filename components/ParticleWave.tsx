@@ -181,12 +181,10 @@ const ParticleWave = () => {
             init();
         };
 
-        // Only enable mouse interaction on desktop devices (non-touch and large screen)
-        // We check for hover support AND screen width to be safe
-        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isSmallScreen = window.innerWidth < 1280; // Increased from 1024 to disable on standard laptops
+        // Only enable mouse interaction on non-mobile devices (tablets and desktops)
+        const isMobile = window.innerWidth < 768;
 
-        if (!isTouch && !isSmallScreen) {
+        if (!isMobile) {
             window.addEventListener("mousemove", handleMouseMove);
         }
 
@@ -205,7 +203,7 @@ const ParticleWave = () => {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 z-[2] pointer-events-none"
+            className="fixed inset-0 z-[1] pointer-events-none"
             style={{ opacity: 0.6 }}
         />
     );

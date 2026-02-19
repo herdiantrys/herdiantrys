@@ -2,7 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { trackShopCompletion, trackFirstShopPurchase } from "./gamification.actions";
+import { serializeForClient } from "@/lib/utils";
+import { trackShopCompletion, trackFirstShopPurchase, awardXP } from "./gamification.actions";
 import { createNotification } from "./notification.actions";
 
 
@@ -13,23 +14,18 @@ export const getShopItems = async () => {
         });
 
         // Map iconUrl if needed, assuming icon stored as URL string in Prisma
-        return items.map(item => ({
+        return serializeForClient(items.map(item => ({
             ...item,
             _id: item.id,
             iconUrl: item.icon
-        }));
+        })));
     } catch (error) {
         console.error("Error fetching shop items:", error);
-        return [];
+        return serializeForClient([]);
     }
 };
 
-// ... (skipping unchanged parts for brevity if tool supported it, but here I just replace the top or specific chunks)
-// Actually I will do this in two chunks if possible, or just one big replace if needed. 
-// But wait, the file is 255 lines.
-// I can just replace the top import and the specific area where I broke it.
-// Wait, `replace_file_content` supports single contiguous block.
-// I need `multi_replace_file_content` to do top and bottom edit.
+
 
 
 export const seedShopItems = async () => {
@@ -49,19 +45,36 @@ export const seedShopItems = async () => {
             value: "from-pink-500 to-purple-600",
         },
         {
-            name: "Custom Neon Frame",
-            description: "Choose your own neon color! A fully customizable glow for your avatar.",
-            price: 1000,
-            type: "FRAME",
-            value: "custom-color",
-        },
-        {
             name: "Professional Portfolio Template",
             description: "Unlock the custom portfolio landing page. Stand out with a premium, customizable layout.",
             price: 50, // This will be treated as $50.00 in Stripe logic
             type: "SAAS_TEMPLATE",
             value: "portfolio-v1",
             icon: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&ixlib=rb-4.0.3"
+        },
+        {
+            name: "Custom Color Background",
+            description: "Memungkinkan Anda mengubah warna background halaman profil sesuka hati.",
+            price: 500,
+            type: "BACKGROUND",
+            value: "custom-color",
+            icon: "https://cdn.sanity.io/images/q8119565/production/60d81c81062b339486c42935266522c091910609-500x500.png"
+        },
+        {
+            name: "Custom Background Image",
+            description: "Unggah gambar pilihan Anda sendiri untuk menjadi background profil yang unik.",
+            price: 5000,
+            type: "BACKGROUND",
+            value: "custom-image",
+            icon: "https://cdn.sanity.io/images/q8119565/production/89241517f692994c50f44e3e3b7b8f9e0d1f4d9b-500x500.png"
+        },
+        {
+            name: "Custom Neon Glow Frame",
+            description: "A premium neon glow for your avatar. Fully customizable neon essence.",
+            price: 500,
+            type: "FRAME",
+            value: "custom-color",
+            icon: "https://cdn.sanity.io/images/q8119565/production/60d81c81062b339486c42935266522c091910609-500x500.png"
         }
     ];
 
@@ -81,15 +94,15 @@ export const seedShopItems = async () => {
                         value: item.value
                     }
                 });
-                console.log(`Seeded shop item: ${item.name}`);
+
             } else {
                 // Optional: Update
             }
         }
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error seeding shop items:", error);
-        return { success: false, error: "Failed to seed items" };
+        return serializeForClient({ success: false, error: "Failed to seed items" });
     }
 };
 
@@ -144,7 +157,7 @@ export const purchaseItem = async (userId: string, itemId: string, price: number
 
         revalidatePath("/shop");
         revalidatePath("/dashboard");
-        revalidatePath(`/user/${userId}`);
+        revalidatePath(`/profile/${userId}`);
         revalidatePath("/inventory");
 
         // Check for Shop Completion Achievement
@@ -161,10 +174,14 @@ export const purchaseItem = async (userId: string, itemId: string, price: number
             details: { amount: -price, reason: `Purchased ${type.toLowerCase()}` }
         }).catch(err => console.error("Coin Notification Error:", err));
 
-        return { success: true };
+
+        // Award 50 XP for purchasing
+        awardXP(userId, 50, `purchase_item_${itemId}`).catch(err => console.error("XP Track Error:", err));
+
+        return serializeForClient({ success: true });
     } catch (error: any) {
         console.error("Error purchasing item:", error);
-        return { success: false, error: error.message || "Transaction failed" };
+        return serializeForClient({ success: false, error: error.message || "Transaction failed" });
     }
 };
 
@@ -191,10 +208,10 @@ export const equipItem = async (userId: string, itemId: string, type: string, ef
         revalidatePath(`/user/${userId}`);
         revalidatePath("/inventory");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error: any) {
         console.error("Error equipping item:", error);
-        return { success: false, error: "Failed to equip item" };
+        return serializeForClient({ success: false, error: "Failed to equip item" });
     }
 };
 
@@ -207,7 +224,7 @@ export const deleteShopItem = async (itemId: string, userId: string) => {
         });
 
         if (!user || await isNotAdmin(userId)) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // 2. Delete from Database
@@ -219,10 +236,10 @@ export const deleteShopItem = async (itemId: string, userId: string) => {
         revalidatePath("/shop");
         revalidatePath("/inventory");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error deleting shop item:", error);
-        return { success: false, error: "Failed to delete item" };
+        return serializeForClient({ success: false, error: "Failed to delete item" });
     }
 };
 
@@ -230,7 +247,7 @@ export const bulkDeleteShopItems = async (itemIds: string[], userId: string) => 
     try {
         // 1. Verify User Role
         if (await isNotAdmin(userId)) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // 2. Delete items
@@ -244,10 +261,10 @@ export const bulkDeleteShopItems = async (itemIds: string[], userId: string) => 
         revalidatePath("/shop");
         revalidatePath("/inventory");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error bulk deleting shop items:", error);
-        return { success: false, error: "Failed to delete items" };
+        return serializeForClient({ success: false, error: "Failed to delete items" });
     }
 };
 
@@ -263,7 +280,7 @@ async function isNotAdmin(userId: string) {
 export const updateShopItem = async (itemId: string, data: any, userId: string) => {
     try {
         if (await isNotAdmin(userId)) {
-            return { success: false, error: "Unauthorized" };
+            return serializeForClient({ success: false, error: "Unauthorized" });
         }
 
         // Create update data object with explicit cast for 'category' due to stale types
@@ -286,9 +303,9 @@ export const updateShopItem = async (itemId: string, data: any, userId: string) 
         revalidatePath("/shop");
         revalidatePath("/inventory");
 
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error updating shop item:", error);
-        return { success: false, error: "Failed to update item" };
+        return serializeForClient({ success: false, error: "Failed to update item" });
     }
 };

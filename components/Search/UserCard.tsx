@@ -13,12 +13,12 @@ export default function UserCard({ user }: UserCardProps) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group relative overflow-hidden rounded-2xl glass-panel p-4 border border-white/10 hover:border-teal-500/30 transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl glass-panel p-4 border border-white/10 hover:border-site-secondary/30 transition-all duration-300"
         >
             <div className="flex items-center gap-4">
                 {/* Avatar */}
                 <div className="relative">
-                    <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/10 group-hover:ring-teal-500/50 transition-all">
+                    <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/10 group-hover:ring-site-secondary/50 transition-all">
                         {user.image || user.imageURL ? (
                             <img
                                 src={user.image || user.imageURL}
@@ -33,7 +33,7 @@ export default function UserCard({ user }: UserCardProps) {
                     </div>
                     {/* Online/Status Indicator (Optional) */}
                     {user.role === "ADMIN" || user.role === "SUPER_ADMIN" ? (
-                        <div className="absolute -bottom-1 -right-1 bg-teal-500 rounded-full p-1 border-2 border-black">
+                        <div className="absolute -bottom-1 -right-1 bg-site-secondary rounded-full p-1 border-2 border-black">
                             <Shield size={10} className="text-white fill-current" />
                         </div>
                     ) : null}
@@ -43,11 +43,11 @@ export default function UserCard({ user }: UserCardProps) {
                 <div className="flex-1 min-w-0">
                     <Link href={`/user/${user.username}`} className="block focus:outline-none">
                         <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-lg text-white group-hover:text-teal-400 transition-colors truncate">
+                            <h3 className="font-bold text-lg text-white group-hover:text-site-secondary transition-colors truncate">
                                 {user.name || "User"}
                             </h3>
                             {user.role === "ADMIN" || user.role === "SUPER_ADMIN" ? (
-                                <Shield size={14} className="text-teal-500" />
+                                <Shield size={14} className="text-site-secondary" />
                             ) : null}
                         </div>
                         <p className="text-sm text-zinc-400 truncate">@{user.username}</p>
@@ -61,8 +61,8 @@ export default function UserCard({ user }: UserCardProps) {
 
                 {/* Action (Follow/View) */}
                 <Link
-                    href={`/user/${user.username}`}
-                    className="px-4 py-2 rounded-full bg-white/5 hover:bg-teal-500/20 text-sm font-medium text-zinc-300 hover:text-teal-400 transition-colors"
+                    href={`/profile/${user.username}`}
+                    className="px-4 py-2 rounded-full bg-white/5 hover:bg-site-secondary/20 text-sm font-medium text-zinc-300 hover:text-site-secondary transition-colors"
                 >
                     View
                 </Link>

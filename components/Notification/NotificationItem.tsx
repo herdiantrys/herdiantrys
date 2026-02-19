@@ -2,16 +2,19 @@
 
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins, Zap, Trophy } from "lucide-react";
+import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins, Zap, Trophy, Repeat } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function NotificationItem({ notification, onClick }: { notification: any; onClick: () => void }) {
-    const { sender, type, relatedPost, read, createdAt } = notification;
+    const { sender, type, relatedPost, relatedProject, read, createdAt } = notification;
 
     const getIcon = () => {
         switch (type) {
-            case 'like_post': return <Heart size={14} className="text-pink-500 fill-pink-500" />;
-            case 'comment_post': return <MessageSquare size={14} className="text-blue-500 fill-blue-500" />;
+            case 'like_post':
+            case 'like_project': return <Heart size={14} className="text-pink-500 fill-pink-500" />;
+            case 'comment_post':
+            case 'comment_project': return <MessageSquare size={14} className="text-blue-500 fill-blue-500" />;
+            case 'repost_post': return <Repeat size={14} className="text-purple-500" />;
             case 'follow': return <UserPlus size={14} className="text-green-500" />;
             case 'system': return <Coins size={14} className="text-yellow-500 animate-pulse" />;
             case 'xp_award': return <Zap size={14} className="text-[var(--site-secondary)] fill-[var(--site-secondary)]" />;
@@ -26,7 +29,10 @@ export default function NotificationItem({ notification, onClick }: { notificati
         const details = notification.details || {};
         switch (type) {
             case 'like_post': return <span>liked your post</span>;
+            case 'like_project': return <span>liked your project</span>;
             case 'comment_post': return <span>commented on your post</span>;
+            case 'comment_project': return <span>commented on your project</span>;
+            case 'repost_post': return <span>reposted your post</span>;
             case 'follow': return <span>started following you</span>;
             case 'system': return <span>You received 10 Runes</span>;
             case 'xp_award': return <span>earned <span className="font-bold text-[var(--site-secondary)]">{details.amount} XP</span> for {details.reason}</span>;
@@ -37,7 +43,10 @@ export default function NotificationItem({ notification, onClick }: { notificati
         }
     };
 
-    const linkHref = relatedPost ? `/dashboard` : `/user/${sender.username}`;
+    const linkHref = relatedPost ? `/dashboard`
+        : relatedProject ? `/projects/${relatedProject.slug}`
+            : type === 'achievement' || type === 'badge_awarded' ? `/profile/${sender.username}`
+                : `/profile/${sender.username}`;
 
     const resolveAvatar = (image: any, fallbackUrl: string) => {
         if (!image) return fallbackUrl;
@@ -93,6 +102,13 @@ export default function NotificationItem({ notification, onClick }: { notificati
                     <div className="mt-1.5 pl-2 border-l-2 border-white/10">
                         <p className="text-xs text-[var(--glass-text-muted)] italic line-clamp-1">
                             "{relatedPost.text}"
+                        </p>
+                    </div>
+                )}
+                {relatedProject && (
+                    <div className="mt-1.5 pl-2 border-l-2 border-white/10">
+                        <p className="text-xs text-[var(--glass-text-muted)] font-bold line-clamp-1">
+                            {relatedProject.title}
                         </p>
                     </div>
                 )}

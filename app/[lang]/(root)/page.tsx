@@ -1,7 +1,7 @@
 import Hero from "@/components/Hero";
 import { getSanityProjects } from "@/lib/sanityProjects";
 import dynamic from "next/dynamic";
-import ScrollBackground from "@/components/ScrollBackground";
+
 
 const GlassPartners = dynamic(() => import("@/components/GlassPartners"));
 const GlassPortfolio = dynamic(() => import("@/components/GlassPortfolio"));
@@ -23,7 +23,7 @@ const Home = async ({ params }: { params: Promise<{ lang: string }> }) => {
   const dict = await getDictionary(lang as any);
 
   const [projects, testimonials, partners, profile, services] = await Promise.all([
-    getSanityProjects(userId, true),
+    getSanityProjects(userId, false),
     getSanityTestimonials(),
     getSanityPartners(),
     getProfile(),
@@ -32,7 +32,7 @@ const Home = async ({ params }: { params: Promise<{ lang: string }> }) => {
 
   return (
     <main className="min-h-screen overflow-hidden relative">
-      <ScrollBackground />
+
       <div id="hero">
         <Hero profile={profile} dict={dict} />
       </div>
@@ -40,7 +40,7 @@ const Home = async ({ params }: { params: Promise<{ lang: string }> }) => {
         <GlassPortfolio projects={projects as any} dict={dict} />
       </div>
       <div id="services">
-        <GlassServices services={services} dict={dict} />
+        <GlassServices services={services as any} dict={dict} />
       </div>
       <div id="testimonials">
         <GlassTestimonials testimonials={testimonials} dict={dict} />

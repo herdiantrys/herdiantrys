@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { awardXP, trackProjectView } from "@/lib/actions/gamification.actions";
 import { toast } from "sonner";
 import { XPToast } from "./XPToast";
+import { RuneToast } from "./RuneToast";
 
 export default function ProjectXPHandler({ userId, projectId }: { userId: string, projectId: string }) {
     const hasTracked = useRef(false);
@@ -22,7 +23,30 @@ export default function ProjectXPHandler({ userId, projectId }: { userId: string
                 }
 
                 // 2. Track View for Milestones (Observer, Scout, etc.)
-                await trackProjectView(userId, projectId);
+                const trackRes: any = await trackProjectView(userId, projectId);
+                if (trackRes?.success && trackRes.awardedBadge) {
+                    const badge = trackRes.awardedBadge;
+                    // Show Badge Achievement Toast (Combined or Separate)
+                    toast.custom((t) => (
+                        <XPToast
+                            amount={badge.xpReward || 0}
+                            reason={`Unlocked: ${badge.name}!`}
+                            type="milestone"
+                        />
+                    ), { duration: 5000 });
+
+                    // Show Rune Toast if present
+                    if (badge.runesReward) {
+                        setTimeout(() => {
+                            toast.custom((t) => (
+                                <RuneToast
+                                    amount={badge.runesReward}
+                                    reason="Achievement Bonus!"
+                                />
+                            ), { duration: 5000 });
+                        }, 1000);
+                    }
+                }
             };
 
             triggerXP();

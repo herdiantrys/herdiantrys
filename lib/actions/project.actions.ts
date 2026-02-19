@@ -53,7 +53,12 @@ export async function createProject(data: any) {
         const session = await auth();
         if (!session?.user?.id) throw new Error("Unauthorized");
 
-        const authorId = session.user.id;
+        let authorId = session.user.id;
+
+        // Allow Admin/Super Admin to set author
+        if (data.authorId && ["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            authorId = data.authorId;
+        }
 
         const project = await prisma.project.create({
             data: {
@@ -101,10 +106,12 @@ export async function updateProject(id: string, data: any) {
                 demoUrl: data.demoUrl,
                 repoUrl: data.repoUrl,
                 tags: data.tags,
-                // authorId: data.authorId, // Do not update author
+                // Only update author if admin and provided
+                ...(data.authorId && ["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string) ? { authorId: data.authorId } : {}),
                 categoryId: data.categoryId || null,
                 favorite: data.favorite,
                 status: data.status,
+                isArchived: data.status === "ARCHIVED",
                 gallery: data.gallery || [],
             }
         });

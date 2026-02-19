@@ -9,6 +9,7 @@ import { bulkDeleteServices, deleteService } from "@/lib/actions/service.actions
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatNumber, formatDate } from "@/lib/utils";
 
 export default function AdminServicesClient({ services }: { services: any[] }) {
     const router = useRouter();
@@ -117,7 +118,7 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeleteServices(selectedIds);
+                const result = (await bulkDeleteServices(selectedIds)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} services`);
                     setSelectedIds([]);
@@ -240,10 +241,10 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                                         {service.description}
                                     </td>
                                     <td className="px-6 py-4 text-sm font-medium text-teal-500">
-                                        Rp. {service.price?.toLocaleString('id-ID')}
+                                        Rp. {formatNumber(service.price || 0)}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
-                                        {new Date(service.createdAt).toLocaleDateString()}
+                                        {formatDate(service.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={`/admin/services/${service.id}`} className="text-sm text-teal-400 hover:text-teal-300 mr-3 font-medium transition-colors">Edit</Link>

@@ -82,7 +82,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                         exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-0 top-full mt-4 w-96 rounded-2xl bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/20 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden z-50 ring-1 ring-white/10"
+                        className="absolute right-[-100px] sm:right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-96 rounded-[2rem] bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/20 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.5)] overflow-hidden z-50 ring-1 ring-white/10"
                     >
                         {/* Header */}
                         <div className="px-5 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 backdrop-blur-xl">

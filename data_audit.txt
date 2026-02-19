@@ -1,0 +1,21 @@
+Checking user: Found 3 records.
+Checking notification: Found 3 records.
+Checking activity: Found 5 records.
+Checking category: Found 3 records.
+Checking project: Found 3 records.
+  [MATCH] project ID: cmlnyykef0004yl5s1y1mqj1u Length: 802
+  Data: {"id":"cmlnyykef0004yl5s1y1mqj1u","title":"Mengapa sebagian pasien PRP beralih ke PRF","slug":"mengapa-sebagian-pasien-prp-beralih-ke-prf","description":"","content":"","type":"VIDEO","image":"https://cdn.sanity.io/images/wxzkwstu/production/e4b18ff125d0936187dd0a7c842ff4e4feaebe94-725x972.png","videoFile":"https://cdn.sanity.io/files/wxzkwstu/production/cc27289d885c75e2a32ff5ebcd459f579a180bd9.mp4","gallery":[],"album":null,"tags":"beauty, content, socialmedia","demoUrl":"","repoUrl":"","views":2,"favorite":true,"status":"PUBLISHED","isArchived":false,"uploadDate":"2026-02-15T16:38:00.903Z","customUpdatedAt":"2026-02-15T16:38:00.903Z","createdAt":"2026-02-15T16:38:00.903Z","updatedAt":"2026-02-15T17:46:57.898Z","categoryId":"cmlnz2oto0005yl5stnsnakax","authorId":"cmlmgrhgv0000yl9kjqzixmfd"}
+Checking post: Found 1 records.
+Checking comment: Found 1 records.
+Checking shopItem: Found 5 records.
+Checking userInventory: Found 4 records.
+Checking service: Found 0 records.
+Checking partner: Found 0 records.
+Checking testimonial: Found 0 records.
+Checking contact: Found 0 records.
+Checking siteContent: Found 1 records.
+Checking globalSetting: Found 1 records.
+Checking projectView: Found 3 records.
+Checking profileVisit: Found 0 records.
+Checking rank: Found 10 records.
+Checking portfolioConfig: Found 2 records.

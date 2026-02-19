@@ -86,7 +86,7 @@ export default function NotFound() {
                                     transition={{ delay: 0.6, duration: 0.8 }}
                                     className="text-base md:text-lg text-white/60 mb-12 max-w-lg mx-auto leading-relaxed font-light"
                                 >
-                                    The coordinates you are looking for seem to have drifted away. <br className="hidden md:block" /> Let's re-align your trajectory.
+                                    The page you're looking for doesn't exist or has been moved.rifted away. <br className="hidden md:block" /> Let's re-align your trajectory.
                                 </motion.p>
 
                                 <motion.div

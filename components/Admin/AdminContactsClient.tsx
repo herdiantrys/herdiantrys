@@ -7,6 +7,7 @@ import { bulkDeleteContacts, deleteContact, markAsRead } from "@/lib/actions/con
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatDate } from "@/lib/utils";
 
 export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
     const router = useRouter();
@@ -133,7 +134,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeleteContacts(selectedIds);
+                const result = (await bulkDeleteContacts(selectedIds)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} messages`);
                     setSelectedIds([]);
@@ -159,7 +160,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                 c.id === contact.id ? { ...c, isRead: true } : c
             ));
 
-            const result = await markAsRead(contact.id);
+            const result = (await markAsRead(contact.id)) as any;
             if (!result.success) {
                 // Revert if failed
                 setLocalContacts(prev => prev.map(c =>
@@ -283,7 +284,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
-                                        {new Date(contact.createdAt).toLocaleDateString()}
+                                        {formatDate(contact.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
                                         <button
@@ -380,7 +381,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                                 </button>
                                 <button
                                     onClick={async () => {
-                                        await deleteContact(viewMessage.id);
+                                        const result = (await deleteContact(viewMessage.id)) as any;
                                         toast.success("Message deleted");
                                         setViewMessage(null);
                                         router.refresh();

@@ -118,7 +118,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                     className="text-center mb-8 sm:mb-12 pt-16 sm:pt-0"
                 >
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-3 sm:mb-4 px-16 sm:px-4">
-                        <span className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-400 dark:via-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-site-accent-prev to-site-accent-next bg-clip-text text-transparent">
                             Search & Discover
                         </span>
                     </h1>
@@ -136,10 +136,10 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                 >
                     <form onSubmit={handleSearchSubmit} className="relative group">
                         {/* Glow on focus */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 rounded-2xl opacity-0 group-focus-within:opacity-20 blur-xl transition-all duration-500" />
+                        <div className="absolute -inset-1 bg-site-secondary rounded-2xl opacity-0 group-focus-within:opacity-20 blur-xl transition-all duration-500" />
 
-                        <div className="relative flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-1.5 sm:p-2 transition-all duration-300 group-focus-within:border-teal-500/50 group-focus-within:shadow-2xl">
-                            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg shrink-0">
+                        <div className="relative flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-1.5 sm:p-2 transition-all duration-300 group-focus-within:border-site-secondary/50 group-focus-within:shadow-2xl">
+                            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-site-secondary shadow-lg shrink-0">
                                 <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
 
@@ -157,7 +157,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                 disabled={!query.trim() || isLoading}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white text-sm sm:text-base font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all relative overflow-hidden shrink-0"
+                                className="px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl bg-site-accent text-white text-sm sm:text-base font-bold shadow-lg hover:shadow-xl hover:shadow-site-accent/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all relative overflow-hidden shrink-0 border border-white/10"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
                                     {isLoading ? (
@@ -195,7 +195,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                     setQuery(tag);
                                     performSearch(tag);
                                 }}
-                                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 hover:from-teal-500/20 hover:to-cyan-500/20 dark:from-teal-500/20 dark:to-cyan-500/20 dark:hover:from-teal-500/30 dark:hover:to-cyan-500/30 text-xs sm:text-sm font-semibold text-teal-700 dark:text-teal-300 border border-teal-200/50 dark:border-teal-500/30 hover:border-teal-300 dark:hover:border-teal-400 transition-all shadow-sm hover:shadow-md"
+                                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-site-secondary/10 hover:bg-site-secondary/20 dark:bg-site-secondary/20 dark:hover:bg-site-secondary/30 text-xs sm:text-sm font-semibold text-site-secondary border border-site-secondary/30 hover:border-site-secondary transition-all shadow-sm hover:shadow-md"
                             >
                                 {tag}
                             </motion.button>
@@ -228,7 +228,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="activeSearchTab"
-                                                    className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-xl"
+                                                    className="absolute inset-0 bg-site-secondary rounded-xl shadow-[0_0_15px_var(--site-secondary)]/30"
                                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                                 />
                                             )}
@@ -258,7 +258,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                 <motion.div
                                     animate={{ rotate: 360 }}
                                     transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                                    className="w-16 h-16 border-4 border-gray-200 dark:border-gray-800 border-t-teal-500 rounded-full mb-6"
+                                    className="w-16 h-16 border-4 border-gray-200 dark:border-gray-800 border-t-site-secondary rounded-full mb-6"
                                 />
                                 <p className="text-xl font-semibold text-gray-600 dark:text-gray-400">
                                     Searching...
@@ -306,7 +306,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                 {filtered.users.length > 0 && (
                                     <section>
                                         <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                                            <div className="w-10 h-10 rounded-xl bg-site-secondary flex items-center justify-center shadow-lg">
                                                 <User2 className="w-5 h-5 text-white" />
                                             </div>
                                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -335,7 +335,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                 {filtered.projects.length > 0 && (
                                     <section>
                                         <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                                            <div className="w-10 h-10 rounded-xl bg-site-secondary flex items-center justify-center shadow-lg">
                                                 <TrendingUp className="w-5 h-5 text-white" />
                                             </div>
                                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -377,7 +377,7 @@ export default function SearchPageClient({ dict, userId }: { dict: any; userId?:
                                 {filtered.posts.length > 0 && (
                                     <section>
                                         <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                                            <div className="w-10 h-10 rounded-xl bg-site-secondary flex items-center justify-center shadow-lg">
                                                 <FileText className="w-5 h-5 text-white" />
                                             </div>
                                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

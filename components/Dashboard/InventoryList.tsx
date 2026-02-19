@@ -55,7 +55,7 @@ export default function InventoryList({
         if (!color) return;
 
         const timer = setTimeout(async () => {
-            const result = await updateProfileColor(userId, color);
+            const result = (await updateProfileColor(userId, color)) as any;
             if (!result.success) {
                 toast.error("Failed to save color");
             } else {
@@ -86,7 +86,7 @@ export default function InventoryList({
         if (!frameColorState) return;
 
         const timer = setTimeout(async () => {
-            const result = await updateFrameColor(userId, frameColorState);
+            const result = (await updateFrameColor(userId, frameColorState)) as any;
             if (!result.success) {
                 toast.error("Failed to save frame color");
             } else {
@@ -119,7 +119,7 @@ export default function InventoryList({
             const formData = new FormData();
             formData.append("image", croppedImageBlob, "custom-bg.jpg");
 
-            const result = await uploadCustomBackground(userId, formData);
+            const result = (await uploadCustomBackground(userId, formData)) as any;
             if (result.success) {
                 toast.success("Background updated!");
                 router.refresh();
@@ -139,7 +139,7 @@ export default function InventoryList({
 
         setIsUploading(true);
         try {
-            const result = await removeCustomBackground(userId);
+            const result = (await removeCustomBackground(userId)) as any;
             if (result.success) {
                 toast.success("Background removed");
                 router.refresh();
@@ -163,10 +163,10 @@ export default function InventoryList({
                 : equippedBackground === item.value) || false;
 
         try {
-            const result = await toggleEquipItem(userId, item.value, item.type, isCurrentlyEquipped);
+            const result = (await toggleEquipItem(userId, item.value, item.type, isCurrentlyEquipped)) as any;
             if (result.success) {
                 toast.success(isCurrentlyEquipped ? "Item unequipped" : "Item equipped!", {
-                    icon: <Sparkles className="text-teal-400" />
+                    icon: <Sparkles className="text-[var(--site-secondary)]" />
                 });
                 router.refresh();
             } else {
@@ -207,7 +207,7 @@ export default function InventoryList({
                         className={`
                             px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300
                             ${filter === type
-                                ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-md"
+                                ? "bg-[var(--site-secondary)] text-white shadow-md"
                                 : "text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/5"
                             }
                         `}

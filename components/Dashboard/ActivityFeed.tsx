@@ -27,7 +27,7 @@ export default function ActivityFeed({ activities, userId, initialBookmarks = []
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <AnimatePresence mode="popLayout">
                 {visibleActivities.map((activity) => (
                     <motion.div

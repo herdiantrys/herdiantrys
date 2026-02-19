@@ -1,101 +1,141 @@
-import { defineQuery } from "next-sanity";
-import { client } from "@/sanity/lib/client";
+import prisma from "@/lib/prisma";
+import { serializeForClient } from "@/lib/utils";
 
 export async function getDashboardStats() {
     try {
-        const PROJECTS_COUNT_QUERY = defineQuery(`count(*[_type == "project"])`);
-        const USERS_COUNT_QUERY = defineQuery(`count(*[_type == "user"])`);
-        // Fetch views array instead of using sum() in GROQ
-        const VIEWS_QUERY = defineQuery(`*[_type == "project" && defined(views)].views`);
-
-        const [totalProjects, totalUsers, viewsArray] = await Promise.all([
-            client.fetch(PROJECTS_COUNT_QUERY),
-            client.fetch(USERS_COUNT_QUERY),
-            client.fetch(VIEWS_QUERY)
+        const [totalProjects, totalUsers, viewsAggregate] = await Promise.all([
+            prisma.project.count({
+                where: { status: "PUBLISHED" }
+            }),
+            prisma.user.count(),
+            prisma.project.aggregate({
+                _sum: { views: true },
+                where: { status: "PUBLISHED" }
+            })
         ]);
 
-        // Calculate sum in JS
-        const totalViews = viewsArray.reduce((acc: number, curr: number) => acc + curr, 0);
+        const totalViews = viewsAggregate._sum.views || 0;
 
-        console.log("DEBUG STATS FETCH:", { totalProjects, totalUsers, totalViews });
 
-        return {
+
+        return serializeForClient({
             totalProjects: totalProjects || 0,
             totalUsers: totalUsers || 0,
             totalViews: totalViews || 0
-        };
+        });
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);
-        return { totalProjects: 0, totalUsers: 0, totalViews: 0 };
+        return serializeForClient({ totalProjects: 0, totalUsers: 0, totalViews: 0 });
     }
 }
 
 export async function getRecentProjects() {
     try {
-        const QUERY = defineQuery(`
-            *[_type == "project"] | order(_createdAt desc)[0...5] {
-                _id,
-                title,
-                _createdAt,
-                "imageUrl": image.asset->url,
-                category->{title}
+        const projects = await prisma.project.findMany({
+            where: { status: "PUBLISHED" },
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+                image: true,
+                category: {
+                    select: { title: true }
+                }
             }
-        `);
-        return await client.fetch(QUERY);
+        });
+
+        return serializeForClient(projects.map(p => ({
+            _id: p.id,
+            title: p.title,
+            _createdAt: p.createdAt.toISOString(),
+            imageUrl: p.image,
+            category: p.category
+        })));
     } catch (error) {
         console.error("Error fetching recent projects:", error);
-        return [];
+        return serializeForClient([]);
     }
 }
 
 export async function getRecentUsers() {
     try {
-        const QUERY = defineQuery(`
-            *[_type == "user"] | order(_createdAt desc)[0...5] {
-                _id,
-                name,
-                email,
-                image,
-                _createdAt
+        const users = await prisma.user.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                createdAt: true
             }
-        `);
-        return await client.fetch(QUERY);
+        });
+
+        return serializeForClient(users.map(u => ({
+            _id: u.id,
+            name: u.name,
+            email: u.email,
+            image: u.image,
+            _createdAt: u.createdAt.toISOString()
+        })));
     } catch (error) {
         console.error("Error fetching recent users:", error);
-        return [];
+        return serializeForClient([]);
     }
 }
 
 export async function getRecentUpdates() {
     try {
-        const QUERY = defineQuery(`
-            *[_type == "project"] | order(_updatedAt desc)[0...5] {
-                _id,
-                title,
-                _updatedAt,
-                "imageUrl": image.asset->url
+        const projects = await prisma.project.findMany({
+            where: { status: "PUBLISHED" },
+            orderBy: { updatedAt: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                title: true,
+                updatedAt: true,
+                image: true
             }
-        `);
-        return await client.fetch(QUERY);
+        });
+
+        return serializeForClient(projects.map(p => ({
+            _id: p.id,
+            title: p.title,
+            _updatedAt: p.updatedAt.toISOString(),
+            imageUrl: p.image
+        })));
     } catch (error) {
         console.error("Error fetching recent updates:", error);
-        return [];
+        return serializeForClient([]);
     }
 }
 
 export async function getPopularProjects() {
     try {
-        const QUERY = defineQuery(`
-            *[_type == "project"] | order(count(likes) desc)[0...5] {
-                _id,
-                title,
-                "likesCount": count(likes),
-                "imageUrl": image.asset->url
+        const projects = await prisma.project.findMany({
+            where: { status: "PUBLISHED" },
+            orderBy: { views: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                title: true,
+                image: true,
+                _count: {
+                    select: { likedBy: true }
+                }
             }
-        `);
-        return await client.fetch(QUERY);
+        });
+
+        return serializeForClient(projects.map(p => ({
+            _id: p.id,
+            title: p.title,
+            likesCount: p._count.likedBy,
+            imageUrl: p.image
+        })));
     } catch (error) {
         console.error("Error fetching popular projects:", error);
-        return [];
+        return serializeForClient([]);
     }
 }

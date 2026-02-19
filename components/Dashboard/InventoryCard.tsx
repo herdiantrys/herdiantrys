@@ -94,7 +94,7 @@ export const InventoryCard = ({
 
                     {/* Equipped Badge Overlay */}
                     {isEquipped && (
-                        <div className="absolute top-2 right-2 bg-teal-500 text-black text-[10px] font-bold px-1.5 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,0.5)]">
+                        <div className="absolute top-2 right-2 bg-[var(--site-secondary)] text-black text-[10px] font-bold px-1.5 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,0.5)]">
                             EQUIPPED
                         </div>
                     )}
@@ -102,7 +102,7 @@ export const InventoryCard = ({
 
                 {/* 2. Middle: Info */}
                 <div className="flex-1 flex flex-col gap-1 text-center">
-                    <h3 className={`text-sm font-bold uppercase tracking-wide break-words ${isEquipped ? "text-teal-400 drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-400"}`}>
+                    <h3 className={`text-sm font-bold uppercase tracking-wide break-words ${isEquipped ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-400"}`}>
                         {item.name}
                     </h3>
                     <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2">
@@ -135,7 +135,7 @@ export const InventoryCard = ({
                                 <button
                                     onClick={onUploadClick}
                                     disabled={isUploading}
-                                    className="flex-1 py-1 bg-teal-900/50 text-teal-400 text-[10px] font-bold border border-teal-500/30 hover:bg-teal-900/80 transition-colors flex items-center justify-center gap-1"
+                                    className="flex-1 py-1 bg-[var(--site-secondary)]/20 text-[var(--site-secondary)] text-[10px] font-bold border border-[var(--site-secondary)]/30 hover:bg-[var(--site-secondary)]/30 transition-colors flex items-center justify-center gap-1"
                                 >
                                     <Upload size={10} />
                                     {hasCustomImageSet ? "CHG" : "UPLD"}
@@ -164,14 +164,14 @@ export const InventoryCard = ({
                             w-full py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:translate-y-0.5 active:shadow-none
                             ${isEquipped
                                 ? "bg-red-900 text-red-200 border-b-2 border-red-950 hover:bg-red-800"
-                                : "bg-teal-600 text-teal-50 border-b-2 border-teal-800 hover:bg-teal-500"
+                                : "bg-[var(--site-secondary)] text-white border-b-2 border-[var(--site-secondary)] hover:opacity-90"
                             }
                             disabled:opacity-50 disabled:cursor-not-allowed
                         `}
                         style={{
                             boxShadow: isEquipped
                                 ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 0 #450a0a'
-                                : 'inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 0 #115e59'
+                                : 'inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 0 var(--site-secondary-rgb)'
                         }}
                     >
                         {isLoading ? (

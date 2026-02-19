@@ -2,12 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { MoreHorizontal, Trash2, Shield, X, Check } from "lucide-react";
+import { MoreHorizontal, Trash2, Shield, X, Check, Pencil } from "lucide-react";
 import { deleteUser, updateUserRole } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function UserActions({ user, currentUser }: { user: any, currentUser: any }) {
+export default function UserActions({ user, currentUser, onEditClick }: { user: any, currentUser: any, onEditClick?: () => void }) {
     const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
 
     const [isOpen, setIsOpen] = useState(false);
@@ -101,6 +101,17 @@ export default function UserActions({ user, currentUser }: { user: any, currentU
                                 }}
                                 className="w-48 z-[9999] rounded-xl overflow-hidden shadow-2xl border border-[var(--glass-border)] bg-white/80 dark:bg-black/80 backdrop-blur-xl"
                             >
+                                <button
+                                    id={`user-action-edit-${user.id}`}
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        onEditClick?.();
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-3 text-sm text-[var(--glass-text)] hover:bg-[var(--glass-border)] text-left"
+                                >
+                                    <Pencil size={16} className="text-blue-400" />
+                                    Edit User
+                                </button>
                                 <button
                                     id={`user-action-change-role-${user.id}`}
                                     onClick={() => {

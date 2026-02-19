@@ -5,10 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, Filter, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown, CheckSquare, Square, FileText, Trash2, Archive, CheckCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { deletePost, bulkDeletePosts, bulkUpdatePostStatus } from "@/lib/actions/post.actions";
+import { deletePost, bulkDeletePosts, bulkUpdatePostStatus, updatePost, createPost } from "@/lib/actions/post.actions";
+import { getAllUsers } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { Plus, Image as ImageIcon, Music, Video, User as UserIcon } from "lucide-react";
+import { useEffect } from "react";
+import { formatDate } from "@/lib/utils";
 
 export default function AdminPostsClient({ posts, currentUserId }: { posts: any[], currentUserId?: string }) {
     const router = useRouter();
@@ -22,6 +26,28 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
     // Bulk Action State
     const [actionType, setActionType] = useState<'DELETE' | 'ARCHIVE' | 'ACTIVATE' | null>(null);
     const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+
+    // Create/Edit Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingPost, setEditingPost] = useState<{
+        id?: string,
+        title?: string,
+        text: string,
+        authorId: string,
+        image?: string,
+        audio?: string,
+        video?: string
+    } | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [users, setUsers] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const allUsers = await getAllUsers();
+            setUsers(allUsers);
+        };
+        fetchUsers();
+    }, []);
 
     // Sort Config
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'createdAt', direction: 'desc' });
@@ -141,7 +167,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
         setIsBulkProcessing(true);
         try {
             if (actionType === 'DELETE') {
-                const result = await bulkDeletePosts(selectedIds, currentUserId);
+                const result = (await bulkDeletePosts(selectedIds, currentUserId)) as any;
                 if (result.success) {
                     toast.success(`Deleted ${selectedIds.length} posts`);
                     setSelectedIds([]);
@@ -151,7 +177,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                     toast.error(result.error);
                 }
             } else if (actionType === 'ARCHIVE' || actionType === 'ACTIVATE') {
-                const result = await bulkUpdatePostStatus(selectedIds, actionType, currentUserId);
+                const result = (await bulkUpdatePostStatus(selectedIds, actionType, currentUserId)) as any;
                 if (result.success) {
                     toast.success(`Updated ${selectedIds.length} posts`);
                     setSelectedIds([]);
@@ -171,28 +197,48 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
 
     return (
         <div>
-            {/* Filters */}
+            {/* Header Section */}
             <div className="flex flex-col gap-4 mb-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold">Posts</h1>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => {
+                                setEditingPost({
+                                    text: "",
+                                    title: "",
+                                    authorId: currentUserId || ""
+                                });
+                                setIsModalOpen(true);
+                            }}
+                            className="flex items-center gap-2 bg-[var(--site-button)] hover:opacity-90 text-[var(--site-button-text)] px-4 py-2 rounded-lg transition-all font-medium shadow-lg shadow-[var(--site-accent)]/20"
+                        >
+                            <Plus size={18} />
+                            Create Post
+                        </button>
+                    </div>
+                </div>
+
+                {/* Filters Box */}
                 <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
 
                         {/* Search */}
                         <div className="relative w-full lg:max-w-md group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-teal-500 transition-colors" size={18} />
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Search posts or authors..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-teal-500/50 transition-all"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
                             />
                         </div>
 
                         {/* Controls Group */}
                         <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
-
                             {/* Status Filter */}
                             <div className="relative w-full sm:w-48 group">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -201,13 +247,13 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 >
                                     <option value="ALL">All Status</option>
                                     <option value="ACTIVE">Active</option>
                                     <option value="ARCHIVED">Archived</option>
                                 </select>
-                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                                     <ArrowUpDown size={14} className="text-gray-400 dark:text-gray-600" />
                                 </div>
                             </div>
@@ -223,7 +269,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
                         </div>
@@ -304,10 +350,26 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
-                                        {new Date(post.createdAt).toLocaleDateString()}
+                                        {formatDate(post.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button className="text-sm text-teal-400 hover:text-teal-300 mr-3">Edit</button>
+                                        <button
+                                            onClick={() => {
+                                                setEditingPost({
+                                                    id: post.id,
+                                                    title: post.title || "",
+                                                    text: post.text,
+                                                    authorId: post.authorId,
+                                                    image: post.image,
+                                                    audio: post.audio,
+                                                    video: post.video
+                                                });
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-sm text-teal-400 hover:text-teal-300 mr-3"
+                                        >
+                                            Edit
+                                        </button>
                                         <Link href={`/post/${post.id}`} className="text-sm text-blue-400 hover:text-blue-300 mr-3">View</Link>
 
                                         {post.isArchived && (
@@ -401,7 +463,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                     setIsDeleting(true);
 
                     try {
-                        const result = await deletePost(postToDelete, currentUserId);
+                        const result = (await deletePost(postToDelete, currentUserId)) as any;
 
                         if (result?.success) {
                             toast.success("Post deleted successfully");
@@ -421,6 +483,194 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                 count={actionType === 'DELETE' ? selectedIds.length : 1}
                 description={actionType === 'DELETE' ? `Are you sure you want to delete ${selectedIds.length} selected posts? This action cannot be undone.` : undefined} // Use dynamic default
             />
+
+            {/* Create/Edit Modal */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 overflow-y-auto">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsModalOpen(false)}
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-lg bg-[#1A1A1A] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-white">
+                                    {editingPost?.id ? "Edit Post" : "Create New Post"}
+                                </h2>
+                                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Title Field */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Title (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={editingPost?.title || ""}
+                                            onChange={(e) => setEditingPost(prev => prev ? { ...prev, title: e.target.value } : null)}
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-teal-500/50"
+                                            placeholder="Enter title..."
+                                        />
+                                    </div>
+
+                                    {/* Author Selection */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Author</label>
+                                        <div className="relative">
+                                            <select
+                                                value={editingPost?.authorId || ""}
+                                                onChange={(e) => setEditingPost(prev => prev ? { ...prev, authorId: e.target.value } : null)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-teal-500/50 appearance-none"
+                                            >
+                                                {users.map(u => (
+                                                    <option key={u.id} value={u.id} className="bg-[#1A1A1A]">
+                                                        {u.name} (@{u.username})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                                <UserIcon size={14} className="text-gray-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Content Field */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">Post Content</label>
+                                    <textarea
+                                        value={editingPost?.text || ""}
+                                        onChange={(e) => setEditingPost(prev => prev ? { ...prev, text: e.target.value } : null)}
+                                        className="w-full h-32 bg-black/40 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-teal-500/50 resize-none"
+                                        placeholder="What's on your mind?"
+                                    />
+                                </div>
+
+                                {/* Media Cluster */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {/* Image Upload */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                                            <ImageIcon size={14} /> Image
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) setEditingPost(prev => prev ? { ...prev, imageFile: file } as any : null);
+                                            }}
+                                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-teal-500/10 file:text-teal-400 hover:file:bg-teal-500/20"
+                                        />
+                                    </div>
+
+                                    {/* Audio Upload */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                                            <Music size={14} /> Audio
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept="audio/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) setEditingPost(prev => prev ? { ...prev, audioFile: file } as any : null);
+                                            }}
+                                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-500/10 file:text-blue-400 hover:file:bg-blue-500/20"
+                                        />
+                                    </div>
+
+                                    {/* Video Upload */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                                            <Video size={14} /> Video
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept="video/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) setEditingPost(prev => prev ? { ...prev, videoFile: file } as any : null);
+                                            }}
+                                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4 border-t border-white/5">
+                                    <button
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!editingPost?.text.trim()) {
+                                                toast.error("Post text cannot be empty");
+                                                return;
+                                            }
+                                            if (!currentUserId) {
+                                                toast.error("Unauthorized");
+                                                return;
+                                            }
+
+                                            setIsSaving(true);
+                                            const formData = new FormData();
+                                            formData.append("title", editingPost.title || "");
+                                            formData.append("text", editingPost.text);
+                                            formData.append("authorId", editingPost.authorId);
+
+                                            // @ts-ignore
+                                            if (editingPost.imageFile) formData.append("image", editingPost.imageFile);
+                                            // @ts-ignore
+                                            if (editingPost.audioFile) formData.append("audio", editingPost.audioFile);
+                                            // @ts-ignore
+                                            if (editingPost.videoFile) formData.append("video", editingPost.videoFile);
+
+                                            try {
+                                                let result;
+                                                if (editingPost.id) {
+                                                    result = (await updatePost(editingPost.id, formData, currentUserId)) as any;
+                                                } else {
+                                                    result = (await createPost(currentUserId, formData, "/admin/posts")) as any;
+                                                }
+
+                                                if (result.success) {
+                                                    toast.success(editingPost.id ? "Post updated" : "Post created");
+                                                    setIsModalOpen(false);
+                                                    router.refresh();
+                                                } else {
+                                                    toast.error(result.error || "Failed");
+                                                }
+                                            } catch (err) {
+                                                toast.error("Action failed");
+                                            } finally {
+                                                setIsSaving(false);
+                                            }
+                                        }}
+                                        disabled={isSaving}
+                                        className="flex-1 py-3 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg shadow-teal-500/20"
+                                    >
+                                        {isSaving ? "Saving..." : editingPost?.id ? "Update Post" : "Create Post"}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Floating Bulk Action Bar */}
             <AnimatePresence>
@@ -446,7 +696,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     onClick={async () => {
                                         if (!currentUserId) { toast.error("Unauthorized: No user ID"); return; }
                                         setIsBulkProcessing(true);
-                                        const res = await bulkUpdatePostStatus(selectedIds, 'ARCHIVE', currentUserId);
+                                        const res = (await bulkUpdatePostStatus(selectedIds, 'ARCHIVE', currentUserId)) as any;
                                         if (res.success) { toast.success(`Archived ${selectedIds.length} posts`); setSelectedIds([]); router.refresh(); }
                                         else { toast.error(res.error || "Failed to archive posts"); }
                                         setIsBulkProcessing(false);
@@ -462,7 +712,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     onClick={async () => {
                                         if (!currentUserId) { toast.error("Unauthorized: No user ID"); return; }
                                         setIsBulkProcessing(true);
-                                        const res = await bulkUpdatePostStatus(selectedIds, 'ACTIVATE', currentUserId);
+                                        const res = (await bulkUpdatePostStatus(selectedIds, 'ACTIVATE', currentUserId)) as any;
                                         if (res.success) { toast.success(`Activated ${selectedIds.length} posts`); setSelectedIds([]); router.refresh(); }
                                         else { toast.error(res.error || "Failed to activate posts"); }
                                         setIsBulkProcessing(false);

@@ -73,11 +73,18 @@ const getTransitionVariants = (sectionId: string) => {
     }
 };
 
+import { usePathname } from "next/navigation";
+
 export default function ScrollBackground() {
+    const pathname = usePathname();
+    const isHomePage = ["/", "/en", "/id"].includes(pathname);
+
     const { scrollYProgress } = useScroll();
     const { resolvedTheme } = useTheme();
     const [isMounted, setIsMounted] = useState(false);
     const [activeSection, setActiveSection] = useState("hero");
+
+    if (!isHomePage) return null;
 
     useEffect(() => {
         setIsMounted(true);
@@ -122,7 +129,7 @@ export default function ScrollBackground() {
 
     return (
         <>
-            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="fixed inset-0 z-[0] pointer-events-none overflow-hidden">
                 {/* 1. Dynamic Background Color Layer (Base) - Z-INDEX 1 */}
                 <div className="absolute inset-0 z-[1]">
                     <AnimatePresence mode="popLayout" initial={false}>

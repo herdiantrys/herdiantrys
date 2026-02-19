@@ -14,7 +14,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
     }
 
     const cleanQuery = query.trim();
-    console.log(`Global Search Query: "${cleanQuery}"`);
+
 
     // Helper to perform safe queries
     const safeSearch = async <T>(promise: Promise<T[]>, label: string): Promise<T[]> => {
@@ -97,6 +97,6 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         safeSearch(postsPromise, 'posts')
     ]);
 
-    console.log(`Search Results: Users(${users.length}), Projects(${projects.length}), Posts(${posts.length})`);
+
     return { users, projects, posts };
 }

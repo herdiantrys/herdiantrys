@@ -12,51 +12,48 @@ interface XPToastProps {
 
 export const XPToast = ({ amount, reason, type = "default", icon }: XPToastProps) => {
     return (
-        <div className="relative overflow-hidden rounded-xl border-2 border-amber-500/50 bg-[#0f172a]/95 backdrop-blur-xl shadow-[0_0_30px_rgba(245,158,11,0.3)] w-full max-w-sm p-0">
-            {/* Background Effects */}
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-amber-500/10 animate-pulse" />
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none" />
+        <motion.div
+            initial={{ y: -20, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -10, opacity: 0, scale: 0.95 }}
+            className="group relative flex items-center gap-4 bg-[var(--site-primary)]/40 backdrop-blur-3xl border border-[var(--site-accent)]/20 rounded-2xl p-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.3)] min-w-[320px] max-w-sm overflow-hidden"
+        >
+            {/* Liquid Background Accents */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-[var(--site-accent)]/10 via-transparent to-[var(--site-secondary)]/5 opacity-50 -z-10" />
 
-            {/* Shining Border Animation */}
-            <div className="absolute top-0 left-[-100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 animate-[shimmer_2s_infinite]" />
-
-            <div className="relative z-10 flex items-center gap-4 p-4">
-                {/* Icon Container */}
-                <div className="relative shrink-0">
-                    <div className="absolute inset-0 bg-amber-500 blur-xl opacity-50 animate-pulse" />
-                    <div className="relative w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 border border-amber-200 shadow-lg flex items-center justify-center text-white">
-                        {icon || (
-                            type === "levelup" ? <Crown size={24} className="drop-shadow-md" /> :
-                                type === "milestone" ? <Trophy size={22} className="drop-shadow-md" /> :
-                                    <Sparkles size={22} className="drop-shadow-md" />
-                        )}
-                    </div>
-                    {/* Floating Particles */}
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full animate-bounce shadow-[0_0_10px_rgba(253,224,71,0.8)]" />
-                </div>
-
-                {/* Text Content */}
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-black font-serif text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                            +{amount} XP
-                        </span>
-                        {type === "levelup" && (
-                            <span className="text-xs font-bold text-amber-300 uppercase tracking-widest animate-pulse">
-                                Level Up!
-                            </span>
-                        )}
-                    </div>
-                    {reason && (
-                        <p className="text-xs font-medium text-amber-100/80 truncate font-serif tracking-wide">
-                            {reason}
-                        </p>
+            {/* Standard Glass Icon Container */}
+            <div className="relative shrink-0 flex items-center justify-center w-11 h-11">
+                <div className="absolute inset-0 bg-[var(--site-accent)] blur-xl opacity-20" />
+                <div className="relative w-full h-full rounded-xl bg-gradient-to-br from-[var(--site-accent)]/90 to-[var(--site-secondary)]/90 shadow-md flex items-center justify-center text-[var(--site-button-text)] border border-white/20">
+                    {icon || (
+                        type === "levelup" ? <Crown size={22} className="drop-shadow-sm" /> :
+                            type === "milestone" ? <Trophy size={20} className="drop-shadow-sm" /> :
+                                <Sparkles size={20} className="drop-shadow-sm" />
                     )}
                 </div>
             </div>
 
-            {/* Progress/Time bar (decorative) */}
-            <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 w-full" />
-        </div>
+            {/* Content Section */}
+            <div className="flex-1 flex flex-col justify-center min-w-0">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-black text-[var(--glass-text)] font-pixel leading-tight">
+                        +{amount} XP
+                    </span>
+                    {type === "levelup" && (
+                        <span className="text-[10px] font-black text-[var(--site-accent)] animate-pulse uppercase tracking-tighter">
+                            Tier Up!
+                        </span>
+                    )}
+                </div>
+                {reason && (
+                    <span className="text-[11px] font-bold text-[var(--glass-text-muted)] uppercase tracking-widest truncate leading-tight mt-0.5">
+                        {reason}
+                    </span>
+                )}
+            </div>
+
+            {/* Subtle Interactive Shimmer */}
+            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--site-accent)]/30 to-transparent" />
+        </motion.div>
     );
 };

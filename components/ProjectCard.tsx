@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useOptimistic, startTransition } from "react";
+import { useState, useEffect, useOptimistic, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Play, Eye, Heart, Video, Image as ImageIcon, MessageCircle, Bookmark } from "lucide-react";
@@ -39,6 +39,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
+    const imgRef = useRef<HTMLImageElement>(null);
 
     // Priority: Thumbnail -> Image -> VideoFile -> First gallery item -> Empty
     const getInitialMedia = () => {
@@ -117,6 +118,11 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
         if (!initial.url && !project.thumbnail && !project.image) {
             setIsLoading(false);
         }
+
+        // Handle cached images that are already 'complete'
+        if (imgRef.current?.complete) {
+            setIsLoading(false);
+        }
     }, [project]);
 
     // Handle hover to show video preview if available
@@ -183,17 +189,21 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 {/* Always render Image (or fallback) to set dimensions and prevent layout shift */}
                 {activeMedia.url && activeMedia.type !== 'video' ? (
                     <img
+                        ref={imgRef}
                         src={activeMedia.url}
                         alt={project.title}
                         onLoad={() => setIsLoading(false)}
+                        onError={() => setIsLoading(false)}
                         className="w-full h-auto object-cover"
                     />
                 ) : project.thumbnail || project.image ? (
                     // If active media is video, we still render the thumbnail image underneath to hold height
                     <img
+                        ref={imgRef}
                         src={project.thumbnail || project.image}
                         alt={project.title}
                         onLoad={() => setIsLoading(false)}
+                        onError={() => setIsLoading(false)}
                         className="w-full h-auto object-cover"
                     />
                 ) : (
@@ -213,6 +223,8 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                             loop
                             playsInline
                             onLoadedData={() => setIsLoading(false)}
+                            onSuspend={() => setIsLoading(false)}
+                            onError={() => setIsLoading(false)}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     </div>

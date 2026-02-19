@@ -5,6 +5,8 @@ interface PixelBadgeProps {
         name: string;
         icon: string;
         description?: string;
+        xpReward?: number;
+        runeReward?: number;
     };
     size?: 'sm' | 'md' | 'lg';
 }
@@ -23,9 +25,8 @@ export default function PixelBadge({ badge, size = 'md' }: PixelBadgeProps) {
                 className={`
                     ${sizeClasses[size]} 
                     bg-slate-800 relative flex items-center justify-center
-                    font-mono text-white cursor-help select-none
+                    font-mono text-white cursor-default select-none
                     transition-transform active:scale-95 active:translate-y-1
-                    hover:-translate-y-1
                 `}
                 style={{
                     // Creates a 2px hard pixel border without blur
@@ -70,29 +71,6 @@ export default function PixelBadge({ badge, size = 'md' }: PixelBadgeProps) {
                 </div>
             </div>
 
-            {/* 8-bit Tooltip */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100]">
-                <div
-                    className="bg-[#1a1a1a] text-white p-3 text-xs font-mono text-center leading-tight relative"
-                    style={{
-                        boxShadow: `
-                            -2px 0 0 0 black,
-                            2px 0 0 0 black,
-                            0 -2px 0 0 black,
-                            0 2px 0 0 black,
-                            3px 3px 0 0 rgba(0,0,0,0.5),
-                            inset 2px 2px 0 0 rgba(255,255,255,0.1)
-                        `
-                    }}
-                >
-                    <div className="text-yellow-400 font-bold mb-1 uppercase tracking-wider text-[10px] border-b border-white/20 pb-1">{badge.name}</div>
-                    <div className="text-slate-300 mt-1">{badge.description}</div>
-
-                    {/* Pixel Connectors */}
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2 h-2 bg-black"></div>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1a1a1a]"></div>
-                </div>
-            </div>
         </div>
     );
 }

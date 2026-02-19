@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Edit2, MapPin, Link as LinkIcon, X, Save, Settings, User, Bell, Shield, Moon, Monitor, Camera, Trash2 } from "lucide-react";
+import { Edit2, MapPin, Link as LinkIcon, X, Save, Settings, User, Bell, Shield, Moon, Monitor, Camera, Trash2, MessageCircle } from "lucide-react";
 import { updateUserProfile, uploadProfileImage, removeProfileImage, uploadBannerImage, removeBannerImage } from "@/lib/actions/user.actions";
 import { urlFor } from "@/sanity/lib/image";
 import { useRouter } from "next/navigation";
@@ -217,6 +217,22 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                                         className={`flex-1 md:flex-none px-6 py-2 rounded-full font-medium transition-all ${activeTab === 'settings' ? 'bg-white text-black' : 'glass text-white hover:bg-white/10'}`}
                                     >
                                         Settings
+                                    </button>
+                                </div>
+                            )}
+
+                            {!isOwner && (
+                                <div className="flex gap-3 mb-2 w-full md:w-auto justify-center md:justify-start">
+                                    <button
+                                        onClick={() => {
+                                            window.dispatchEvent(new CustomEvent('open-direct-message', {
+                                                detail: { recipientId: user.id || user._id }
+                                            }));
+                                        }}
+                                        className="flex-1 md:flex-none px-8 py-2.5 rounded-full font-bold bg-[var(--site-secondary)] text-white hover:opacity-90 transition-all shadow-lg shadow-[var(--site-secondary)]/20 flex items-center justify-center gap-2"
+                                    >
+                                        <MessageCircle size={18} />
+                                        Message
                                     </button>
                                 </div>
                             )}

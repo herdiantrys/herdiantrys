@@ -6,7 +6,7 @@ import { createNotification } from "./notification.actions";
 import { auth } from "@/auth";
 import { trackLikeReceived, awardXP } from "./gamification.actions";
 
-export const toggleLike = async (targetId: string, targetType: "project" | "user" | "post" = "project") => {
+export const toggleLike = async (targetId: string, targetType: "project" | "user" | "post" | "activity" = "project") => {
     try {
         const session = await auth();
         if (!session?.user?.id) return { success: false, error: "Unauthorized" };
@@ -73,7 +73,37 @@ export const toggleLike = async (targetId: string, targetType: "project" | "user
             }
         }
 
-        // 3. Handle USER likes (if applicable, though schema doesn't support generic user likes yet)
+        // 3. Handle ACTIVITY likes (achievements, badges, etc)
+        else if (targetType === "activity") {
+            const activity = await prisma.activity.findUnique({
+                where: { id: targetId },
+                include: {
+                    likedBy: { where: { id: userId } },
+                    user: true
+                }
+            });
+
+            if (!activity) return { success: false, error: "Activity not found" };
+
+            recipientId = activity.userId;
+            isLiked = activity.likedBy.length > 0;
+
+            if (isLiked) {
+                // Unlike
+                await prisma.activity.update({
+                    where: { id: targetId },
+                    data: { likedBy: { disconnect: { id: userId } } }
+                });
+            } else {
+                // Like
+                await prisma.activity.update({
+                    where: { id: targetId },
+                    data: { likedBy: { connect: { id: userId } } }
+                });
+            }
+        }
+
+        // 4. Handle USER likes (if applicable, though schema doesn't support generic user likes yet)
         else if (targetType === "user") {
             // Placeholder: User likes not fully implemented in schema relation
             // If we really need it, we'd add 'likedUsers' relation.
@@ -86,7 +116,7 @@ export const toggleLike = async (targetId: string, targetType: "project" | "user
             await createNotification({
                 recipientId,
                 senderId: userId,
-                type: 'like_post', // We can genericize if needed, usually 'like_post' covers both in UI?
+                type: targetType === 'project' ? 'like_project' : 'like_post',
                 relatedPostId: targetType === 'post' ? targetId : undefined,
                 relatedProjectId: targetType === 'project' ? targetId : undefined
             });

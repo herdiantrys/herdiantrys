@@ -52,20 +52,27 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ lang: string }>;
 }>) {
-  const { lang } = await params;
-  const session = await auth();
-  const theme = await getGlobalTheme();
+  try {
+    const { lang } = await params;
+    const session = await auth();
+    const theme = await getGlobalTheme();
 
-  return (
-    <html lang={lang} suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
-        <ThemeInjector theme={theme} />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
-          {session?.user?.id && <ScrollProgressTracker userId={session.user.id} />}
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+
+
+    return (
+      <html lang={lang} suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
+          <ThemeInjector theme={theme} />
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <Toaster position="top-center" richColors closeButton />
+            {session?.user?.id && <ScrollProgressTracker userId={session.user.id} />}
+          </ThemeProvider>
+        </body>
+      </html>
+    );
+  } catch (error: any) {
+    console.error("CRITICAL LAYOUT ERROR:", error);
+    throw error;
+  }
 }

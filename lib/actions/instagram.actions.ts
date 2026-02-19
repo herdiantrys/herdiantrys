@@ -5,7 +5,7 @@ import { load } from "cheerio";
 export async function analyzeInstagramUser(username: string) {
     const tryFetch = async (url: string, sourceName: string, headers: any = {}) => {
         try {
-            console.log(`[Instagram Analyzer] Attempting ${sourceName} for ${username}...`);
+
             const response = await fetch(url, {
                 headers: {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -160,10 +160,10 @@ export async function analyzeInstagramUser(username: string) {
         }
 
         // --- FALLBACK: SIMULATION ---
-        console.warn("All live sources failed. Returning Simulation.");
+
 
         // --- FALLBACK: SIMULATION ---
-        console.warn("All live sources failed. Returning Simulation.");
+
 
         let finalImage = foundProfileImage;
         if (!finalImage) {

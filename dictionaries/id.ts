@@ -93,7 +93,17 @@ const id = {
             web_dev: "Pengembangan Web",
             motion_graphics: "Grafis Gerak",
             brand_identity: "Identitas Merek"
-        }
+        },
+        newsletter_title: "Berlangganan Newsletter",
+        newsletter_desc: "Dapatkan pembaruan terbaru, tips desain, dan pengumuman eksklusif langsung di email Anda.",
+        newsletter_placeholder: "Alamat email Anda",
+        subscribe: "Berlangganan",
+        exploration: "Eksplorasi",
+        recent_works: "Karya Terbaru",
+        top_creators: "Kreator Teratas",
+        back_to_top: "Kembali ke Atas",
+        based_in: "Berbasis di",
+        local_time: "Waktu Lokal"
     },
     dashboard: {
         title: "Dasbor",

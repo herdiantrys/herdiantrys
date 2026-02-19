@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { Project as PrismaProject, Category } from "@prisma/client";
+import { serializeForClient } from "@/lib/utils";
 
 // Define the shape expected by the UI
 export type Project = {
@@ -29,11 +30,23 @@ export type Project = {
   videoFile?: string | null;
 };
 
-export async function getSanityProjects(userId?: string, onlyFavorites: boolean = false): Promise<Project[]> {
+export async function getSanityProjects(userId?: string, onlyFavorites: boolean = false, authorId?: string): Promise<Project[]> {
   try {
     const where: any = {
-      status: "PUBLISHED"
+      status: "PUBLISHED",
     };
+
+    if (authorId) {
+      where.authorId = authorId;
+    } else {
+      // Only show official portfolio projects for general lists
+      where.author = {
+        role: {
+          in: ["ADMIN", "SUPER_ADMIN"]
+        }
+      };
+    }
+
     if (onlyFavorites) {
       where.favorite = true;
     }
@@ -53,7 +66,7 @@ export async function getSanityProjects(userId?: string, onlyFavorites: boolean 
       }
     });
 
-    return projects.map((p) => {
+    return serializeForClient(projects.map((p) => {
       // Parse tags (CSV -> Array)
       const tags = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
 
@@ -89,7 +102,7 @@ export async function getSanityProjects(userId?: string, onlyFavorites: boolean 
           url: g.url
         }))
       };
-    });
+    }));
   } catch (error) {
     console.error("Error fetching projects from Prisma:", error);
     return [];
@@ -125,7 +138,7 @@ export const getSanityProject = async (slug: string, userId?: string) => {
     const gallery = (project.gallery as any) || [];
     const isLiked = userId ? (project.likedBy && project.likedBy.length > 0) : false;
 
-    return {
+    return serializeForClient({
       ...project,
       // Map fields
       category: project.category?.title || null,
@@ -147,7 +160,7 @@ export const getSanityProject = async (slug: string, userId?: string) => {
       isLiked,
       tags,
       gallery,
-    };
+    });
   } catch (error) {
     console.error("Error fetching project:", error);
     return null;

@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { serializeForClient } from "@/lib/utils";
 
 export type Activity = {
     id: string;
@@ -46,21 +47,23 @@ export const createActivity = async (userId: string, type: string, details: any)
         });
         revalidatePath("/");
         revalidatePath("/dashboard");
-        return { success: true };
+        return serializeForClient({ success: true });
     } catch (error) {
         console.error("Error creating activity:", error);
-        return { success: false };
+        return serializeForClient({ success: false });
     }
 }
 
-export const getRecentActivities = async (currentUserId?: string): Promise<Activity[]> => {
+export const getRecentActivities = async (currentUserId?: string, limit = 10, before?: string): Promise<Activity[]> => {
     const activities: Activity[] = [];
+    const dateLimit = before ? { lt: new Date(before) } : undefined;
     try {
         // 1. Fetch New Users
         let users: any[] = [];
         try {
             users = await prisma.user.findMany({
-                take: 5,
+                take: limit,
+                where: before ? { createdAt: dateLimit } : {},
                 orderBy: { createdAt: 'desc' },
             });
         } catch (e) {
@@ -71,8 +74,11 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
         let projects: any[] = [];
         try {
             projects = await prisma.project.findMany({
-                take: 10,
-                where: { status: "PUBLISHED" },
+                take: limit,
+                where: {
+                    status: "PUBLISHED",
+                    ...(before ? { createdAt: dateLimit } : {})
+                },
                 orderBy: { createdAt: 'desc' },
                 include: {
                     _count: { select: { likedBy: true, comments: true } },
@@ -87,8 +93,11 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
         let posts: any[] = [];
         try {
             posts = await prisma.post.findMany({
-                take: 10,
-                where: { isArchived: false },
+                take: limit,
+                where: {
+                    isArchived: false,
+                    ...(before ? { createdAt: dateLimit } : {})
+                },
                 orderBy: { createdAt: 'desc' },
                 include: {
                     author: true,
@@ -108,9 +117,14 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
             // Check if activity model exists in prisma before calling
             if ((prisma as any).activity) {
                 customActivities = await (prisma as any).activity.findMany({
-                    take: 15,
+                    take: limit,
+                    where: before ? { createdAt: dateLimit } : {},
                     orderBy: { createdAt: 'desc' },
-                    include: { user: true }
+                    include: {
+                        user: true,
+                        _count: { select: { likedBy: true } },
+                        likedBy: currentUserId ? { where: { id: currentUserId } } : false
+                    }
                 });
             } else {
                 console.warn("Prisma 'activity' model not found in client. Schema sync might be needed.");
@@ -133,8 +147,8 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
                     frameColor: (act.user as any).frameColor || undefined
                 },
                 details: act.details as any,
-                likesCount: 0,
-                isLiked: false
+                likesCount: act._count?.likedBy || 0,
+                isLiked: act.likedBy && act.likedBy.length > 0
             });
         });
 
@@ -236,28 +250,34 @@ export const getRecentActivities = async (currentUserId?: string): Promise<Activ
             });
         });
 
-        return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
 
     } catch (error) {
         console.error("Error fetching activities:", error);
-        return [];
+        return serializeForClient([]);
     }
 };
 
-export const getUserActivities = async (username: string, currentUserId?: string): Promise<Activity[]> => {
+export const getUserActivities = async (username: string, currentUserId?: string, limit = 10, before?: string): Promise<Activity[]> => {
     const activities: Activity[] = [];
+    const dateLimit = before ? { lt: new Date(before) } : undefined;
     try {
         const targetUser = await prisma.user.findUnique({
             where: { username }
         });
 
-        if (!targetUser) return [];
+        if (!targetUser) return serializeForClient([]);
 
         // 1. User Posts
         let posts: any[] = [];
         try {
             posts = await prisma.post.findMany({
-                where: { authorId: targetUser.id, isArchived: false },
+                where: {
+                    authorId: targetUser.id,
+                    isArchived: false,
+                    ...(before ? { createdAt: dateLimit } : {})
+                },
+                take: limit,
                 orderBy: { createdAt: 'desc' },
                 include: {
                     author: true,
@@ -271,14 +291,41 @@ export const getUserActivities = async (username: string, currentUserId?: string
             console.error("Error fetching user posts:", e);
         }
 
-        // 2. User Custom Activities
+        // 2. User Projects
+        let projects: any[] = [];
+        try {
+            projects = await prisma.project.findMany({
+                where: {
+                    authorId: targetUser.id,
+                    status: "PUBLISHED",
+                    ...(before ? { uploadDate: dateLimit } : {})
+                },
+                take: limit,
+                orderBy: { uploadDate: 'desc' },
+                include: {
+                    _count: { select: { likedBy: true, comments: true } },
+                    likedBy: currentUserId ? { where: { id: currentUserId } } : false
+                }
+            });
+        } catch (e) {
+            console.error("Error fetching user projects:", e);
+        }
+
+        // 3. User Custom Activities
         let customActivities: any[] = [];
         try {
             if ((prisma as any).activity) {
                 customActivities = await (prisma as any).activity.findMany({
-                    where: { userId: targetUser.id },
+                    where: {
+                        userId: targetUser.id,
+                        ...(before ? { createdAt: dateLimit } : {})
+                    },
+                    take: limit,
                     orderBy: { createdAt: 'desc' },
-                    take: 20
+                    include: {
+                        _count: { select: { likedBy: true } },
+                        likedBy: currentUserId ? { where: { id: currentUserId } } : false
+                    }
                 });
             }
         } catch (e) {
@@ -299,8 +346,8 @@ export const getUserActivities = async (username: string, currentUserId?: string
                     frameColor: (targetUser as any).frameColor || undefined
                 },
                 details: act.details as any,
-                likesCount: 0,
-                isLiked: false
+                likesCount: act._count?.likedBy || 0,
+                isLiked: act.likedBy && act.likedBy.length > 0
             });
         });
 
@@ -324,6 +371,30 @@ export const getUserActivities = async (username: string, currentUserId?: string
                 isLiked: false
             });
         }
+
+        projects.forEach((project) => {
+            activities.push({
+                id: `project-${project.id}`,
+                type: "new_project",
+                timestamp: project.uploadDate.toISOString(),
+                actor: {
+                    name: targetUser.name || "User",
+                    username: targetUser.username || "user",
+                    image: targetUser.imageURL || targetUser.image,
+                    equippedFrame: (targetUser as any).equippedFrame || undefined,
+                    frameColor: (targetUser as any).frameColor || undefined
+                },
+                details: {
+                    title: project.title,
+                    slug: project.slug,
+                    image: project.image,
+                    description: "added a new project"
+                },
+                likesCount: project._count.likedBy,
+                commentsCount: project._count.comments,
+                isLiked: project.likedBy && project.likedBy.length > 0
+            });
+        });
 
         posts.forEach((postItem) => {
             const post = postItem as any;
@@ -375,9 +446,9 @@ export const getUserActivities = async (username: string, currentUserId?: string
             });
         });
 
-        return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
     } catch (error) {
         console.error("Error fetching user activities:", error);
-        return [];
+        return serializeForClient([]);
     }
 };

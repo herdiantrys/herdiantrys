@@ -35,7 +35,7 @@ export default function UserBanner({ user, isOwner }: UserBannerProps) {
             ) : (
                 <div className="w-full h-full bg-slate-900 relative">
                     <img
-                        src="/default-banner.png"
+                        src="/images/default-banner.jpg"
                         alt="Default Banner"
                         className="w-full h-full object-cover opacity-80"
                     />
