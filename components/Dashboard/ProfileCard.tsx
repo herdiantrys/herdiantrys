@@ -16,11 +16,13 @@ import { formatNumber } from "@/lib/utils";
 export default function ProfileCard({
     user,
     isPublic = false,
-    isCollapsed = false
+    isCollapsed = false,
+    dict
 }: {
     user: any;
     isPublic?: boolean;
-    isCollapsed?: boolean
+    isCollapsed?: boolean;
+    dict?: any;
 }) {
     const { data: session } = useSession();
     const currentUserId = session?.user?.id;
@@ -134,13 +136,22 @@ export default function ProfileCard({
             {/* Banner Section with Refined Overlay */}
             {!isCollapsed && (
                 <div className="w-full h-32 relative bg-gradient-to-r from-[var(--site-primary)]/30 to-[var(--site-primary)]/50 overflow-hidden group/banner">
-                    {bannerUrl && (
+                    {user.equippedBanner === 'custom-video' && user.bannerVideo ? (
+                        <video
+                            src={user.bannerVideo}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
+                        />
+                    ) : bannerUrl ? (
                         <img
                             src={bannerUrl}
                             alt="Profile Banner"
                             className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
                         />
-                    )}
+                    ) : null}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
                     {/* Decorative Arcane Orb */}
@@ -258,7 +269,7 @@ export default function ProfileCard({
                                 <Coins size={16} className="text-[var(--site-accent)] animate-pulse group-hover/runes:scale-110 transition-transform" />
                             </div>
                             <div className="flex flex-col items-start leading-none">
-                                <span className="text-[10px] text-[var(--site-accent)]/60 font-black uppercase tracking-tighter mb-1">Soul Fortune</span>
+                                <span className="text-[10px] text-[var(--site-accent)]/60 font-black uppercase tracking-tighter mb-1">{dict?.profile_card?.soul_fortune || "Soul Fortune"}</span>
                                 <span className="font-black text-lg text-white font-mono tracking-tight underline decoration-[var(--site-accent)]/30 decoration-2 underline-offset-4">
                                     {formatNumber(points)} <span className="text-sm font-bold text-[var(--site-accent)]/80">R</span>
                                 </span>
@@ -310,10 +321,10 @@ export default function ProfileCard({
                         {/* Stats Matrix */}
                         <div className="grid grid-cols-4 gap-2 mb-8 px-2">
                             {[
-                                { label: 'Posts', value: user.stats?.posts || 0 },
-                                { label: 'Followers', value: followersCount },
-                                { label: 'Likes', value: user.stats?.likes || 0 },
-                                { label: 'Talks', value: user.stats?.comments || 0 },
+                                { label: dict?.profile_card?.stats?.posts || 'Posts', value: user.stats?.posts || 0 },
+                                { label: dict?.profile_card?.stats?.followers || 'Followers', value: followersCount },
+                                { label: dict?.profile_card?.stats?.likes || 'Likes', value: user.stats?.likes || 0 },
+                                { label: dict?.profile_card?.stats?.talks || 'Talks', value: user.stats?.comments || 0 },
                             ].map((stat, i) => (
                                 <div key={i} className="flex flex-col items-center p-2 rounded-xl bg-white/[0.02] border border-white/5 group/stat hover:bg-white/[0.05] transition-all">
                                     <span className="font-black text-lg text-white group-hover/stat:text-[var(--site-secondary)] transition-colors leading-none mb-1">
@@ -340,7 +351,7 @@ export default function ProfileCard({
                                         >
                                             <div className="flex items-center justify-center gap-2">
                                                 {isFollowLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                                                <span>{isFollowing ? "Break Tether" : "Forge Follow"}</span>
+                                                <span>{isFollowing ? (dict?.profile_card?.actions?.break_tether || "Break Tether") : (dict?.profile_card?.actions?.forge_follow || "Forge Follow")}</span>
                                             </div>
                                         </button>
                                     ) : (
@@ -348,7 +359,7 @@ export default function ProfileCard({
                                             onClick={() => setIsEditOpen(true)}
                                             className="w-full py-3.5 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-xs"
                                         >
-                                            Edit Essence
+                                            {dict?.profile_card?.actions?.edit_essence || "Edit Essence"}
                                         </button>
                                     )}
                                     <button
@@ -360,7 +371,7 @@ export default function ProfileCard({
                                         className="w-full py-3 px-6 rounded-2xl bg-white/10 border border-white/10 hover:border-[var(--site-secondary)]/50 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-2 group/msg"
                                     >
                                         <MessageSquare size={14} className="group-hover/msg:scale-110 transition-transform" />
-                                        <span>Send Message</span>
+                                        <span>{dict?.profile_card?.actions?.send_message || "Send Message"}</span>
                                     </button>
                                 </div>
                             ) : (
@@ -372,7 +383,7 @@ export default function ProfileCard({
                                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--site-secondary)]/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                                         <Edit size={16} className="text-[var(--site-secondary)] relative z-10" />
                                         <span className="text-xs font-black uppercase tracking-[0.2em] text-[var(--site-secondary)] relative z-10">
-                                            Modify Essence
+                                            {dict?.profile_card?.actions?.modify_essence || "Modify Essence"}
                                         </span>
                                     </button>
                                 ) : (
@@ -380,7 +391,7 @@ export default function ProfileCard({
                                         href={`/profile/${user.username}`}
                                         className="block w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)]/80 text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_20px_rgba(var(--site-secondary-rgb),0.3)] hover:shadow-[0_15px_30px_rgba(var(--site-secondary-rgb),0.4)] transition-all hover:scale-[1.03] text-center"
                                     >
-                                        Visit Sanctuary
+                                        {dict?.profile_card?.actions?.visit_sanctuary || "Visit Sanctuary"}
                                     </Link>
                                 )
                             )}

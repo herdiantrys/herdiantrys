@@ -11,17 +11,18 @@ type ShopGridProps = {
     userInventory: any[];
     userId?: string | null;
     username?: string | null;
+    dict: any;
 };
 
-const CATEGORIES = [
-    { id: 'all', label: 'All', icon: LayoutGrid },
-    { id: 'premium', label: 'Premium', icon: Sparkles },
-    { id: 'cosmetics', label: 'Cosmetics', icon: Palette },
-    { id: 'frame', label: 'Frames', icon: Square },
-    { id: 'background', label: 'Backgrounds', icon: ImageIcon },
-];
+export default function ShopGrid({ items, userPoints, userInventory, userId, username, dict }: ShopGridProps) {
+    const CATEGORIES = [
+        { id: 'all', label: dict.categories.all, icon: LayoutGrid },
+        { id: 'premium', label: dict.categories.premium, icon: Sparkles },
+        { id: 'cosmetics', label: dict.categories.cosmetics, icon: Palette },
+        { id: 'frame', label: dict.categories.frames, icon: Square },
+        { id: 'background', label: dict.categories.backgrounds, icon: ImageIcon },
+    ];
 
-export default function ShopGrid({ items, userPoints, userInventory, userId, username }: ShopGridProps) {
     const [activeCategory, setActiveCategory] = useState('all');
 
     const filteredItems = useMemo(() => {
@@ -103,6 +104,7 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
                                             isOwned={!!isOwned}
                                             userId={userId}
                                             username={username}
+                                            dict={dict}
                                         />
                                     </motion.div>
                                 );
@@ -116,7 +118,7 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
                         className="flex flex-col items-center justify-center py-20 text-[var(--glass-text-muted)]"
                     >
                         <PackageOpen size={48} className="mb-4 opacity-50" />
-                        <p className="text-lg">No items found in this section.</p>
+                        <p className="text-lg">{dict.messages.no_items_found}</p>
                     </motion.div>
                 )}
             </div>

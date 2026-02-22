@@ -26,7 +26,16 @@ export default function UserBanner({ user, isOwner }: UserBannerProps) {
             className="absolute top-0 left-0 w-full h-[60vh] md:h-[600px] overflow-hidden group z-0"
             style={{ maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' }}
         >
-            {bannerUrl ? (
+            {user.equippedBanner === 'custom-video' && user.bannerVideo ? (
+                <video
+                    src={user.bannerVideo}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover opacity-50 md:opacity-100"
+                />
+            ) : bannerUrl ? (
                 <img
                     src={bannerUrl}
                     alt={`${user.fullName}'s banner`}

@@ -133,7 +133,7 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                         `}>
                             <ChevronLeft
                                 size={14}
-                                className="text-white/40 group-hover:text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]"
+                                className="text-black/60 dark:text-white/40 group-hover:text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]"
                             />
                         </div>
 
@@ -177,10 +177,10 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                                                 href={item.href}
                                                 title={isCollapsed ? item.name : ""}
                                                 className={`
-                                                    flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300
+                                                    flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300 text-black dark:text-white
                                                     ${isActive
-                                                        ? "text-[var(--site-secondary)] font-bold"
-                                                        : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
+                                                        ? "font-bold"
+                                                        : "hover:bg-black/5 dark:hover:bg-white/5"
                                                     }
                                                 `}
                                             >
@@ -193,7 +193,7 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
                                                 )}
 
                                                 <div className="relative">
-                                                    <Icon size={20} className={`min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
+                                                    <Icon size={20} className={`text-[var(--site-secondary)] min-w-[20px] transition-transform duration-300 group-hover:scale-110 ${isActive ? "drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
                                                     {item.name === "Contacts" && unreadCount > 0 && (
                                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">
                                                             {unreadCount > 99 ? "99+" : unreadCount}
@@ -218,8 +218,8 @@ export default function AdminSidebar({ isOpen, setIsOpen, isCollapsed, setIsColl
 
                     {/* Footer */}
                     <div className="p-4 border-t border-[var(--glass-border)] overflow-hidden">
-                        <Link id="admin-exit-button" href="/dashboard" className="flex items-center px-4 py-3 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors group text-red-400/80 whitespace-nowrap">
-                            <LogOut size={20} className="min-w-[20px]" />
+                        <Link id="admin-exit-button" href="/dashboard" className="flex items-center px-4 py-3 rounded-lg hover:bg-red-500/10 text-black dark:text-white hover:text-red-400 transition-colors group whitespace-nowrap">
+                            <LogOut size={20} className="min-w-[20px] text-[var(--site-secondary)]" />
                             <span className={`ml-3 font-medium transition-all duration-300 ${isCollapsed ? "lg:opacity-0 lg:w-0" : "opacity-100 w-auto"}`}>Exit Admin</span>
                         </Link>
                     </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -146,14 +146,14 @@ export default function AdminNotificationsClient({
                 <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full lg:max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
+                            <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-secondary)] transition-colors" size={18} />
                         </div>
                         <input
                             type="text"
                             placeholder="Search user..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                         />
                     </div>
 
@@ -226,7 +226,7 @@ export default function AdminNotificationsClient({
                                 </button>
                             </th>
                             <th className="px-6 py-4">Type</th>
-                            <th className="px-6 py-4">From → To</th>
+                            <th className="px-6 py-4">From â†’ To</th>
                             <th className="px-6 py-4">Context</th>
                             <th className="px-6 py-4">Date</th>
                             <th className="px-6 py-4">Actions</th>
@@ -257,7 +257,7 @@ export default function AdminNotificationsClient({
                                                 ) : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />}
                                                 <span className="text-xs font-medium max-w-[80px] truncate">{notification.sender.username}</span>
                                             </div>
-                                            <span className="text-gray-300 dark:text-gray-600">→</span>
+                                            <span className="text-gray-300 dark:text-gray-600">â†’</span>
                                             {/* Recipient */}
                                             <div className="flex items-center gap-1.5" title={`To: ${notification.recipient.username}`}>
                                                 {notification.recipient.image ? (
@@ -379,3 +379,4 @@ export default function AdminNotificationsClient({
         </div>
     );
 }
+

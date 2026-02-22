@@ -42,6 +42,7 @@ enum ShopItemType {
   BACKGROUND
   COURSE
   SAAS_TEMPLATE
+  BANNER_VIDEO
 }
 
 // Models
@@ -68,6 +69,8 @@ model User {
   equippedEffect String? // Deprecated
   equippedFrame  String?
   equippedBackground String?
+  equippedBanner String? // Tracks 'custom-video' or other future banners
+  bannerVideo    String? // The actual URL of the uploaded video
   profileColor   String?
   frameColor     String?
   phoneNumber    String?
@@ -523,4 +526,10 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   @@unique([email, token])
+}
+
+model SiteVisit {
+  id        String   @id @default(cuid())
+  path      String   // e.g. "/", "/works", "/about"
+  createdAt DateTime @default(now())
 }

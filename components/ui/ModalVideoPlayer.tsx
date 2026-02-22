@@ -18,11 +18,11 @@ export const ModalVideoPlayer = ({ src }: { src: string }) => {
     };
 
     return (
-        <div className="w-full h-full relative bg-black group">
+        <div className="w-full h-full relative bg-black group rounded-tl-[2.5rem] md:rounded-bl-[2.5rem] overflow-hidden">
             <video
                 ref={videoRef}
                 src={src}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain rounded-tl-[2.5rem] md:rounded-bl-[2.5rem]"
                 controls
                 autoPlay
                 onPlay={() => setIsPlaying(true)}

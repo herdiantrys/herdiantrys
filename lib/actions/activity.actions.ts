@@ -226,7 +226,7 @@ export const getRecentActivities = async (currentUserId?: string, limit = 10, be
                     description: isRepost ? (original?.text || "") : post.text
                 },
                 likesCount: post._count.likedBy,
-                isLiked: post.likedBy.length > 0,
+                isLiked: post.likedBy && post.likedBy.length > 0,
                 commentsCount: post._count.comments,
                 repostsCount: post._count.reposts || 0,
                 isReposted: post.reposts && post.reposts.length > 0,
@@ -250,7 +250,7 @@ export const getRecentActivities = async (currentUserId?: string, limit = 10, be
             });
         });
 
-        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit));
 
     } catch (error) {
         console.error("Error fetching activities:", error);
@@ -446,7 +446,7 @@ export const getUserActivities = async (username: string, currentUserId?: string
             });
         });
 
-        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+        return serializeForClient(activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit));
     } catch (error) {
         console.error("Error fetching user activities:", error);
         return serializeForClient([]);

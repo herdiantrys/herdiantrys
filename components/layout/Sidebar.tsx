@@ -76,61 +76,61 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
 
     // Define Links
     const publicLinks = [
-        { name: dict.nav.home || "Home", href: "/dashboard", icon: Home },
-        { name: dict.nav.works || "Works", href: "/projects", icon: Briefcase },
-        { name: "Search", href: "/search", icon: Search },
+        { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
+        { name: dict.nav?.works || "Works", href: "/projects", icon: Briefcase },
+        { name: dict.nav?.search || "Search", href: "/search", icon: Search },
     ];
 
     if (user) {
         // Only show "Admin Panel" link in User Mode if authorized
         if (isAuthorizedAdmin && !isAdminMode) {
             // We can keep this as a quick link or rely on the toggle
-            // publicLinks.push({ name: "Admin Panel", href: "/admin", icon: ShieldCheck });
+            // publicLinks.push({ name: dict.nav?.admin_panel || "Admin Panel", href: "/admin", icon: ShieldCheck });
         }
-        publicLinks.push({ name: "Shop", href: "/shop", icon: ShoppingBag });
-        publicLinks.push({ name: "Notifications", href: "/notifications", icon: Bell });
-        publicLinks.push({ name: "Settings", href: "/settings", icon: Settings });
+        publicLinks.push({ name: dict.nav?.shop || "Shop", href: "/shop", icon: ShoppingBag });
+        publicLinks.push({ name: dict.nav?.notifications || "Notifications", href: "/notifications", icon: Bell });
+        publicLinks.push({ name: dict.nav?.settings || "Settings", href: "/settings", icon: Settings });
     }
 
     publicLinks.push(
-        { name: dict.nav.about || "About", href: "/about", icon: User },
-        { name: dict.nav.contact || "Contact", href: "/contact", icon: Mail }
+        { name: dict.nav?.about || "About", href: "/about", icon: User },
+        { name: dict.nav?.contact || "Contact", href: "/contact", icon: Mail }
     );
 
     const adminSections = [
         {
-            title: "Overview",
+            title: dict.nav?.overview || "Overview",
             items: [
-                { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-                { name: "Users", href: "/admin/users", icon: Users },
+                { name: dict.nav?.dashboard || "Dashboard", href: "/admin", icon: LayoutDashboard },
+                { name: dict.nav?.users || "Users", href: "/admin/users", icon: Users },
             ]
         },
         {
-            title: "Content",
+            title: dict.nav?.content || "Content",
             items: [
-                { name: "Projects", href: "/admin/projects", icon: FolderOpen },
-                { name: "Posts", href: "/admin/posts", icon: FileText },
-                { name: "Portfolio", href: "/admin/content", icon: Layout },
-                { name: "Services", href: "/admin/services", icon: Briefcase },
-                { name: "Categories", href: "/admin/categories", icon: Layers },
+                { name: dict.nav?.projects || "Projects", href: "/admin/projects", icon: FolderOpen },
+                { name: dict.nav?.posts || "Posts", href: "/admin/posts", icon: FileText },
+                { name: dict.nav?.portfolio || "Portfolio", href: "/admin/content", icon: Layout },
+                { name: dict.nav?.services || "Services", href: "/admin/services", icon: Briefcase },
+                { name: dict.nav?.categories || "Categories", href: "/admin/categories", icon: Layers },
             ]
         },
         {
-            title: "Engagement",
+            title: dict.nav?.engagement || "Engagement",
             items: [
-                { name: "Comments", href: "/admin/comments", icon: MessageSquare },
-                { name: "Notifications", href: "/admin/notifications", icon: Bell },
-                { name: "Testimonials", href: "/admin/testimonials", icon: Star },
-                { name: "Partners", href: "/admin/partners", icon: Handshake },
-                { name: "Contacts", href: "/admin/contacts", icon: Mail },
+                { name: dict.nav?.comments || "Comments", href: "/admin/comments", icon: MessageSquare },
+                { name: dict.nav?.notifications || "Notifications", href: "/admin/notifications", icon: Bell },
+                { name: dict.nav?.testimonials || "Testimonials", href: "/admin/testimonials", icon: Star },
+                { name: dict.nav?.partners || "Partners", href: "/admin/partners", icon: Handshake },
+                { name: dict.nav?.contacts || "Contacts", href: "/admin/contacts", icon: Mail },
             ]
         },
         {
-            title: "System",
+            title: dict.nav?.system || "System",
             items: [
-                { name: "Shop", href: "/admin/shop", icon: ShoppingBag },
-                { name: "Ranks", href: "/admin/ranks", icon: Trophy },
-                { name: "Theme", href: "/admin/theme", icon: Palette },
+                { name: dict.nav?.shop || "Shop", href: "/admin/shop", icon: ShoppingBag },
+                { name: dict.nav?.ranks || "Ranks", href: "/admin/ranks", icon: Trophy },
+                { name: dict.nav?.theme || "Theme", href: "/admin/theme", icon: Palette },
             ]
         }
     ];
@@ -203,7 +203,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                         `}>
                             <ChevronLeft
                                 size={14}
-                                className="text-white/40 group-hover:text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]"
+                                className="text-black/60 dark:text-white/40 group-hover:text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]"
                             />
                         </div>
 
@@ -271,12 +271,12 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                         ) : (
                             <>
                                 {/* User Mode Menu */}
-                                <SidebarSection label="Main Menu" isExpanded={isExpanded} show={true}>
+                                <SidebarSection label={dict.nav?.main_menu || "Main Menu"} isExpanded={isExpanded} show={true}>
                                     {[
-                                        { name: dict.nav.home || "Home", href: "/dashboard", icon: Home },
-                                        { name: dict.nav.works || "Works", href: "/projects", icon: Briefcase },
-                                        { name: dict.nav.about || "About", href: "/about", icon: User },
-                                        { name: dict.nav.contact || "Contact", href: "/contact", icon: Mail },
+                                        { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
+                                        { name: dict.nav?.works || "Works", href: "/projects", icon: Briefcase },
+                                        { name: dict.nav?.about || "About", href: "/about", icon: User },
+                                        { name: dict.nav?.contact || "Contact", href: "/contact", icon: Mail },
                                     ].map((item) => (
                                         <SidebarLink
                                             key={item.href}
@@ -289,11 +289,11 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                     ))}
                                 </SidebarSection>
 
-                                <SidebarSection label="Tools" isExpanded={isExpanded} show={true}>
+                                <SidebarSection label={dict.nav?.tools || "Tools"} isExpanded={isExpanded} show={true}>
                                     {[
-                                        { name: "Shop", href: "/shop", icon: ShoppingBag },
-                                        { name: "App Store", href: "/apps", icon: Layout },
-                                        { name: "Search", href: "/search", icon: Search },
+                                        { name: dict.nav?.shop || "Shop", href: "/shop", icon: ShoppingBag },
+                                        { name: dict.nav?.app_store || "App Store", href: "/apps", icon: Layout },
+                                        { name: dict.nav?.search || "Search", href: "/search", icon: Search },
                                     ].map((item) => (
                                         <SidebarLink
                                             key={item.href}
@@ -306,12 +306,12 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                     ))}
                                 </SidebarSection>
 
-                                <SidebarSection label="User" isExpanded={isExpanded} show={!!user}>
+                                <SidebarSection label={dict.nav?.user || "User"} isExpanded={isExpanded} show={!!user}>
                                     {[
-                                        { name: "Profile", href: `/profile/${user?.username || user?.id || 'me'}`, icon: User },
-                                        { name: "Messages", href: "#", icon: MessageSquare, onClick: () => setIsMessageOpen(true), unread: unreadMessages },
-                                        { name: "Notifications", href: "/notifications", icon: Bell },
-                                        { name: "Settings", href: "/settings", icon: Settings },
+                                        { name: dict.nav?.profile || "Profile", href: `/profile/${user?.username || user?.id || 'me'}`, icon: User },
+                                        { name: dict.nav?.messages || "Messages", href: "#", icon: MessageSquare, onClick: () => setIsMessageOpen(true), unread: unreadMessages },
+                                        { name: dict.nav?.notifications || "Notifications", href: "/notifications", icon: Bell },
+                                        { name: dict.nav?.settings || "Settings", href: "/settings", icon: Settings },
                                     ].map((item: any) => (
                                         <SidebarLink
                                             key={item.href || item.name}
@@ -351,7 +351,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                 <div className="relative z-10 flex items-center w-full justify-start">
                                     {isAdminMode ? <User size={20} className="min-w-[20px]" /> : <ShieldCheck size={20} className="min-w-[20px]" />}
                                     <span className={`ml-3 font-bold text-sm whitespace-nowrap transition-all duration-500 ${!isExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
-                                        {isAdminMode ? "Switch to User" : "Switch to Admin"}
+                                        {isAdminMode ? (dict.nav?.switch_to_user || "Switch to User") : (dict.nav?.switch_to_admin || "Switch to Admin")}
                                     </span>
                                     {unreadMessages > 0 && (
                                         <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
@@ -365,11 +365,11 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                         {/* Logout / Exit Button */}
                         <button
                             onClick={() => { setIsOpen(false); signOut(); }}
-                            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/5 text-[var(--glass-text-muted)] hover:text-red-400 border border-transparent transition-all group whitespace-nowrap"
+                            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-black dark:text-white hover:text-red-400 border border-transparent transition-all group whitespace-nowrap"
                         >
-                            <LogOut size={20} className="min-w-[20px] transition-transform group-hover:-translate-x-1" />
+                            <LogOut size={20} className="min-w-[20px] transition-transform group-hover:-translate-x-1 text-[var(--site-secondary)]" />
                             <span className={`ml-3 font-medium text-sm transition-all duration-500 ${!isExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
-                                Log Out
+                                {dict.nav?.log_out || "Log Out"}
                             </span>
                         </button>
                     </div>
@@ -432,10 +432,10 @@ function SidebarLink({
                 }
             }}
             className={`
-                flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300 w-auto
+                flex items-center px-4 py-3 mx-2 rounded-xl transition-all group relative duration-300 w-auto text-black dark:text-white
                 ${active
-                    ? "text-[var(--site-secondary)] font-bold"
-                    : "text-[var(--glass-text-muted)] hover:text-white hover:bg-white/5"
+                    ? "font-bold"
+                    : "hover:bg-black/5 dark:hover:bg-white/5"
                 }
             `}
         >
@@ -449,9 +449,9 @@ function SidebarLink({
 
             <div className="relative flex items-center">
                 {(!isExpanded || isSmall) ? (
-                    <Icon size={20} className={`transition-all duration-300 group-hover:scale-110 ${active ? "text-[var(--site-secondary)] drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
+                    <Icon size={20} className={`text-[var(--site-secondary)] transition-all duration-300 group-hover:scale-110 ${active ? "drop-shadow-[0_0_8px_var(--site-secondary)]" : "opacity-70 group-hover:opacity-100"}`} />
                 ) : (
-                    <Icon size={18} className={`mr-3 transition-colors duration-300 ${active ? "text-[var(--site-secondary)]" : ""}`} />
+                    <Icon size={18} className={`text-[var(--site-secondary)] mr-3 transition-colors duration-300`} />
                 )}
 
                 {(unreadCount ?? 0) > 0 && (
@@ -644,9 +644,9 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
                         {[
                             { label: dict.nav.home || "Home", href: "#hero", id: "hero" },
                             { label: dict.nav.works || "Portfolio", href: "#portfolio", id: "portfolio" },
-                            { label: dict.nav.services || "Services", href: "#services", id: "services" },
-                            { label: "About", href: "#about", id: "about" },
-                            { label: dict.nav.contact || "Contact", href: "#contact", id: "contact" },
+                            { label: dict.nav?.services || "Services", href: "#services", id: "services" },
+                            { label: dict.nav?.about || "About", href: "#about", id: "about" },
+                            { label: dict.nav?.contact || "Contact", href: "#contact", id: "contact" },
                         ].map((item) => {
                             const isActive = activeSection === item.id;
                             return (
@@ -731,7 +731,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder="Search..."
+                        placeholder={dict.nav?.search_placeholder || "Search..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-64 pl-10 pr-12 py-2 rounded-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-[var(--site-accent)]/50 outline-none text-sm transition-all placeholder:text-muted-foreground/70 focus:w-80 focus:bg-white dark:focus:bg-black focus:shadow-[0_0_20px] focus:shadow-[var(--site-accent)]/10"
@@ -754,12 +754,16 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
 
                         <button
                             onClick={() => setIsMessageOpen(true)}
-                            className="relative p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-all group"
+                            className="relative p-2.5 rounded-xl hover:bg-white/10 dark:hover:bg-white/5 text-muted-foreground hover:text-[var(--site-secondary)] transition-all group overflow-hidden"
                         >
-                            <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-[var(--site-secondary)]/0 to-[var(--site-secondary)]/0 group-hover:from-[var(--site-secondary)]/10 group-hover:to-transparent transition-all duration-500" />
+                            <MessageSquare size={20} className="relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300" />
                             {unreadMessages > 0 && (
-                                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#111]">
-                                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                                <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white shadow-[0_0_10px_rgba(239,68,68,0.5)] border border-white/20">
+                                        {unreadMessages > 9 ? '9+' : unreadMessages}
+                                    </span>
                                 </span>
                             )}
                         </button>
@@ -778,35 +782,47 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
 
                 <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors relative overflow-hidden"
+                    className="p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-white/10 hover:border-white/20 transition-all group relative overflow-hidden"
                     aria-label="Toggle theme"
                 >
-                    <div className="relative z-10">
-                        {mounted ? (
-                            theme === "dark" ? <Sun size={20} /> : <Moon size={20} />
-                        ) : (
-                            <div className="w-5 h-5" />
-                        )}
+                    <div className="flex items-center gap-1 relative z-10">
+                        <div className={`p-1.5 rounded-lg transition-all duration-500 ${theme === 'light' ? 'bg-white text-amber-500 shadow-sm' : 'text-muted-foreground group-hover:text-white'}`}>
+                            <Sun size={16} />
+                        </div>
+                        <div className={`p-1.5 rounded-lg transition-all duration-500 ${theme === 'dark' ? 'bg-zinc-800 text-purple-400 shadow-sm' : 'text-muted-foreground group-hover:text-white'}`}>
+                            <Moon size={16} />
+                        </div>
                     </div>
+                    {/* Animated background pill */}
+                    <motion.div
+                        className="absolute inset-y-1 h-auto bg-white dark:bg-zinc-800 rounded-lg shadow-sm"
+                        initial={false}
+                        animate={{
+                            x: theme === 'light' ? 4 : 32,
+                            width: 28
+                        }}
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
                 </button>
 
                 {user ? (
                     <div className="relative" ref={profileRef}>
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-3 p-1 pl-2 pr-1 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200 dark:hover:border-white/10 transition-all"
+                            className="flex items-center gap-3 p-1.5 pl-3 pr-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 hover:border-white/20 transition-all group relative overflow-hidden"
                         >
-                            <span className="text-sm font-medium hidden sm:block">
+                            <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--site-secondary)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <span className="text-sm font-bold hidden sm:block tracking-tight">
                                 {user.name?.split(" ")[0]}
                             </span>
-                            <div className="relative">
+                            <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/20 to-transparent group-hover:from-[var(--site-secondary)]/50 group-hover:to-transparent transition-all duration-500">
                                 <AvatarWithEffect
                                     src={user.image}
                                     alt={user.name || "User"}
-                                    size={32}
+                                    size={30}
                                     effect={user.equippedEffect}
                                     frame={user.equippedFrame}
-                                    background={user.equippedBackground}
+                                    background={user.equippedEffect}
                                     profileColor={user.profileColor}
                                     frameColor={user.frameColor}
                                 />
@@ -816,42 +832,81 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
                         <AnimatePresence>
                             {isProfileOpen && (
                                 <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 mt-2 w-64 p-2 rounded-2xl glass-panel shadow-2xl border border-white/20 dark:border-white/10 z-50 bg-white/80 dark:bg-[#111]/90 backdrop-blur-xl"
+                                    initial={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
+                                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                                    exit={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
+                                    transition={{ duration: 0.3, ease: [0.19, 1.0, 0.22, 1.0] }}
+                                    className="absolute right-0 top-full mt-4 w-72 p-1.5 rounded-3xl glass-liquid backdrop-blur-[40px] shadow-[0_30px_70px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 z-50 overflow-hidden ring-1 ring-white/5"
                                 >
-                                    <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5 mb-1">
-                                        <p className="text-sm font-bold text-foreground">{user.name}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                    {/* User Header Section */}
+                                    <div className="px-4 py-4 mb-1">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="min-w-0">
+                                                <p className="text-base font-black tracking-tighter text-foreground truncate">{user.name}</p>
+                                                <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest truncate">{user.email}</p>
+                                            </div>
+                                            <div className="px-2 py-0.5 rounded-md bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 text-[10px] font-black text-[var(--site-secondary)] uppercase tracking-tighter">
+                                                {user.role || 'User'}
+                                            </div>
+                                        </div>
+
+                                        {/* Quick Stats: Points */}
+                                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 shadow-inner">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center text-amber-400">
+                                                <Coins size={20} className="drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Your Balance</p>
+                                                <p className="text-lg font-black tracking-tight text-foreground leading-none">
+                                                    {user.points || 0} <span className="text-xs text-amber-400 ml-0.5">PTS</span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-0.5">
+                                    {/* Links Section */}
+                                    <div className="p-1.5 space-y-1">
                                         {['admin', 'superadmin'].includes(user.role?.toLowerCase() || '') && (
                                             <Link
                                                 href="/admin"
                                                 onClick={() => setIsProfileOpen(false)}
-                                                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl hover:bg-[var(--site-accent)]/10 hover:text-[var(--site-accent)] transition-colors"
+                                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-2xl bg-gradient-to-r from-[var(--site-accent)]/10 to-transparent text-[var(--site-accent)] hover:from-[var(--site-accent)]/20 transition-all border border-[var(--site-accent)]/10"
                                             >
-                                                Admin Panel
+                                                <ShieldCheck size={18} />
+                                                {dict.nav?.admin_panel || "Admin Panel"}
                                             </Link>
                                         )}
                                         <Link
                                             href={`/profile/${user.username || user.id}`}
                                             onClick={() => setIsProfileOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl hover:bg-white/5 transition-all text-foreground/80 hover:text-foreground group"
                                         >
-                                            <User size={16} /> Profile
+                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-100 dark:bg-white/5 group-hover:bg-[var(--site-secondary)]/10 group-hover:text-[var(--site-secondary)] transition-colors">
+                                                <User size={16} />
+                                            </div>
+                                            {dict.nav?.profile || "Profile"}
                                         </Link>
-                                        <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
-                                            <Settings size={16} /> Settings
-                                        </button>
-                                        <div className="h-px bg-zinc-200 dark:bg-white/5 my-1" />
+                                        <Link
+                                            href="/settings"
+                                            onClick={() => setIsProfileOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl hover:bg-white/5 transition-all text-foreground/80 hover:text-foreground group"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-100 dark:bg-white/5 group-hover:bg-[var(--site-secondary)]/10 group-hover:text-[var(--site-secondary)] transition-colors">
+                                                <Settings size={16} />
+                                            </div>
+                                            {dict.nav?.settings || "Settings"}
+                                        </Link>
+
+                                        <div className="h-px bg-white/10 mx-4 my-2" />
+
                                         <button
                                             onClick={() => signOut()}
-                                            className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl text-red-400 hover:bg-red-400/10 transition-all group"
                                         >
-                                            <LogOut size={16} /> Sign Out
+                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-red-400/10 transition-colors">
+                                                <LogOut size={16} />
+                                            </div>
+                                            {dict.nav?.log_out || "Sign Out"}
                                         </button>
                                     </div>
                                 </motion.div>
@@ -863,7 +918,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
                         href="/login"
                         className="px-6 py-2 rounded-full bg-foreground text-background font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
                     >
-                        Sign In
+                        {dict.nav?.login || "Sign In"}
                     </Link>
                 )}
             </div>

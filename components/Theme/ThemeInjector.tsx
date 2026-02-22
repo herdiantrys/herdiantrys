@@ -71,17 +71,20 @@ export default function ThemeInjector({ theme }: { theme: ThemeConfig }) {
         };
 
         const updateThemeVariables = (currentTheme: ThemeConfig) => {
-            // Light Mode Source Variables
+            // Primary remains split for Light / Dark mode
             setProp("--theme-light-primary", currentTheme.primary);
-            setProp("--theme-light-secondary", currentTheme.secondary);
-            setProp("--theme-light-accent", currentTheme.accent);
-            setProp("--theme-light-button", currentTheme.button || currentTheme.accent);
-            setProp("--theme-light-button-text", currentTheme.buttonText || "#ffffff");
-            setProp("--theme-light-link", currentTheme.link || currentTheme.accent);
-            setProp("--theme-light-card", currentTheme.card || "#ffffff");
-            setProp("--theme-light-card-text", currentTheme.cardText || "#1f2937");
+            setProp("--theme-dark-primary", currentTheme.darkPrimary);
 
-            // Advanced & Sidebar (Light)
+            // The rest are unified
+            setProp("--theme-secondary", currentTheme.secondary);
+            setProp("--theme-accent", currentTheme.accent);
+            setProp("--theme-button", currentTheme.button || currentTheme.accent);
+            setProp("--theme-button-text", currentTheme.buttonText || "#ffffff");
+            setProp("--theme-link", currentTheme.link || currentTheme.accent);
+            setProp("--theme-card", currentTheme.card || "#ffffff");
+            setProp("--theme-card-text", currentTheme.cardText || "#1f2937");
+
+            // Advanced
             setProp("--radius", `${currentTheme.radius || 0.5}rem`);
             setProp("--glass-blur", `${currentTheme.glassBlur || 8}px`);
             setProp("--glass-opacity", `${currentTheme.glassOpacity || 0.25}`);
@@ -90,58 +93,21 @@ export default function ThemeInjector({ theme }: { theme: ThemeConfig }) {
             // Scale (Density)
             setProp("font-size", `${(currentTheme.scale || 1) * 100}%`);
 
-            setProp("--theme-light-sidebar-bg", currentTheme.sidebarBg || "#ffffff");
-            setProp("--theme-light-sidebar-fg", currentTheme.sidebarFg || "#1f2937");
-            setProp("--theme-light-sidebar-border", currentTheme.sidebarBorder || "#e5e7eb");
-            setProp("--theme-light-sidebar-accent", currentTheme.sidebarAccent || currentTheme.accent || "#14b8a6");
-            setProp("--theme-light-sidebar-active", currentTheme.sidebarActive || "#f0fdfa");
+            // Sidebar (Unified)
+            setProp("--theme-sidebar-bg", currentTheme.sidebarBg || "#ffffff");
+            setProp("--theme-sidebar-fg", currentTheme.sidebarFg || "#1f2937");
+            setProp("--theme-sidebar-border", currentTheme.sidebarBorder || "#e5e7eb");
+            setProp("--theme-sidebar-accent", currentTheme.sidebarAccent || currentTheme.accent || "#14b8a6");
+            setProp("--theme-sidebar-active", currentTheme.sidebarActive || "#f0fdfa");
 
-            // Dark Mode Source Variables
-            setProp("--theme-dark-primary", currentTheme.darkPrimary);
-            setProp("--theme-dark-secondary", currentTheme.darkSecondary);
-            setProp("--theme-dark-accent", currentTheme.darkAccent);
-            setProp("--theme-dark-button", currentTheme.darkButton || currentTheme.darkAccent);
-            setProp("--theme-dark-button-text", currentTheme.darkButtonText || "#1a1a1a");
-            setProp("--theme-dark-link", currentTheme.darkLink || currentTheme.darkAccent);
-            setProp("--theme-dark-card", currentTheme.darkCard || "#333333");
-            setProp("--theme-dark-card-text", currentTheme.darkCardText || "#ffffff");
-
-            // Sidebar (Dark)
-            setProp("--theme-dark-sidebar-bg", currentTheme.darkSidebarBg || "#333333");
-            setProp("--theme-dark-sidebar-fg", currentTheme.darkSidebarFg || "#ffffff");
-            setProp("--theme-dark-sidebar-border", currentTheme.darkSidebarBorder || "#404040");
-            setProp("--theme-dark-sidebar-accent", currentTheme.darkSidebarAccent || currentTheme.darkAccent || "#2dd4bf");
-            setProp("--theme-dark-sidebar-active", currentTheme.darkSidebarActive || "#2d2d2d");
-
-            // --- STRICT GRADIENT SEPARATION ---
-
-            // 1. Light Mode Gradient
-            const lightGradient = calculateGradient(
+            // Unified Gradient
+            const gradient = calculateGradient(
                 currentTheme.accentGradientStart,
                 currentTheme.accentGradientEnd,
                 currentTheme.accent
             );
-            setProp("--theme-light-accent-prev", lightGradient.prev);
-            setProp("--theme-light-accent-next", lightGradient.next);
-
-            // 2. Dark Mode Gradient
-            // Note: We currently don't have separate fields for darkAccentGradientStart/End in ThemeConfig interface yet (likely),
-            // but if we did, we would use them here. For now, we fallback to generating from darkAccent.
-            // If the user adds 'darkAccentGradientStart' later, we can use it here.
-            // Assuming the type definition might not have them yet, we check safely or just generate.
-            // Let's assume for now we generate from darkAccent to ensure separation.
-
-            // Checking if the properties exist on the object (even if TS ignores them for now)
-            const darkStart = (currentTheme as any).darkAccentGradientStart;
-            const darkEnd = (currentTheme as any).darkAccentGradientEnd;
-
-            const darkGradient = calculateGradient(
-                darkStart,
-                darkEnd,
-                currentTheme.darkAccent
-            );
-            setProp("--theme-dark-accent-prev", darkGradient.prev);
-            setProp("--theme-dark-accent-next", darkGradient.next);
+            setProp("--theme-accent-prev", gradient.prev);
+            setProp("--theme-accent-next", gradient.next);
         };
 
         // Initial Load

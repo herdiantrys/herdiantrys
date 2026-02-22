@@ -56,7 +56,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
 
     return (
         <div className="space-y-6">
-            <ProfileCard user={user} isPublic={isPublic} />
+            <ProfileCard user={user} isPublic={isPublic} dict={dict} />
 
             {/* Admin Quick Access - For robust visibility */}
             {!isPublic && ['admin', 'superadmin'].includes(user.role?.toLowerCase() || '') && (
@@ -66,7 +66,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                         className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm bg-[var(--site-accent)]/10 text-[var(--site-accent)] hover:bg-[var(--site-accent)]/20 border border-[var(--site-accent)]/20 group"
                     >
                         <ShieldCheck size={18} className="group-hover:scale-110 transition-transform" />
-                        Admin Management
+                        {t.admin_management || "Admin Management"}
                     </Link>
                 </div>
             )}
@@ -136,7 +136,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                         <div className="relative flex items-center justify-center w-14 h-14 bg-gradient-to-b from-slate-800 to-black border-2 border-amber-500/50 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 ml-2 rotate-3 group-hover:rotate-0 transition-transform duration-500">
                             <div className="absolute inset-0 bg-amber-500/10 rounded-xl animate-pulse" />
                             <div className="text-center z-10">
-                                <div className="text-[9px] text-amber-500/80 uppercase font-black tracking-widest leading-none mb-0.5">LVL</div>
+                                <div className="text-[9px] text-amber-500/80 uppercase font-black tracking-widest leading-none mb-0.5">{t.lvl || "LVL"}</div>
                                 <div className="text-2xl font-black text-white leading-none font-serif">{currentLevel}</div>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                     {/* XP Progress Bar */}
                     <div className="relative mb-2">
                         <div className="flex justify-between text-[10px] font-bold tracking-wider text-slate-400 mb-1.5 uppercase">
-                            <span className="text-amber-500/80">Next Rank Progress</span>
+                            <span className="text-amber-500/80">{t.next_rank_progress || "Next Rank Progress"}</span>
                             <span className="text-white">{xpInLevel} <span className="text-slate-600">/</span> 100 XP</span>
                         </div>
 
@@ -165,7 +165,7 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
                             </div>
                         </div>
                         <div className="text-right mt-1.5">
-                            <span className="text-[9px] text-slate-500 font-mono tracking-widest">TOTAL XP: <span className="text-slate-300">{formatNumber(currentXP)}</span></span>
+                            <span className="text-[9px] text-slate-500 font-mono tracking-widest">{t.total_xp || "TOTAL XP"}: <span className="text-slate-300">{formatNumber(currentXP)}</span></span>
                         </div>
                     </div>
                 </div>

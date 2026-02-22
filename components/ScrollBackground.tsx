@@ -84,8 +84,6 @@ export default function ScrollBackground() {
     const [isMounted, setIsMounted] = useState(false);
     const [activeSection, setActiveSection] = useState("hero");
 
-    if (!isHomePage) return null;
-
     useEffect(() => {
         setIsMounted(true);
 
@@ -125,7 +123,7 @@ export default function ScrollBackground() {
 
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0]);
 
-    if (!isMounted) return null;
+    if (!isHomePage || !isMounted) return null;
 
     return (
         <>

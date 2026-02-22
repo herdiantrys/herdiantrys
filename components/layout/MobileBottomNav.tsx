@@ -17,10 +17,10 @@ export default function MobileBottomNav({ user, dict }: { user: any; dict: any }
     const normalizedPath = pathname.replace(/^\/[a-z]{2}/, "") || "/";
 
     const navItems: NavItem[] = [
-        { name: "Home", href: "/dashboard", icon: Home },
-        { name: "Search", href: "/search", icon: Search },
-        { name: "Projects", href: "/projects", icon: Briefcase },
-        { name: "Profile", href: user ? `/profile/${user.username || user.id}` : "/login", icon: User },
+        { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
+        { name: dict.nav?.search || "Search", href: "/search", icon: Search },
+        { name: dict.nav?.projects || "Projects", href: "/projects", icon: Briefcase },
+        { name: dict.nav?.profile || "Profile", href: user ? `/profile/${user.username || user.id}` : "/login", icon: User },
     ];
 
     const isActive = (href: string) => {

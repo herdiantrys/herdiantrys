@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { LayoutGrid, Bookmark, ShoppingBag, Bell, Trophy } from "lucide-react";
 import { getRecentActivities, getUserActivities, Activity } from "@/lib/actions/activity.actions";
@@ -46,6 +46,11 @@ export default function ActivityArea({
     const [activities, setActivities] = useState<Activity[]>(initialActivities);
     const [isLoading, setIsLoading] = useState(false);
     const [hasMore, setHasMore] = useState(initialActivities.length >= LIMIT);
+
+    useEffect(() => {
+        setActivities(initialActivities);
+        setHasMore(initialActivities.length >= LIMIT);
+    }, [initialActivities]);
 
     const handleLoadMore = async () => {
         if (isLoading || !hasMore) return;
@@ -104,10 +109,10 @@ export default function ActivityArea({
     // If not owner, hide 'saved'. 'Inventory' might be visible if we want to show other's items (usually yes).
     const tabs = [
         { id: 'feed', icon: LayoutGrid, label: t.feed || "Feed", show: true },
-        { id: 'projects', icon: Trophy, label: "Projects", show: true },
-        { id: 'inventory', icon: ShoppingBag, label: "Inventory", show: true },
+        { id: 'projects', icon: Trophy, label: t.tab_projects || "Projects", show: true },
+        { id: 'inventory', icon: ShoppingBag, label: t.tab_inventory || "Inventory", show: true },
         { id: 'saved', icon: Bookmark, label: t.saved_nav || "Saved", show: isOwner }, // Only show saved for owner
-        { id: 'achievements', icon: Trophy, label: "Achievements", show: true }, // Always show achievements
+        { id: 'achievements', icon: Trophy, label: t.tab_achievements || "Achievements", show: true }, // Always show achievements
     ].filter(tab => tab.show);
 
     return (
@@ -155,7 +160,7 @@ export default function ActivityArea({
                                     {isOwner && !profileUser ? (dict.dashboard.activity_feed_title || "Activity Feed") : `${targetUser.fullName}'s Activities`}
                                 </h1>
                                 <p className="text-[var(--glass-text-muted)] text-sm mt-1">
-                                    {isOwner && !profileUser ? (dict.dashboard.activity_feed_desc || "Check out what's happening in the community.") : "Recent posts and updates."}
+                                    {isOwner && !profileUser ? (dict.dashboard.activity_feed_desc || "Check out what's happening in the community.") : (t.recent_updates_desc || "Recent posts and updates.")}
                                 </p>
                             </div>
                         </div>
@@ -189,7 +194,7 @@ export default function ActivityArea({
                                     ) : (
                                         <Plus className="group-hover:rotate-90 transition-transform duration-300" size={18} />
                                     )}
-                                    {isLoading ? "Loading..." : "Load More Activity"}
+                                    {isLoading ? (t.loading || "Loading...") : (t.load_more_activity || "Load More Activity")}
                                 </button>
                             </div>
                         )}
@@ -203,8 +208,8 @@ export default function ActivityArea({
                                 <Trophy size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">Projects</h1>
-                                <p className="text-[var(--glass-text-muted)] text-sm">{isOwner ? "Your published projects." : `${targetUser.fullName}'s projects.`}</p>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">{t.tab_projects || "Projects"}</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">{isOwner ? (t.your_published_projects || "Your published projects.") : `${targetUser.fullName}${t.others_projects || "'s projects."}`}</p>
                             </div>
                         </div>
 
@@ -226,7 +231,7 @@ export default function ActivityArea({
                                             className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/50 dark:bg-white/5 hover:bg-[var(--site-secondary)]/10 hover:text-[var(--site-secondary)] border border-white/40 dark:border-white/10 transition-all duration-200 font-medium text-sm group disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
-                                            {isLoading ? "Loading..." : "Load More Projects"}
+                                            {isLoading ? (t.loading || "Loading...") : (t.load_more_projects || "Load More Projects")}
                                         </button>
                                     </div>
                                 )}
@@ -236,8 +241,8 @@ export default function ActivityArea({
                                 <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500">
                                     <Trophy size={32} />
                                 </div>
-                                <p className="text-[var(--glass-text)] text-lg mb-2">No projects yet.</p>
-                                <p className="text-[var(--glass-text-muted)]">Share your work to see projects here.</p>
+                                <p className="text-[var(--glass-text)] text-lg mb-2">{t.no_projects_yet || "No projects yet."}</p>
+                                <p className="text-[var(--glass-text-muted)]">{t.share_work_prompt || "Share your work to see projects here."}</p>
                             </div>
                         )}
                     </div>
@@ -250,8 +255,8 @@ export default function ActivityArea({
                                 <Bookmark size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">Saved Collection</h1>
-                                <p className="text-[var(--glass-text-muted)] text-sm">Your bookmarked posts and projects.</p>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">{t.saved_collection || "Saved Collection"}</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">{t.saved_collection_desc || "Your bookmarked posts and projects."}</p>
                             </div>
                         </div>
 
@@ -269,8 +274,8 @@ export default function ActivityArea({
                                 <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500">
                                     <Bookmark size={32} />
                                 </div>
-                                <p className="text-[var(--glass-text)] text-lg mb-2">No saved items yet.</p>
-                                <p className="text-[var(--glass-text-muted)]">Bookmarks posts to see them here.</p>
+                                <p className="text-[var(--glass-text)] text-lg mb-2">{t.no_saved_items || "No saved items yet."}</p>
+                                <p className="text-[var(--glass-text-muted)]">{t.bookmark_prompt || "Bookmark posts to see them here."}</p>
                             </div>
                         )}
                     </div>
@@ -283,8 +288,8 @@ export default function ActivityArea({
                                 <Trophy size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">Achievements</h1>
-                                <p className="text-[var(--glass-text-muted)] text-sm">Badges earned through community participation.</p>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">{t.tab_achievements || "Achievements"}</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">{t.achievements_desc || "Badges earned through community participation."}</p>
                             </div>
                         </div>
                         <AchievementsList user={targetUser} isOwner={isOwner} />
@@ -298,8 +303,8 @@ export default function ActivityArea({
                                 <ShoppingBag size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">My Inventory</h1>
-                                <p className="text-[var(--glass-text-muted)] text-sm">Manage your purchased profile effects and items.</p>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)]">{t.my_inventory || "My Inventory"}</h1>
+                                <p className="text-[var(--glass-text-muted)] text-sm">{t.inventory_desc || "Manage your purchased profile effects and items."}</p>
                             </div>
                         </div>
                         <InventoryList

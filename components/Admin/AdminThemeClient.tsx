@@ -11,8 +11,25 @@ import FrontPagePreview from "./FrontPagePreview";
 
 export default function AdminThemeClient({ initialTheme }: { initialTheme: ThemeConfig }) {
     const router = useRouter();
-    const [theme, setTheme] = useState<ThemeConfig>(initialTheme);
+    const [theme, setTheme] = useState<ThemeConfig>(() => ({
+        ...initialTheme,
+        darkSecondary: initialTheme.secondary,
+        darkAccent: initialTheme.accent,
+        darkButton: initialTheme.button,
+        darkButtonText: initialTheme.buttonText,
+        darkLink: initialTheme.link,
+        darkCard: initialTheme.card,
+        darkCardText: initialTheme.cardText,
+        darkSidebarBg: initialTheme.sidebarBg,
+        darkSidebarFg: initialTheme.sidebarFg,
+        darkSidebarBorder: initialTheme.sidebarBorder,
+        darkSidebarAccent: initialTheme.sidebarAccent,
+        darkSidebarActive: initialTheme.sidebarActive,
+        darkAccentGradientStart: initialTheme.accentGradientStart,
+        darkAccentGradientEnd: initialTheme.accentGradientEnd,
+    }));
     const [isSaving, setIsSaving] = useState(false);
+    const [isPreviewDark, setIsPreviewDark] = useState(true);
 
     // OPTIMISTIC UPDATE: Broadcast changes to ThemeInjector immediately
     useEffect(() => {
@@ -20,7 +37,26 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
     }, [theme]);
 
     const handleChange = (key: keyof ThemeConfig, value: string | number) => {
-        setTheme(prev => ({ ...prev, [key]: value }));
+        setTheme(prev => {
+            const next = { ...prev, [key]: value };
+
+            if (key === 'secondary') next.darkSecondary = value as string;
+            if (key === 'accent') next.darkAccent = value as string;
+            if (key === 'button') next.darkButton = value as string;
+            if (key === 'buttonText') next.darkButtonText = value as string;
+            if (key === 'link') next.darkLink = value as string;
+            if (key === 'card') next.darkCard = value as string;
+            if (key === 'cardText') next.darkCardText = value as string;
+            if (key === 'sidebarBg') next.darkSidebarBg = value as string;
+            if (key === 'sidebarFg') next.darkSidebarFg = value as string;
+            if (key === 'sidebarBorder') next.darkSidebarBorder = value as string;
+            if (key === 'sidebarAccent') next.darkSidebarAccent = value as string;
+            if (key === 'sidebarActive') next.darkSidebarActive = value as string;
+            if (key === 'accentGradientStart') next.darkAccentGradientStart = value as string;
+            if (key === 'accentGradientEnd') next.darkAccentGradientEnd = value as string;
+
+            return next;
+        });
     };
 
     const handleSave = async () => {
@@ -45,6 +81,8 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
             setTheme(DEFAULT_THEME);
         }
     };
+
+    const [activeTab, setActiveTab] = useState<"light" | "dark" | "interface">("light");
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -81,129 +119,208 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
             {/* Main Configuration Layout */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
 
-                {/* Left Column: Controls (Light/Dark/Interface) */}
-                <div className="xl:col-span-7 space-y-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Light Mode Config */}
-                        <ThemePanel
-                            title="Light Mode"
-                            icon={<Sun className="text-orange-400" />}
-                            colors={{
-                                primary: theme.primary,
-                                secondary: theme.secondary,
-                                accent: theme.accent,
-                                button: theme.button,
-                                buttonText: theme.buttonText,
-                                link: theme.link,
-                                card: theme.card,
-                                cardText: theme.cardText,
-                                gradientStart: theme.accentGradientStart,
-                                gradientEnd: theme.accentGradientEnd
-                            }}
-                            onColorChange={(k, v) => {
-                                // For light mode, we might receive 'gradientStart' -> map to 'accentGradientStart'
-                                if (k === 'gradientStart') handleChange('accentGradientStart', v);
-                                else if (k === 'gradientEnd') handleChange('accentGradientEnd', v);
-                                else handleChange(k as any, v);
-                            }}
+                {/* Left Column: Controls (Tabs) */}
+                <div className="xl:col-span-7 flex flex-col gap-6">
+
+                    {/* Tab Navigation */}
+                    <div className="flex bg-white/5 dark:bg-black/20 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md w-full max-w-lg">
+                        <TabButton
+                            active={activeTab === "light"}
+                            onClick={() => setActiveTab("light")}
+                            icon={<Sun size={16} className={activeTab === "light" ? "text-orange-400" : ""} />}
+                            label="Light Theme"
                         />
-
-                        {/* Dark Mode Config */}
-                        <ThemePanel
-                            title="Dark Mode"
-                            icon={<Moon className="text-purple-400" />}
-                            colors={{
-                                primary: theme.darkPrimary,
-                                secondary: theme.darkSecondary,
-                                accent: theme.darkAccent,
-                                button: theme.darkButton,
-                                buttonText: theme.darkButtonText,
-                                link: theme.darkLink,
-                                card: theme.card,
-                                cardText: theme.cardText,
-                                radius: theme.radius,
-                                sidebarBg: theme.sidebarBg,
-                                sidebarFg: theme.sidebarFg,
-                                sidebarBorder: theme.sidebarBorder,
-                                sidebarAccent: theme.sidebarAccent,
-                                sidebarActive: theme.sidebarActive,
-                                gradientStart: theme.darkAccentGradientStart,
-                                gradientEnd: theme.darkAccentGradientEnd
-                            }}
-                            onColorChange={(k, v) => {
-                                if (k === 'radius') {
-                                    handleChange('radius', v); // Shared setting
-                                } else {
-                                    // Handle gradients specifically for dark mode keys if we choose to map them
-                                    // For now, let's just map them directly if the key is explicitly 'darkAccentGradientStart' 
-                                    // passed from the panel, or use the prefix logic.
-
-                                    // The Panel will pass 'gradientStart' -> we want 'darkAccentGradientStart'
-                                    if (k === 'gradientStart') handleChange('darkAccentGradientStart', v);
-                                    else if (k === 'gradientEnd') handleChange('darkAccentGradientEnd', v);
-                                    else {
-                                        const darkKey = `dark${k.charAt(0).toUpperCase() + k.slice(1)}`;
-                                        handleChange(darkKey as any, v);
-                                    }
-                                }
-                            }}
+                        <TabButton
+                            active={activeTab === "dark"}
+                            onClick={() => setActiveTab("dark")}
+                            icon={<Moon size={16} className={activeTab === "dark" ? "text-purple-400" : ""} />}
+                            label="Dark Theme"
+                        />
+                        <TabButton
+                            active={activeTab === "interface"}
+                            onClick={() => setActiveTab("interface")}
+                            icon={<Palette size={16} className={activeTab === "interface" ? "text-pink-400" : ""} />}
+                            label="Interface"
                         />
                     </div>
 
-                    {/* Interface Settings */}
-                    <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10 space-y-6">
-                        <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-                            <Palette className="text-pink-500" />
-                            <h2 className="text-xl font-bold">Interface & Glassmorphism</h2>
-                        </div>
+                    {/* Tab Content */}
+                    <div className="flex-1 relative">
+                        {activeTab === "light" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {/* 60/30/10 Rule visualization */}
+                                <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-6 rounded-3xl border border-white/10">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Info className="text-teal-500" size={18} />
+                                        <h3 className="text-lg font-bold">Theme Distribution (60/30/10)</h3>
+                                    </div>
+                                    <div className="flex h-12 w-full rounded-xl overflow-hidden shadow-inner border border-white/10 mb-6">
+                                        <div
+                                            className="h-full flex items-center justify-center text-xs font-bold text-white/70"
+                                            style={{ backgroundColor: theme.primary, width: '60%' }}
+                                        >
+                                            60% Primary
+                                        </div>
+                                        <div
+                                            className="h-full flex items-center justify-center text-xs font-bold text-black/50"
+                                            style={{ backgroundColor: theme.secondary, width: '30%' }}
+                                        >
+                                            30% Secondary
+                                        </div>
+                                        <div
+                                            className="h-full flex items-center justify-center text-xs font-bold text-white shadow-[inset_0_0_20px_rgba(0,0,0,0.1)]"
+                                            style={{ backgroundColor: theme.accent, width: '10%' }}
+                                        >
+                                            10% Accent
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Glass Effect</h3>
-                                <RangePicker
-                                    label="Blur Strength"
-                                    value={theme.glassBlur ?? 8}
-                                    min={0} max={20} step={1}
-                                    suffix="px"
-                                    onChange={(v) => handleChange('glassBlur', v)}
-                                    description="Softness of the background blur."
-                                />
-                                <RangePicker
-                                    label="Opacity"
-                                    value={theme.glassOpacity ?? 0.25}
-                                    min={0} max={1} step={0.05}
-                                    onChange={(v) => handleChange('glassOpacity', v)}
-                                    description="Transparency of the glass layer."
-                                />
-                                <RangePicker
-                                    label="Saturation"
-                                    value={theme.glassSaturation ?? 150}
-                                    min={100} max={200} step={10}
-                                    suffix="%"
-                                    onChange={(v) => handleChange('glassSaturation', v)}
-                                    description="Vibrancy of colors behind the glass."
+                                {/* Light Mode Config */}
+                                <ThemePanel
+                                    title="Global Theme (Light Primary)"
+                                    icon={<Sun className="text-orange-400" />}
+                                    colors={{
+                                        primary: theme.primary,
+                                        secondary: theme.secondary,
+                                        accent: theme.accent,
+                                        button: theme.button,
+                                        buttonText: theme.buttonText,
+                                        link: theme.link,
+                                        card: theme.card,
+                                        cardText: theme.cardText,
+                                        gradientStart: theme.accentGradientStart,
+                                        gradientEnd: theme.accentGradientEnd
+                                    }}
+                                    onColorChange={(k, v) => {
+                                        if (k === 'gradientStart') handleChange('accentGradientStart', v);
+                                        else if (k === 'gradientEnd') handleChange('accentGradientEnd', v);
+                                        else handleChange(k as any, v);
+                                    }}
                                 />
                             </div>
+                        )}
 
-                            <div className="space-y-4">
-                                <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Layout & Density</h3>
-                                <RangePicker
-                                    label="Global Scale (Density)"
-                                    value={theme.scale ?? 1}
-                                    min={0.8} max={1.2} step={0.05}
-                                    onChange={(v) => handleChange('scale', v)}
-                                    description="Adjust the comprehensive size of the UI."
-                                />
-                                <RangePicker
-                                    label="Global Radius"
-                                    value={theme.radius ?? 0.5}
-                                    min={0} max={1.5} step={0.125}
-                                    suffix="rem"
-                                    onChange={(v) => handleChange('radius', v)}
-                                    description="Roundness of buttons, cards, and inputs."
+                        {activeTab === "dark" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {/* Dark Mode Config */}
+                                <ThemePanel
+                                    title="Dark Mode Primary"
+                                    icon={<Moon className="text-purple-400" />}
+                                    isDarkMode={true}
+                                    colors={{
+                                        primary: theme.darkPrimary,
+                                    }}
+                                    onColorChange={(k, v) => {
+                                        if (k === 'primary') handleChange('darkPrimary', v);
+                                    }}
                                 />
                             </div>
-                        </div>
+                        )}
+
+                        {activeTab === "interface" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {/* Interface Settings */}
+                                <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10 space-y-6">
+                                    <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+                                        <Palette className="text-pink-500" />
+                                        <h2 className="text-xl font-bold">Interface & Glassmorphism</h2>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Glass Effect</h3>
+                                            <RangePicker
+                                                label="Blur Strength"
+                                                value={theme.glassBlur ?? 8}
+                                                min={0} max={20} step={1}
+                                                suffix="px"
+                                                onChange={(v) => handleChange('glassBlur', v)}
+                                                description="Softness of the background blur."
+                                            />
+                                            <RangePicker
+                                                label="Opacity"
+                                                value={theme.glassOpacity ?? 0.25}
+                                                min={0} max={1} step={0.05}
+                                                onChange={(v) => handleChange('glassOpacity', v)}
+                                                description="Transparency of the glass layer."
+                                            />
+                                            <RangePicker
+                                                label="Saturation"
+                                                value={theme.glassSaturation ?? 150}
+                                                min={100} max={200} step={10}
+                                                suffix="%"
+                                                onChange={(v) => handleChange('glassSaturation', v)}
+                                                description="Vibrancy of colors behind the glass."
+                                            />
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Layout & Density</h3>
+                                            <RangePicker
+                                                label="Global Scale (Density)"
+                                                value={theme.scale ?? 1}
+                                                min={0.8} max={1.2} step={0.05}
+                                                onChange={(v) => handleChange('scale', v)}
+                                                description="Adjust the comprehensive size of the UI."
+                                            />
+                                            <RangePicker
+                                                label="Global Radius"
+                                                value={theme.radius ?? 0.5}
+                                                min={0} max={1.5} step={0.125}
+                                                suffix="rem"
+                                                onChange={(v) => handleChange('radius', v)}
+                                                description="Roundness of buttons, cards, and inputs."
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Interactive Live Glass Preview */}
+                                    <div className={`pt-8 mt-4 border-t border-white/10 relative overflow-hidden rounded-2xl w-full h-[300px] flex items-center justify-center p-8 group transition-colors duration-500 ${isPreviewDark ? 'bg-gray-900/60' : 'bg-gray-100'}`}>
+
+                                        {/* Theme Toggle for Preview */}
+                                        <button
+                                            onClick={() => setIsPreviewDark(!isPreviewDark)}
+                                            className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+                                            title="Toggle Preview Background"
+                                        >
+                                            {isPreviewDark ? <Sun size={16} className="text-orange-400" /> : <Moon size={16} className="text-purple-500" />}
+                                        </button>
+
+                                        {/* Decorative background blobs to show off glass effect clearly */}
+                                        <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-[var(--site-accent)] rounded-full mix-blend-screen filter blur-2xl opacity-60 group-hover:translate-x-4 group-hover:-translate-y-4 transition-transform duration-700"></div>
+                                        <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-[var(--site-secondary)] rounded-full mix-blend-screen filter blur-3xl opacity-50 group-hover:-translate-x-8 group-hover:translate-y-4 transition-transform duration-700"></div>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-gradient-to-tr from-[var(--site-accent)] to-purple-500 rounded-full mix-blend-screen filter blur-[40px] opacity-40 animate-pulse"></div>
+
+                                        {/* The Glass Component Preview */}
+                                        <div
+                                            style={{
+                                                backdropFilter: `blur(${theme.glassBlur}px) saturate(${theme.glassSaturation}%)`,
+                                                WebkitBackdropFilter: `blur(${theme.glassBlur}px) saturate(${theme.glassSaturation}%)`,
+                                                backgroundColor: `rgba(${isPreviewDark ? '255, 255, 255' : '0, 0, 0'}, ${theme.glassOpacity})`,
+                                                borderRadius: `${theme.radius}rem`,
+                                                transform: `scale(${theme.scale})`,
+                                            }}
+                                            className={`relative z-10 w-full max-w-xs border border-white/20 p-6 shadow-2xl transition-all duration-300 flex flex-col items-center text-center ${isPreviewDark ? 'border-white/10' : 'border-black/10'}`}
+                                        >
+                                            <div className={`w-12 h-12 rounded-full mb-4 flex items-center justify-center shadow-inner ${isPreviewDark ? 'bg-white/10' : 'bg-black/5'}`}>
+                                                <Palette className={isPreviewDark ? 'text-white drop-shadow-md' : 'text-gray-900 drop-shadow-md'} size={20} />
+                                            </div>
+                                            <h4 className={`text-lg font-bold mb-2 tracking-tight drop-shadow-sm ${isPreviewDark ? 'text-white' : 'text-gray-900'}`}>Glass Preview</h4>
+                                            <p className={`text-xs font-medium leading-relaxed max-w-[200px] drop-shadow-sm ${isPreviewDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Observe how blur, opacity, and saturation interact with the vibrant background behind this card.
+                                            </p>
+                                            <button
+                                                style={{ borderRadius: `${theme.radius}rem` }}
+                                                className={`mt-6 px-6 py-2.5 font-bold text-xs uppercase tracking-widest transition-colors shadow-sm ${isPreviewDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-black/10 text-gray-900 hover:bg-black/20'}`}
+                                            >
+                                                Interactive
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -212,70 +329,50 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
                     <FrontPagePreview theme={theme} />
                 </div>
             </div>
-
-            {/* 60/30/10 Rule visualization */}
-            <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-                <div className="flex items-center gap-2 mb-6">
-                    <Info className="text-teal-500" />
-                    <h2 className="text-xl font-bold">Theme Distribution (60/30/10)</h2>
-                </div>
-                <div className="flex h-16 w-full rounded-2xl overflow-hidden shadow-inner border border-white/10">
-                    <div
-                        className="h-full flex items-center justify-center text-xs font-bold text-white/70"
-                        style={{ backgroundColor: theme.primary, width: '60%' }}
-                    >
-                        60% Primary
-                    </div>
-                    <div
-                        className="h-full flex items-center justify-center text-xs font-bold text-black/50"
-                        style={{ backgroundColor: theme.secondary, width: '30%' }}
-                    >
-                        30% Secondary
-                    </div>
-                    <div
-                        className="h-full flex items-center justify-center text-xs font-bold text-white shadow-[inset_0_0_20px_rgba(0,0,0,0.1)]"
-                        style={{ backgroundColor: theme.accent, width: '10%' }}
-                    >
-                        10% Accent
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                    <DistributionCard
-                        label="Primary (60%)"
-                        usage="Used for major backgrounds, large surfaces, and the overall base tone of the site."
-                    />
-                    <DistributionCard
-                        label="Secondary (30%)"
-                        usage="Used for sidebars, navigation bars, cards, and distinct feature areas."
-                    />
-                    <DistributionCard
-                        label="Accent (10%)"
-                        usage="Used for call-to-action buttons, active states, highlights, and small visual cues."
-                    />
-                </div>
-            </div>
         </div>
     );
 }
 
-function ThemePanel({ title, icon, colors, onColorChange }: {
+function TabButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`
+                flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all
+                ${active
+                    ? "bg-white dark:bg-white/10 text-black dark:text-white shadow-sm"
+                    : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"
+                }
+            `}
+        >
+            {icon}
+            {label}
+        </button>
+    );
+}
+
+function ThemePanel({ title, icon, colors, onColorChange, isDarkMode = false }: {
     title: string,
     icon: React.ReactNode,
     colors: {
-        primary: string, secondary: string, accent: string,
-        button: string, buttonText: string, link: string,
-        card: string, cardText: string,
+        primary: string, secondary?: string, accent?: string,
+        button?: string, buttonText?: string, link?: string,
+        card?: string, cardText?: string,
         radius?: any, // Optional/shared
         sidebarBg?: string, sidebarFg?: string, sidebarBorder?: string, sidebarAccent?: string, sidebarActive?: string,
         gradientStart?: string, gradientEnd?: string
     },
-    onColorChange: (k: string, v: string | number) => void
+    onColorChange: (k: string, v: string | number) => void,
+    isDarkMode?: boolean
 }) {
     return (
         <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-6 rounded-3xl space-y-6 border border-white/10">
             <div className="flex items-center gap-3 pb-4 border-b border-white/10">
                 {icon}
-                <h2 className="text-xl font-bold">{title} Config</h2>
+                <div className="flex flex-col">
+                    <h2 className="text-xl font-bold">{title} Config</h2>
+                    {isDarkMode && <span className="text-[10px] text-[var(--glass-text-muted)]">Only Primary color differs from Light Mode</span>}
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -287,69 +384,77 @@ function ThemePanel({ title, icon, colors, onColorChange }: {
                         onChange={(v) => onColorChange('primary', v)}
                         description="Background and main content area"
                     />
-                    <ColorPicker
-                        label="Secondary (30%)"
-                        value={colors.secondary}
-                        onChange={(v) => onColorChange('secondary', v)}
-                        description="Navigation and UI surfaces"
-                    />
-                    <ColorPicker
-                        label="Accent (10%)"
-                        value={colors.accent}
-                        onChange={(v) => onColorChange('accent', v)}
-                        description="Interactive elements and highlights"
-                    />
+                    {!isDarkMode && colors.secondary && colors.accent && (
+                        <>
+                            <ColorPicker
+                                label="Secondary (30%)"
+                                value={colors.secondary}
+                                onChange={(v) => onColorChange('secondary', v)}
+                                description="Navigation and UI surfaces"
+                            />
+                            <ColorPicker
+                                label="Accent (10%)"
+                                value={colors.accent}
+                                onChange={(v) => onColorChange('accent', v)}
+                                description="Interactive elements and highlights"
+                            />
+                        </>
+                    )}
                 </div>
 
-                <div className="pt-4 border-t border-white/5 space-y-2">
-                    <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Accent Gradient</h3>
-                    <ColorPicker
-                        label="Gradient Start"
-                        value={colors.gradientStart || colors.accent} // Fallback to accent if undefined
-                        onChange={(v) => onColorChange('gradientStart', v)}
-                        description="Start color of the accent gradient"
-                    />
-                    <ColorPicker
-                        label="Gradient End"
-                        value={colors.gradientEnd || colors.accent}
-                        onChange={(v) => onColorChange('gradientEnd', v)}
-                        description="End color of the accent gradient"
-                    />
-                </div>
+                {!isDarkMode && (
+                    <>
+                        <div className="pt-4 border-t border-white/5 space-y-2">
+                            <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Accent Gradient</h3>
+                            <ColorPicker
+                                label="Gradient Start"
+                                value={colors.gradientStart || colors.accent || ""}
+                                onChange={(v) => onColorChange('gradientStart', v)}
+                                description="Start color of the accent gradient"
+                            />
+                            <ColorPicker
+                                label="Gradient End"
+                                value={colors.gradientEnd || colors.accent || ""}
+                                onChange={(v) => onColorChange('gradientEnd', v)}
+                                description="End color of the accent gradient"
+                            />
+                        </div>
 
-                <div className="pt-4 border-t border-white/5 space-y-2">
-                    <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Elements</h3>
-                    <ColorPicker
-                        label="Button Background"
-                        value={colors.button}
-                        onChange={(v) => onColorChange('button', v)}
-                        description="Primary button background"
-                    />
-                    <ColorPicker
-                        label="Button Text"
-                        value={colors.buttonText}
-                        onChange={(v) => onColorChange('buttonText', v)}
-                        description="Text color inside buttons"
-                    />
-                    <ColorPicker
-                        label="Link Color"
-                        value={colors.link}
-                        onChange={(v) => onColorChange('link', v)}
-                        description="Hyperlink text color"
-                    />
-                    <ColorPicker
-                        label="Card Background"
-                        value={colors.card}
-                        onChange={(v) => onColorChange('card', v)}
-                        description="Background for cards/containers"
-                    />
-                    <ColorPicker
-                        label="Card Text"
-                        value={colors.cardText}
-                        onChange={(v) => onColorChange('cardText', v)}
-                        description="Text color inside cards"
-                    />
-                </div>
+                        <div className="pt-4 border-t border-white/5 space-y-2">
+                            <h3 className="text-xs font-bold uppercase text-[var(--glass-text-muted)] tracking-wider">Elements</h3>
+                            <ColorPicker
+                                label="Button Background"
+                                value={colors.button || ""}
+                                onChange={(v) => onColorChange('button', v)}
+                                description="Primary button background"
+                            />
+                            <ColorPicker
+                                label="Button Text"
+                                value={colors.buttonText || ""}
+                                onChange={(v) => onColorChange('buttonText', v)}
+                                description="Text color inside buttons"
+                            />
+                            <ColorPicker
+                                label="Link Color"
+                                value={colors.link || ""}
+                                onChange={(v) => onColorChange('link', v)}
+                                description="Hyperlink text color"
+                            />
+                            <ColorPicker
+                                label="Card Background"
+                                value={colors.card || ""}
+                                onChange={(v) => onColorChange('card', v)}
+                                description="Background for cards/containers"
+                            />
+                            <ColorPicker
+                                label="Card Text"
+                                value={colors.cardText || ""}
+                                onChange={(v) => onColorChange('cardText', v)}
+                                description="Text color inside cards"
+                            />
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

@@ -61,16 +61,16 @@ export default async function ShopPage({
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass bg-white/5 border border-purple-500/30 text-purple-400 mb-6">
                         <ShoppingBag size={16} />
-                        <span className="text-sm font-medium tracking-wide uppercase">Profile Shop</span>
+                        <span className="text-sm font-medium tracking-wide uppercase">{dict.shop.profile_shop}</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-400">
-                        Customize Your Look
+                        {dict.shop.customize_look}
                     </h1>
                     <p className="text-xl text-[var(--glass-text-muted)] max-w-2xl mx-auto">
-                        Spend your hard-earned points on exclusive profile effects and frames. Stand out from the crowd!
+                        {dict.shop.spend_points}
                         <br />
                         <span className="text-amber-400 font-bold mt-2 block">
-                            Your Balance: {user?.points || 0} Points
+                            {dict.shop.your_balance}: {user?.points || 0} {dict.shop.points}
                         </span>
                     </p>
                 </div>
@@ -81,6 +81,7 @@ export default async function ShopPage({
                     userInventory={(user as any)?.inventory || []}
                     userId={user?._id}
                     username={user?.username}
+                    dict={dict.shop}
                 />
             </div>
         </main>

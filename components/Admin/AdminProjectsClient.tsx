@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -231,14 +231,14 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-secondary)] transition-colors" size={18} />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Search projects..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -324,7 +324,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] group-hover:text-[var(--site-accent)] transition-colors">{project.title}</p>
+                                            <p className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] group-hover:text-[var(--site-secondary)] transition-colors">{project.title}</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{project.slug}</p>
                                         </div>
                                     </td>
@@ -362,7 +362,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                     </td>
                                     <td className="px-6 py-4 text-xs">
                                         <div className="text-gray-500 dark:text-gray-400">Views: {project.views}</div>
-                                        {project.favorite && <div className="text-amber-500 font-medium">★ Favorite</div>}
+                                        {project.favorite && <div className="text-amber-500 font-medium">â˜… Favorite</div>}
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         {formatDate(project.createdAt)}
@@ -512,3 +512,4 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
         </div >
     );
 }
+

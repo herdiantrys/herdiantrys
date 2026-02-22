@@ -44,12 +44,12 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
                         {/* Middle - Notifications List */}
                         <div className="lg:col-span-2">
                             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5 mb-6">
-                                <h1 className="text-2xl font-bold text-[var(--glass-text)] mb-2">Notifications</h1>
-                                <p className="text-[var(--glass-text-muted)]">Stay updated with your latest interactions.</p>
+                                <h1 className="text-2xl font-bold text-[var(--glass-text)] mb-2">{dict?.notifications_messages?.page_title || "Notifications"}</h1>
+                                <p className="text-[var(--glass-text-muted)]">{dict?.notifications_messages?.page_desc || "Stay updated with your latest interactions."}</p>
                             </div>
 
                             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5">
-                                <NotificationList initialNotifications={notifications} userId={user._id} />
+                                <NotificationList initialNotifications={notifications} userId={user._id} dict={dict} />
                             </div>
                         </div>
 

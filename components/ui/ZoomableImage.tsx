@@ -101,7 +101,7 @@ export const ZoomableImage = ({ src, alt }: { src: string; alt: string }) => {
     }, [scale, position]);
 
     return (
-        <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center group">
+        <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center group rounded-tl-[2.5rem] md:rounded-bl-[2.5rem]">
             <motion.div
                 drag={scale > 1}
                 dragConstraints={constraints}

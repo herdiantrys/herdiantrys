@@ -98,6 +98,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role as any;
+        session.user.language = token.language as string || "en";
       }
       return session;
     },
@@ -108,10 +109,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (dbUser) {
           token.sub = dbUser.id;
           token.role = dbUser.role;
+          const prefs: any = dbUser.preferences || {};
+          token.language = prefs.language || "en";
         }
       } else if (user) {
         token.sub = user.id;
         token.role = user.role;
+        // Search user to get preferences since credentials login only returns basic fields via authorize
+        const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
+        if (dbUser) {
+          const prefs: any = dbUser.preferences || {};
+          token.language = prefs.language || "en";
+        }
       }
       return token;
     }

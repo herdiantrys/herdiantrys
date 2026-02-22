@@ -36,11 +36,11 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
                         <div className="p-2 bg-[var(--site-primary)]/20 rounded-lg text-[var(--site-secondary)]">
                             <Layout size={18} />
                         </div>
-                        <h3 className="font-bold text-white text-base">My Portfolio</h3>
+                        <h3 className="font-bold text-white text-base">{t.my_portfolio || "My Portfolio"}</h3>
                     </div>
                     {isEnabled ? (
                         <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
-                            ACTIVE
+                            {t.active || "ACTIVE"}
                         </span>
                     ) : (
                         <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
@@ -51,8 +51,8 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
 
                 <p className="text-sm text-slate-300 mb-4 line-clamp-2">
                     {isEnabled
-                        ? "Your professional landing page is live. Share it with the world!"
-                        : "Your portfolio is currently hidden from the public. Enable it in the editor."}
+                        ? (t.portfolio_active_desc || "Your professional landing page is live. Share it with the world!")
+                        : (t.portfolio_inactive_desc || "Your portfolio is currently hidden from the public. Enable it in the editor.")}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -64,14 +64,14 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
                             }`}
                     >
                         <ExternalLink size={14} />
-                        View
+                        {t.view || "View"}
                     </Link>
                     <Link
                         href="/dashboard/portfolio"
                         className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[var(--site-button)] hover:opacity-90 text-[var(--site-button-text)] text-xs font-bold transition-all shadow-lg shadow-[var(--site-accent)]/20"
                     >
                         <Settings size={14} />
-                        Edit
+                        {t.edit || "Edit"}
                     </Link>
                 </div>
             </div>

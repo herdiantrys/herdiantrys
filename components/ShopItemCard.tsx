@@ -13,9 +13,10 @@ type ShopItemProps = {
     isOwned: boolean;
     userId?: string | null;
     username?: string | null;
+    dict: any;
 };
 
-export default function ShopItemCard({ item, userPoints, isOwned, userId, username }: ShopItemProps) {
+export default function ShopItemCard({ item, userPoints, isOwned, userId, username, dict }: ShopItemProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [optimisticOwned, setOptimisticOwned] = useState(isOwned);
     const router = useRouter();
@@ -28,7 +29,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
     const handleBuy = async () => {
         if (isLoading || optimisticOwned) return;
         if (!userId) {
-            toast.error("Please login to purchase items");
+            toast.error(dict.messages.login_required);
             return;
         }
 
@@ -42,7 +43,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                     window.location.href = result.url;
                     return;
                 } else {
-                    throw new Error(result.error || "Failed to create checkout session");
+                    throw new Error(result.error || dict.messages.checkout_session_failed);
                 }
             }
 
@@ -50,16 +51,16 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
 
             if (result.success) {
                 setOptimisticOwned(true);
-                toast.success("Item purchased!", {
-                    description: `${item.name} added to inventory.`,
+                toast.success(dict.messages.purchase_success, {
+                    description: `${item.name} ${dict.messages.added_to_inventory}`,
                     icon: <Sparkles className="text-amber-400" />
                 });
                 router.refresh();
             } else {
-                toast.error("Purchase failed", { description: result.error });
+                toast.error(dict.messages.purchase_failed, { description: result.error });
             }
         } catch (error: any) {
-            toast.error("An error occurred", { description: error.message });
+            toast.error(dict.messages.error_occurred, { description: error.message });
         } finally {
             setIsLoading(false);
         }
@@ -100,7 +101,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                 {optimisticOwned && (
                     <div className="flex items-center gap-1.5 text-site-secondary text-xs font-bold bg-site-secondary/10 px-2 py-1 rounded-lg border border-site-secondary/20">
                         <ShieldCheck size={12} />
-                        COLLECTED
+                        {dict.actions.collected}
                     </div>
                 )}
             </div>
@@ -176,14 +177,14 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                             ) : (
                                 <div className={`flex items-center gap-1.5 font-black ${optimisticOwned ? 'text-site-secondary' : 'text-amber-400'}`}>
                                     <Coins size={18} className={!optimisticOwned ? "animate-bounce-slow" : ""} />
-                                    <span className="text-lg">{optimisticOwned ? "OWNED" : item.price}</span>
+                                    <span className="text-lg">{optimisticOwned ? dict.actions.owned : item.price}</span>
                                 </div>
                             )}
                         </div>
 
                         {!optimisticOwned && (
                             <div className="text-[10px] font-bold text-white/20 tracking-tighter uppercase italic">
-                                Reward: 50 XP
+                                {dict.actions.reward}: 50 XP
                             </div>
                         )}
                     </div>
@@ -203,10 +204,10 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                         >
                             <div className="absolute inset-0 bg-site-secondary/10 border border-site-secondary/20 flex items-center justify-center gap-2 group-hover/btn:opacity-0 transition-opacity duration-300">
                                 <Check size={16} />
-                                <span className="text-sm font-bold">In Inventory</span>
+                                <span className="text-sm font-bold">{dict.actions.in_inventory}</span>
                             </div>
                             <div className="absolute inset-0 bg-site-secondary flex items-center justify-center gap-2 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
-                                <span className="text-sm font-black text-black">USE NOW</span>
+                                <span className="text-sm font-black text-black">{dict.actions.use_now}</span>
                             </div>
                         </button>
                     ) : (
@@ -222,7 +223,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                             {isLoading ? (
                                 <Loader2 className="animate-spin mx-auto" size={20} />
                             ) : (
-                                "ACQUIRE"
+                                dict.actions.acquire
                             )}
                         </button>
                     )}

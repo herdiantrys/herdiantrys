@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { X, Save, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
 import { Portal } from "@/components/Portal";
 import { motion, AnimatePresence } from "framer-motion";
-import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground, updateUsername } from "@/lib/actions/user.actions";
+import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground, updateUsername, uploadBannerVideo } from "@/lib/actions/user.actions";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -67,12 +67,14 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
     };
 
     const [bannerFile, setBannerFile] = useState<File | null>(null);
+    const [bannerVideoFile, setBannerVideoFile] = useState<File | null>(null);
     const [profileFile, setProfileFile] = useState<File | null>(null);
     const [customBgFile, setCustomBgFile] = useState<File | null>(null);
     const [shouldResetBg, setShouldResetBg] = useState(false);
 
 
     const [previewBanner, setPreviewBanner] = useState<string | null>(resolveImageUrl(user.bannerImage, 600));
+    const [previewBannerVideo, setPreviewBannerVideo] = useState<string | null>(user.bannerVideo || null);
     const [previewProfile, setPreviewProfile] = useState<string | null>(resolveImageUrl(user.profileImage, 200) || user.imageURL || null);
 
     // Check preferences for existing custom background URL
@@ -125,9 +127,16 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
             const reader = new FileReader();
             reader.onload = (event) => {
                 if (type === 'banner') {
-                    // Open cropper for banner
-                    setCropImageSrc(event.target?.result as string);
-                    setCropType('banner');
+                    if (user.equippedBanner === 'custom-video' && file.type.startsWith('video/')) {
+                        setBannerVideoFile(file);
+                        setPreviewBannerVideo(URL.createObjectURL(file));
+                        setBannerFile(null); // Clear image if video selected
+                    } else {
+                        // Open cropper for banner image
+                        setCropImageSrc(event.target?.result as string);
+                        setCropType('banner');
+                        setBannerVideoFile(null); // Clear video if image selected
+                    }
                 } else if (type === 'profile') {
                     // Profile image direct update (or could crop too)
                     setProfileFile(file);
@@ -206,8 +215,12 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         }, 300);
 
         try {
-            // Upload images
-            if (bannerFile) {
+            // Upload images or videos
+            if (user.equippedBanner === 'custom-video' && bannerVideoFile) {
+                const videoFormData = new FormData();
+                videoFormData.append("video", bannerVideoFile);
+                await uploadBannerVideo(user._id, videoFormData);
+            } else if (bannerFile && user.equippedBanner !== 'custom-video') {
                 const bannerFormData = new FormData();
                 bannerFormData.append("image", bannerFile);
                 await uploadBannerImage(user._id, bannerFormData);
@@ -278,36 +291,105 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
-                        {/* Image Upload Area */}
+                        {/* Image/Video Upload Area */}
                         <div className="relative mb-10 group">
                             {/* Banner Area */}
                             <div className="relative h-36 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-white/10 shadow-inner group-hover/banner:border-teal-500/50 transition-colors">
-                                {previewBanner ? (
-                                    <Image
-                                        src={previewBanner}
-                                        alt="Banner Preview"
-                                        fill
-                                        className="object-cover opacity-90 group-hover:opacity-60 transition-all duration-300"
-                                    />
+                                {user.equippedBanner === 'custom-video' ? (
+                                    (previewBannerVideo && !bannerFile) ? (
+                                        <video
+                                            src={previewBannerVideo}
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            className="w-full h-full object-cover opacity-90 group-hover:opacity-60 transition-all duration-300"
+                                        />
+                                    ) : previewBanner ? (
+                                        <Image
+                                            src={previewBanner}
+                                            alt="Banner Preview"
+                                            fill
+                                            className="object-cover opacity-90 group-hover:opacity-60 transition-all duration-300"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-teal-500/10 to-indigo-500/10 dark:from-teal-500/20 dark:to-indigo-500/20">
+                                            <span className="text-sm font-medium text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                                                <Camera size={18} /> Upload Banner (Image, or Video under 10MB)
+                                            </span>
+                                        </div>
+                                    )
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-r from-purple-500/10 to-teal-500/10 dark:from-purple-500/20 dark:to-teal-500/20" />
+                                    previewBanner ? (
+                                        <Image
+                                            src={previewBanner}
+                                            alt="Banner Preview"
+                                            fill
+                                            className="object-cover opacity-90 group-hover:opacity-60 transition-all duration-300"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-r from-purple-500/10 to-teal-500/10 dark:from-purple-500/20 dark:to-teal-500/20" />
+                                    )
                                 )}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <button
-                                        type="button"
-                                        onClick={() => bannerInputRef.current?.click()}
-                                        className="flex items-center gap-2 px-5 py-2.5 bg-white/90 dark:bg-black/70 hover:bg-white dark:hover:bg-black/90 rounded-full text-gray-900 dark:text-white backdrop-blur-md shadow-lg border border-black/5 dark:border-white/10 transition-all transform hover:scale-105"
-                                    >
-                                        <Camera size={18} />
-                                        <span className="font-medium text-sm">Change Banner</span>
-                                    </button>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[2px]">
+                                    {user.equippedBanner === 'custom-video' ? (
+                                        <div className="flex gap-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (bannerInputRef.current) {
+                                                        bannerInputRef.current.accept = "image/*";
+                                                        bannerInputRef.current.click();
+                                                    }
+                                                }}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-white/90 dark:bg-black/70 hover:bg-white dark:hover:bg-black/90 rounded-full text-gray-900 dark:text-white backdrop-blur-md shadow-lg border border-black/5 dark:border-white/10 transition-all transform hover:scale-105"
+                                            >
+                                                <ImageIcon size={18} />
+                                                <span className="font-medium text-sm">Upload Image</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (bannerInputRef.current) {
+                                                        bannerInputRef.current.accept = "video/*";
+                                                        bannerInputRef.current.click();
+                                                    }
+                                                }}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-white/90 dark:bg-black/70 hover:bg-white dark:hover:bg-black/90 rounded-full text-gray-900 dark:text-white backdrop-blur-md shadow-lg border border-black/5 dark:border-white/10 transition-all transform hover:scale-105"
+                                            >
+                                                <Camera size={18} />
+                                                <span className="font-medium text-sm">Upload Video</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (bannerInputRef.current) {
+                                                    bannerInputRef.current.accept = "image/*";
+                                                    bannerInputRef.current.click();
+                                                }
+                                            }}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-white/90 dark:bg-black/70 hover:bg-white dark:hover:bg-black/90 rounded-full text-gray-900 dark:text-white backdrop-blur-md shadow-lg border border-black/5 dark:border-white/10 transition-all transform hover:scale-105"
+                                        >
+                                            <Camera size={18} />
+                                            <span className="font-medium text-sm">Change Banner</span>
+                                        </button>
+                                    )}
                                 </div>
                                 <input
                                     type="file"
                                     ref={bannerInputRef}
-                                    onChange={(e) => handleFileChange(e, 'banner')}
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (user.equippedBanner === 'custom-video' && file && file.type.startsWith('video/') && file.size > 10 * 1024 * 1024) {
+                                            toast.error("Video exceeds 10MB limit");
+                                            e.target.value = '';
+                                            return;
+                                        }
+                                        handleFileChange(e, 'banner');
+                                    }}
                                     className="hidden"
-                                    accept="image/*"
                                 />
                             </div>
 

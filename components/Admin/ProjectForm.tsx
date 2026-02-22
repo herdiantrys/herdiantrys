@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -215,11 +215,11 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-6">
                             <div className="group">
-                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 group-focus-within:text-[var(--site-accent)] transition-colors">Project Title</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 group-focus-within:text-[var(--site-secondary)] transition-colors">Project Title</label>
                                 <input
                                     value={formData.title}
                                     onChange={e => updateFormData({ title: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-accent)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white transition-all duration-300 placeholder-gray-400"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-secondary)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white transition-all duration-300 placeholder-gray-400"
                                     placeholder="e.g. Modern E-commerce Platform"
                                 />
                             </div>
@@ -232,7 +232,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                     <input
                                         value={formData.slug}
                                         onChange={e => updateFormData({ slug: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-accent)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-[var(--site-accent)] font-mono text-sm transition-all duration-300 placeholder-gray-400"
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-secondary)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-[var(--site-accent)] font-mono text-sm transition-all duration-300 placeholder-gray-400"
                                         placeholder="project-slug"
                                     />
                                 </div>
@@ -260,7 +260,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                 <select
                                     value={formData.status}
                                     onChange={e => updateFormData({ status: e.target.value as "PUBLISHED" | "DRAFT" | "ARCHIVED" })}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-accent)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white appearance-none transition-all duration-300 cursor-pointer"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-secondary)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white appearance-none transition-all duration-300 cursor-pointer"
                                 >
                                     <option value="PUBLISHED">Published</option>
                                     <option value="DRAFT">Draft</option>
@@ -299,7 +299,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                 <select
                                     value={formData.authorId}
                                     onChange={e => updateFormData({ authorId: e.target.value })}
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-accent)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white appearance-none transition-all duration-300 cursor-pointer"
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-secondary)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white appearance-none transition-all duration-300 cursor-pointer"
                                     title="Project Author"
                                 >
                                     <option value="">Current User</option>
@@ -320,7 +320,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                 <input
                                     value={formData.tags}
                                     onChange={e => updateFormData({ tags: e.target.value })}
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-accent)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white transition-all duration-300 placeholder-gray-400"
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[var(--site-secondary)] focus:bg-white dark:focus:bg-black/40 outline-none text-gray-900 dark:text-white transition-all duration-300 placeholder-gray-400"
                                     placeholder="Comma separated tags (e.g. React, Design, UI/UX)"
                                 />
                             </div>
@@ -552,3 +552,4 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
         </div>
     );
 }
+

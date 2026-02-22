@@ -72,6 +72,8 @@ export const getUserByUsername = async (username: string, currentUserId?: string
             frameColor: (await getRawFrameColor(u.id)) || u.frameColor,
             equippedFrame: u.equippedFrame,
             equippedBackground: u.equippedBackground,
+            equippedBanner: u.equippedBanner,
+            bannerVideo: u.bannerVideo,
             lastActiveAt: u.lastActiveAt,
             isFollowing: (u.followedBy || []).length > 0,
             stats: {
@@ -243,6 +245,40 @@ export const removeBannerImage = async (userId: string) => {
     }
 };
 
+export const uploadBannerVideo = async (userId: string, formData: FormData) => {
+    try {
+        const file = formData.get("video") as File;
+        if (!file) return { success: false, error: "No video uploaded" };
+
+        if (file.size > 10 * 1024 * 1024) {
+            return { success: false, error: "Video exceeds 10MB limit" };
+        }
+
+        // 1. Upload to Sanity as file/video
+        const asset = await writeClient.assets.upload("file", file, {
+            contentType: file.type,
+            filename: file.name,
+        });
+
+        // 2. Update Prisma
+        await prisma.user.update({
+            where: { id: userId },
+            data: { bannerVideo: asset.url }
+        });
+
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
+        if (user?.username) {
+            revalidatePath(`/profile/${user.username}`);
+            revalidatePath(`/user/${user.username}`);
+        }
+
+        return { success: true, videoUrl: asset.url };
+    } catch (error) {
+        console.error("Error uploading banner video:", error);
+        return { success: false, error: "Failed to upload video" };
+    }
+};
+
 export const uploadCustomBackground = async (userId: string, formData: FormData) => {
     try {
         const file = formData.get("image") as File;
@@ -380,6 +416,8 @@ export const getUserByEmail = async (email: string) => {
             frameColor: (await getRawFrameColor(user.id)) || (user as any).frameColor,
             equippedFrame: (user as any).equippedFrame,
             equippedBackground: (user as any).equippedBackground,
+            equippedBanner: (user as any).equippedBanner,
+            bannerVideo: (user as any).bannerVideo,
             lastActiveAt: (user as any).lastActiveAt,
             stats: {
                 posts: user._count.posts,

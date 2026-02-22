@@ -135,32 +135,32 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
     return (
         <motion.div
             layoutId={`card-${project.id}`}
-            className="relative w-[95vw] h-[90vh] md:w-[80vw] md:h-[80vh] glass bg-[var(--glass-bg)] border-[var(--glass-border)] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
+            className="relative w-[95vw] h-[90vh] md:w-[85vw] md:h-[85vh] bg-black/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col md:flex-row ring-1 ring-white/10"
             onClick={(e) => e.stopPropagation()}
             transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
         >
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors border border-white/10"
+                className="absolute top-5 right-5 z-[50] p-2.5 rounded-full bg-black/20 hover:bg-red-500/80 text-white/70 hover:text-white transition-all duration-300 border border-white/10 hover:border-red-400 group/close backdrop-blur-md shadow-lg"
             >
-                <X size={24} />
+                <X size={20} className="group-hover/close:rotate-90 transition-transform duration-300" />
             </button>
 
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="w-full md:w-[75%] relative h-[40vh] md:h-auto bg-black flex flex-col group/media"
+                className="w-full md:w-[70%] relative h-[40vh] md:h-auto bg-black/80 flex flex-col group/media border-r border-white/5"
             >
-                <div className="flex-1 relative w-full h-full">
+                <div className="flex-1 relative w-full h-full overflow-hidden">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeMedia.url}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="w-full h-full"
+                            initial={{ opacity: 0, scale: 1.05 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                            className="w-full h-full rounded-tl-[2.5rem] md:rounded-bl-[2.5rem] overflow-hidden"
                         >
                             {activeMedia.type === "video" ? (
                                 <ModalVideoPlayer src={activeMedia.url} />
@@ -191,12 +191,12 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
 
                 {/* Gallery Thumbnails */}
                 {allMedia.length > 1 && (
-                    <div className="h-24 bg-black/80 backdrop-blur-md border-t border-white/10 p-4 flex gap-4 overflow-x-auto">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-black/40 backdrop-blur-xl border border-white/20 p-2 rounded-2xl flex gap-3 shadow-2xl max-w-[90%] overflow-x-auto custom-scrollbar">
                         {allMedia.map((item, index) => (
                             <button
                                 key={index}
                                 onClick={() => setCurrentIndex(index)}
-                                className={`relative w-24 h-full rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${currentIndex === index ? "border-teal-500" : "border-transparent opacity-60 hover:opacity-100"}`}
+                                className={`relative w-16 h-12 rounded-xl overflow-hidden transition-all duration-300 flex-shrink-0 ${currentIndex === index ? "ring-2 ring-[var(--site-secondary)] scale-110 shadow-[0_0_15px_rgba(20,184,166,0.4)]" : "opacity-50 hover:opacity-100 hover:scale-105"}`}
                             >
                                 {item.type === 'video' ? (
                                     <video src={item.url} className="w-full h-full object-cover" />
@@ -204,8 +204,8 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                     <Image src={item.url} alt={`Thumb ${index}`} fill className="object-cover" />
                                 )}
                                 {item.type === 'video' && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Play size={16} className="text-white fill-white" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                        <Play size={14} className="text-white fill-white shadow-sm" />
                                     </div>
                                 )}
                             </button>
@@ -216,77 +216,90 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="w-full md:w-[25%] min-w-[280px] p-6 flex flex-col relative overflow-hidden bg-white/80 dark:bg-black/40 backdrop-blur-2xl border-l border-white/20 dark:border-white/10"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="w-full md:w-[30%] min-w-[320px] p-8 flex flex-col relative overflow-hidden bg-white/5 dark:bg-white/5 backdrop-blur-3xl"
             >
                 {/* Decorative Liquid Gradient Background */}
-                <div className="absolute top-0 right-0 w-[120%] h-[120%] bg-gradient-to-br from-teal-500/5 via-primary/5 to-purple-500/5 blur-3xl opacity-50 pointer-events-none -z-10" />
+                <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-br from-[var(--site-secondary)]/20 via-primary/10 to-transparent blur-[100px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
 
-                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6">
-                    <div>
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shadow-[0_0_10px_rgba(45,212,191,0.1)] uppercase tracking-wider">
+                <div className="absolute bottom-0 left-0 w-[120%] h-[100%] bg-gradient-to-tr from-purple-500/10 via-transparent to-transparent blur-[80px] pointer-events-none -z-10" />
+
+                <motion.div
+                    variants={{
+                        hidden: { opacity: 0 },
+                        show: {
+                            opacity: 1,
+                            transition: { staggerChildren: 0.1, delayChildren: 0.4 }
+                        }
+                    }}
+                    initial="hidden"
+                    animate="show"
+                    className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-8 relative z-10"
+                >
+                    <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+                        <div className="flex items-center justify-between mb-5">
+                            <span className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-[var(--site-secondary)]/20 text-[var(--site-secondary)] border border-[var(--site-secondary)]/40 shadow-[0_0_15px_rgba(20,184,166,0.2)] uppercase tracking-wider backdrop-blur-md">
                                 {project.category}
                             </span>
                             {project.album && (
-                                <span className="text-xs font-medium text-[var(--glass-text-muted)] bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md border border-black/5 dark:border-white/5">
+                                <span className="text-[11px] font-semibold text-white/70 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
                                     {project.album}
                                 </span>
                             )}
                         </div>
 
-                        <h3 className="text-3xl md:text-3xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 via-cyan-600 to-indigo-600 dark:from-teal-400 dark:via-cyan-400 dark:to-indigo-400 leading-tight">
+                        <h3 className="text-3xl md:text-4xl font-extrabold mb-5 text-white leading-tight drop-shadow-md tracking-tight">
                             {project.title}
                         </h3>
 
                         {project.tags && project.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-4">
+                            <div className="flex flex-wrap gap-2 mb-6">
                                 {project.tags.map(tag => (
-                                    <span key={tag} className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-black/5 dark:bg-white/5 text-[var(--glass-text)] border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-default">
+                                    <span key={tag} className="px-3 py-1 text-[11px] font-semibold rounded-lg bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-default shadow-sm">
                                         #{tag}
                                     </span>
                                 ))}
                             </div>
                         )}
 
-                        <div className="p-4 rounded-2xl bg-white/50 dark:bg-black/20 border border-black/5 dark:border-white/5 backdrop-blur-sm space-y-3 shadow-sm dark:shadow-inner">
-                            <p className="text-[var(--glass-text-muted)] leading-relaxed text-sm">
+                        <div className="p-5 rounded-2xl bg-black/20 border border-white/10 backdrop-blur-md space-y-4 shadow-inner">
+                            <p className="text-gray-300 leading-relaxed text-[15px] font-medium">
                                 {project.description}
                             </p>
 
-                            <div className="pt-3 border-t border-black/5 dark:border-white/5 flex flex-wrap gap-y-3 justify-between items-center text-xs">
-                                <div className="flex items-center gap-3 text-[var(--glass-text-muted)]">
-                                    <span className="flex items-center gap-1.5"><Eye size={14} className="text-teal-600 dark:text-teal-500" /> {formatViewCount(project.views || 0)}</span>
-                                    <span className="flex items-center gap-1.5"><MessageCircle size={14} className="text-purple-600 dark:text-purple-500" /> {project.comments || 0}</span>
+                            <div className="pt-4 border-t border-white/10 flex flex-wrap gap-y-3 justify-between items-center text-xs font-semibold">
+                                <div className="flex items-center gap-4 text-gray-400">
+                                    <span className="flex items-center gap-1.5 text-white/90"><Eye size={15} className="text-[var(--site-secondary)] drop-shadow-sm" /> {formatViewCount(project.views || 0)}</span>
+                                    <span className="flex items-center gap-1.5 text-white/90"><MessageCircle size={15} className="text-purple-400 drop-shadow-sm" /> {project.comments || 0}</span>
                                 </div>
-                                <span className="text-[var(--glass-text-muted)] opacity-75">
+                                <span className="text-gray-500 font-medium">
                                     {project.uploadDate ? formatDate(project.uploadDate) : new Date().getFullYear()}
                                 </span>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Comments Section */}
-                    <div className="space-y-3">
-                        <div className="space-y-3">
-                            <h4 className="text-sm font-bold text-[var(--glass-text)] flex items-center gap-2">
-                                <MessageCircle size={14} className="text-teal-500" />
+                    <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }} className="space-y-4">
+                        <div className="space-y-4">
+                            <h4 className="text-[13px] font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                                <MessageCircle size={15} className="text-[var(--site-secondary)]" />
                                 Latest Comments
                             </h4>
 
                             {/* Comment Input */}
-                            <form onSubmit={handlePostComment} className="relative group">
+                            <form onSubmit={handlePostComment} className="relative group/form">
                                 <input
                                     type="text"
                                     placeholder="Write a comment..."
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
-                                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-[var(--glass-text)] focus:outline-none focus:border-teal-500/50 focus:bg-white/10 dark:focus:bg-black/10 transition-all pr-10 hover:border-black/20 dark:hover:border-white/20"
+                                    className="w-full bg-black/20 border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-black/40 focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all pr-12 hover:border-white/20 shadow-inner placeholder:text-gray-500 font-medium"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!newComment.trim() || isPostingComment}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-teal-500 hover:bg-teal-500/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-white/5 text-[var(--site-secondary)] hover:bg-[var(--site-secondary)]/20 disabled:opacity-30 disabled:hover:bg-transparent transition-all hover:scale-105 active:scale-95"
                                 >
                                     {isPostingComment ? <Loader2 size={16} className="animate-spin" /> : <div className="-rotate-90"><Share2 size={16} style={{ transform: "rotate(-90deg)" }} /></div>}
                                 </button>
@@ -294,72 +307,84 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                         </div>
 
                         {isLoadingComments ? (
-                            <div className="flex items-center justify-center py-8">
-                                <Loader2 size={20} className="text-teal-500 animate-spin" />
+                            <div className="flex items-center justify-center py-10">
+                                <Loader2 size={24} className="text-[var(--site-secondary)] animate-spin" />
                             </div>
                         ) : comments.length > 0 ? (
                             <div className="space-y-3">
-                                {comments.slice(0, 3).map((comment) => (
-                                    <div key={comment._id} className="p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex gap-3 text-sm shadow-sm dark:shadow-none">
-                                        <div className="shrink-0 relative">
-                                            {comment.user.imageURL ? (
-                                                <Link href={`/profile/${comment.user.username}`} onClick={(e) => e.stopPropagation()}>
-                                                    <Image
-                                                        src={comment.user.imageURL}
-                                                        alt={comment.user.username}
-                                                        width={32}
-                                                        height={32}
-                                                        className="rounded-full object-cover border border-black/10 dark:border-white/10"
-                                                    />
-                                                </Link>
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20 dark:border-indigo-500/30">
-                                                    <User size={16} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <Link href={`/profile/${comment.user.username}`} className="font-bold text-[var(--glass-text)] hover:text-teal-500 transition-colors" onClick={(e) => e.stopPropagation()}>
-                                                    {comment.user.fullName}
-                                                </Link>
-                                                <span className="text-[10px] text-[var(--glass-text-muted)] opacity-60">
-                                                    {formatDate(comment.createdAt)}
-                                                </span>
+                                <AnimatePresence initial={false}>
+                                    {comments.slice(0, 3).map((comment) => (
+                                        <motion.div
+                                            key={comment._id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="p-3.5 rounded-2xl bg-black/20 border border-white/5 flex gap-3.5 text-sm shadow-sm backdrop-blur-sm"
+                                        >
+                                            <div className="shrink-0 relative">
+                                                {comment.user.imageURL ? (
+                                                    <Link href={`/profile/${comment.user.username}`} onClick={(e) => e.stopPropagation()}>
+                                                        <Image
+                                                            src={comment.user.imageURL}
+                                                            alt={comment.user.username}
+                                                            width={36}
+                                                            height={36}
+                                                            className="rounded-full object-cover border border-white/10 shadow-sm"
+                                                        />
+                                                    </Link>
+                                                ) : (
+                                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                                                        <User size={16} />
+                                                    </div>
+                                                )}
                                             </div>
-                                            <p className="text-[var(--glass-text-muted)] leading-snug text-xs">
-                                                {comment.text}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                                            <div>
+                                                <div className="flex items-baseline gap-2 mb-1">
+                                                    <Link href={`/profile/${comment.user.username}`} className="font-bold text-white hover:text-[var(--site-secondary)] transition-colors" onClick={(e) => e.stopPropagation()}>
+                                                        {comment.user.fullName}
+                                                    </Link>
+                                                    <span className="text-[10px] font-medium text-gray-500">
+                                                        {formatDate(comment.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-300 leading-snug text-[13px] font-medium">
+                                                    {comment.text}
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
                                 {comments.length > 3 && (
-                                    <Link href={`/projects/${projectSlug}`} className="block text-center text-xs text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 transition-colors py-2">
+                                    <Link href={`/projects/${projectSlug}`} className="block text-center text-[12px] font-bold text-[var(--site-secondary)] hover:text-white transition-colors py-3 bg-white/5 hover:bg-[var(--site-secondary)]/20 rounded-xl border border-white/5 hover:border-[var(--site-secondary)]/40 mt-2">
                                         View all {comments.length} comments
                                     </Link>
                                 )}
                             </div>
                         ) : (
-                            <div className="text-center py-6 px-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 border-dashed">
-                                <p className="text-xs text-[var(--glass-text-muted)]">No comments yet.</p>
+                            <div className="text-center py-8 px-4 rounded-2xl bg-black/20 border border-white/5 border-dashed">
+                                <p className="text-sm font-medium text-gray-500">No comments yet. Be the first!</p>
                             </div>
                         )}
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
-                <div className="mt-4 pt-4 border-t border-black/10 dark:border-white/10 flex flex-col gap-3 relative z-20">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                    className="mt-6 pt-5 border-t border-white/10 flex flex-col gap-4 relative z-20"
+                >
                     <div className="flex items-center gap-3">
-                        <Link href={`/projects/${projectSlug}`} className="flex-1 group relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 dark:from-teal-600 dark:to-cyan-600 p-[1px] shadow-lg hover:shadow-teal-500/25 transition-all active:scale-[0.98]">
+                        <Link href={`/projects/${projectSlug}`} className="flex-1 group relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--site-secondary)] to-teal-400 p-[1px] shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_30px_rgba(20,184,166,0.5)] transition-all duration-300 active:scale-[0.98]">
                             <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-700 ease-in-out -skew-x-12 origin-left z-20" />
-                            <div className="relative h-10 bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-[11px] flex items-center justify-center gap-2 px-6 transition-colors group-hover:bg-transparent">
-                                <span className="font-bold text-white relative z-10 text-sm">{dict.portfolio.view_project}</span>
-                                <ExternalLink size={16} className="text-white group-hover:translate-x-1 transition-transform relative z-10" />
+                            <div className="relative h-12 bg-black/40 backdrop-blur-md rounded-[15px] flex items-center justify-center gap-2 px-6 transition-colors group-hover:bg-transparent">
+                                <span className="font-extrabold text-white relative z-10 text-[14px] uppercase tracking-wider">{dict.portfolio.view_project}</span>
+                                <ExternalLink size={18} className="text-white group-hover:translate-x-1 transition-transform relative z-10" />
                             </div>
                         </Link>
 
                         <button
                             onClick={() => setIsShareOpen(true)}
-                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/30 text-[var(--glass-text)] transition-all hover:rotate-12 hover:scale-105 active:scale-95"
+                            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-white transition-all duration-300 hover:rotate-12 hover:scale-110 active:scale-95 shadow-lg backdrop-blur-md"
                         >
                             <Share2 size={18} />
                         </button>
@@ -368,12 +393,12 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                             onClick={handleLike}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className={`h-10 min-w-[3rem] px-3 flex items-center justify-center gap-2 rounded-xl border transition-all duration-300 ${optimisticProject.isLiked
-                                ? "bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-                                : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/30 text-[var(--glass-text)]"
+                            className={`h-12 min-w-[4rem] px-4 flex items-center justify-center gap-2.5 rounded-2xl border transition-all duration-300 backdrop-blur-md shadow-lg ${optimisticProject.isLiked
+                                ? "bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]"
+                                : "bg-white/5 border-white/10 hover:bg-red-500/10 hover:border-red-400/40 text-white"
                                 }`}
                         >
-                            <div className="relative w-4 h-4 flex items-center justify-center">
+                            <div className="relative w-5 h-5 flex items-center justify-center">
                                 <AnimatePresence mode="wait">
                                     {optimisticProject.isLiked ? (
                                         <motion.div
@@ -383,7 +408,7 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                             exit={{ scale: 0 }}
                                             transition={{ type: "spring", stiffness: 400, damping: 15 }}
                                         >
-                                            <Heart size={16} className="fill-red-500 text-red-500" />
+                                            <Heart size={20} className="fill-red-500 text-red-500 drop-shadow-md" />
                                         </motion.div>
                                     ) : (
                                         <motion.div
@@ -393,17 +418,17 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
                                             exit={{ scale: 0 }}
                                             transition={{ type: "spring", stiffness: 400, damping: 15 }}
                                         >
-                                            <Heart size={16} />
+                                            <Heart size={20} className="drop-shadow-sm group-hover:text-red-400 transition-colors" />
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
-                            <span className="font-bold text-xs">
+                            <span className="font-extrabold text-[15px]">
                                 {optimisticProject.likes || 0}
                             </span>
                         </motion.button>
                     </div>
-                </div>
+                </motion.div>
             </motion.div>
 
             <AnimatePresence>

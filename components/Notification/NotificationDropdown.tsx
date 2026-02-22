@@ -13,6 +13,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
     const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const nm = dict?.notifications_messages || {};
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -78,53 +79,52 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
+                        initial={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
                         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-[-100px] sm:right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-96 rounded-[2rem] bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/20 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.5)] overflow-hidden z-50 ring-1 ring-white/10"
+                        exit={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
+                        transition={{ duration: 0.3, ease: [0.19, 1.0, 0.22, 1.0] }}
+                        className="absolute right-[-100px] sm:right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-96 rounded-[32px] glass-liquid backdrop-blur-[40px] border border-white/20 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.5)] overflow-hidden z-50 ring-1 ring-white/5"
                     >
-                        {/* Header */}
-                        <div className="px-5 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 backdrop-blur-xl">
+                        <div className="px-5 py-4 border-b border-white/5 bg-white/5 backdrop-blur-3xl">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                                    {dict?.dashboard?.notifications || "Notifications"}
+                                <h3 className="font-black text-xl tracking-tighter text-foreground flex items-center gap-2">
+                                    {dict?.dashboard?.notifications_nav || nm.page_title || "Notifications"}
                                     {unreadCount > 0 && (
-                                        <span className="bg-[var(--site-secondary)] text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm shadow-[var(--site-secondary)]/30">
-                                            {unreadCount} new
+                                        <span className="bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] text-[10px] font-black px-2 py-0.5 rounded-md border border-[var(--site-secondary)]/20 shadow-sm transition-all duration-300">
+                                            {unreadCount} {nm.new || "new"}
                                         </span>
                                     )}
                                 </h3>
                                 {unreadCount > 0 && (
                                     <button
                                         onClick={handleMarkAllRead}
-                                        className="text-[10px] font-bold uppercase tracking-wider text-[var(--site-secondary)] hover:text-[var(--site-secondary)]/80 transition-colors flex items-center gap-1"
+                                        className="text-[10px] font-black uppercase tracking-tighter text-[var(--site-secondary)] hover:text-foreground transition-colors flex items-center gap-1.5"
                                     >
-                                        <CheckCheck size={12} />
-                                        Mark all read
+                                        <CheckCheck size={14} className="opacity-70" />
+                                        {nm.mark_all_read || "Mark all read"}
                                     </button>
                                 )}
                             </div>
 
                             {/* Tabs */}
-                            <div className="flex p-1 bg-gray-200/50 dark:bg-white/5 rounded-xl border border-white/10">
+                            <div className="flex p-1.5 bg-black/10 dark:bg-white/5 rounded-2xl border border-white/5">
                                 {['all', 'unread'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab as 'all' | 'unread')}
-                                        className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all relative ${activeTab === tab
-                                            ? "text-white shadow-sm"
-                                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                        className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all relative ${activeTab === tab
+                                            ? "text-black dark:text-white"
+                                            : "text-muted-foreground/60 hover:text-muted-foreground"
                                             }`}
                                     >
                                         {activeTab === tab && (
                                             <motion.div
                                                 layoutId="activeTabBg"
-                                                className="absolute inset-0 bg-[var(--site-secondary)] rounded-lg shadow-sm shadow-[var(--site-secondary)]/20"
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                                className="absolute inset-0 bg-white dark:bg-zinc-800 rounded-lg shadow-sm"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                                             />
                                         )}
-                                        <span className="relative z-10 capitalize">{tab}</span>
+                                        <span className="relative z-10">{tab === 'all' ? (nm.all || 'all') : (nm.unread || 'unread')}</span>
                                     </button>
                                 ))}
                             </div>
@@ -135,7 +135,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                             {loading && notifications.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                                     <Loader2 size={24} className="animate-spin text-[var(--site-secondary)]" />
-                                    <p className="text-xs text-gray-500">Loading updates...</p>
+                                    <p className="text-xs text-gray-500">{nm.loading || "Loading updates..."}</p>
                                 </div>
                             ) : filteredNotifications.length > 0 ? (
                                 <AnimatePresence initial={false} mode="popLayout">
@@ -150,6 +150,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                                         >
                                             <NotificationItem
                                                 notification={notification}
+                                                dict={dict}
                                                 onClick={() => {
                                                     if (!notification.read) {
                                                         setNotifications(prev => prev.map(n => n._id === notification._id ? { ...n, read: true } : n));
@@ -162,13 +163,14 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                                     ))}
                                 </AnimatePresence>
                             ) : (
-                                <div className="text-center py-16 px-6">
-                                    <div className="bg-gray-100 dark:bg-white/5 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 border border-white/10 shadow-inner">
-                                        <Bell size={24} className="text-gray-300 dark:text-gray-600" />
+                                <div className="text-center py-20 px-8">
+                                    <div className="bg-white/5 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-inner relative group">
+                                        <div className="absolute inset-0 bg-[var(--site-secondary)]/5 rounded-3xl blur-xl group-hover:bg-[var(--site-secondary)]/10 transition-colors" />
+                                        <Bell size={32} className="text-muted-foreground/30 relative z-10 group-hover:scale-110 transition-transform duration-500" />
                                     </div>
-                                    <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">All caught up!</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px] mx-auto leading-relaxed">
-                                        {activeTab === 'unread' ? "You have no unread notifications." : "You have no notifications at this time."}
+                                    <h4 className="text-lg font-black tracking-tighter text-foreground mb-2">{nm.all_caught_up || "All caught up!"}</h4>
+                                    <p className="text-xs text-muted-foreground max-w-[200px] mx-auto leading-relaxed font-medium">
+                                        {activeTab === 'unread' ? (nm.no_unread || "You have no unread notifications.") : (nm.no_notifications_time || "You have no notifications at this time.")}
                                     </p>
                                 </div>
                             )}
@@ -183,7 +185,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                                 }}
                                 className="w-full py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-white hover:bg-[var(--site-secondary)] transition-all flex items-center justify-center gap-2 group"
                             >
-                                View full history
+                                {nm.view_history || "View full history"}
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                             </button>
                         </div>

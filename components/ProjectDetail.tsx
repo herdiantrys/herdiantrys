@@ -421,8 +421,14 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
             <main className="relative z-20 mt-0">
                 <div className="container mx-auto px-4 lg:px-8 pb-32">
 
-                    <div className="bg-background/80 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl p-8 lg:p-16">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                    {/* Liquid Glass Container */}
+                    <div className="relative bg-[#050505]/60 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-8 lg:p-16 overflow-hidden ring-1 ring-white/5">
+
+                        {/* Decorative Liquid Gradient Backgrounds */}
+                        <div className="absolute top-0 right-0 w-[80%] h-[80%] bg-gradient-to-br from-[var(--site-secondary)]/10 via-primary/5 to-transparent blur-[120px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
+                        <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-purple-500/10 via-transparent to-transparent blur-[100px] pointer-events-none -z-10" />
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
 
                             {/* Title & Metadata (Sticky) */}
                             <div className="lg:col-span-4">
@@ -434,57 +440,57 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     variants={staggerContainer}
                                 >
                                     <motion.div variants={fadeInUp}>
-                                        <div className="flex flex-wrap items-center gap-3 mb-4 text-sm font-medium">
-                                            <span className="px-3 py-1 rounded-full bg-teal-500/10 text-teal-500 border border-teal-500/20 font-bold uppercase tracking-wider text-[11px]">
+                                        <div className="flex flex-wrap items-center gap-3 mb-5 text-sm font-medium">
+                                            <span className="px-3.5 py-1.5 rounded-full bg-[var(--site-secondary)]/20 text-[var(--site-secondary)] border border-[var(--site-secondary)]/30 font-bold uppercase tracking-wider text-[11px] shadow-[0_0_15px_rgba(20,184,166,0.15)] backdrop-blur-md">
                                                 {typeof project.category === 'string' ? project.category : project.category?.title}
                                             </span>
-                                            <span className="text-muted-foreground">
+                                            <span className="text-gray-400 text-xs font-semibold">
                                                 {formatDate(project.uploadDate)}
                                             </span>
                                         </div>
 
-                                        <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] mb-6 text-foreground">
+                                        <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] mb-6 text-white drop-shadow-md">
                                             {project.title}
                                         </h1>
 
-                                        <div className="flex items-center gap-6 text-muted-foreground mb-8">
-                                            <div className="flex items-center gap-2" title="Views">
-                                                <Eye size={18} />
-                                                <span className="font-semibold text-foreground">{formatViewCount(project.views)}</span>
+                                        <div className="flex items-center gap-6 text-gray-400 mb-8 font-semibold text-sm">
+                                            <div className="flex items-center gap-2.5" title="Views">
+                                                <Eye size={18} className="text-[var(--site-secondary)] drop-shadow-sm" />
+                                                <span className="text-white/90">{formatViewCount(project.views)}</span>
                                             </div>
-                                            <div className="flex items-center gap-2" title="Likes">
-                                                <Heart size={18} className={isLiked ? "fill-rose-500 text-rose-500" : ""} />
-                                                <span className={`font-semibold ${isLiked ? "text-rose-500" : "text-foreground"}`}>
+                                            <div className="flex items-center gap-2.5" title="Likes">
+                                                <Heart size={18} className={isLiked ? "fill-red-500 text-red-500 drop-shadow-md" : "text-gray-400 drop-shadow-sm"} />
+                                                <span className={isLiked ? "text-red-400" : "text-white/90"}>
                                                     {likeCount}
                                                 </span>
                                             </div>
                                         </div>
                                     </motion.div>
 
-                                    <motion.div variants={fadeInUp} className="flex flex-col gap-3">
+                                    <motion.div variants={fadeInUp} className="flex flex-col gap-4 pt-4">
                                         <button
                                             onClick={handleLike}
-                                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-300 border ${isLiked
-                                                ? "bg-rose-500/10 border-rose-500/20 text-rose-500 shadow-lg shadow-rose-500/10 scale-[1.02]"
-                                                : "bg-muted/30 border-border hover:bg-muted text-foreground hover:scale-[1.02]"
+                                            className={`w-full py-4 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all duration-300 border backdrop-blur-md shadow-lg ${isLiked
+                                                ? "bg-red-500/20 border-red-500/40 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)] scale-[1.02]"
+                                                : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white hover:scale-[1.02]"
                                                 }`}
                                         >
-                                            <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-                                            <span>{isLiked ? "Liked Artwork" : "Appreciate Artwork"}</span>
+                                            <Heart size={20} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "drop-shadow-sm" : ""} />
+                                            <span className="tracking-wide">{isLiked ? "Liked Artwork" : "Appreciate Artwork"}</span>
                                         </button>
                                         <button
                                             onClick={() => setIsShareOpen(true)}
-                                            className="w-full py-4 rounded-xl bg-background border border-border hover:bg-muted font-bold text-muted-foreground hover:text-foreground transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 font-extrabold text-white tracking-wide transition-all flex items-center justify-center gap-3 backdrop-blur-md shadow-lg hover:scale-[1.02]"
                                         >
-                                            <Share2 size={20} /> Share
+                                            <Share2 size={20} /> Share Project
                                         </button>
                                     </motion.div>
 
                                     {/* Tags */}
                                     {project.tags && project.tags.length > 0 && (
-                                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-2 pt-6 border-t border-border/50">
+                                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-2.5 pt-8 border-t border-white/10">
                                             {project.tags.map(tag => (
-                                                <span key={tag} className="px-3 py-1 bg-muted/50 rounded-lg text-xs font-mono text-muted-foreground border border-border/50">
+                                                <span key={tag} className="px-3 py-1.5 bg-white/5 rounded-lg text-[11px] font-semibold text-gray-300 border border-white/10 hover:bg-white/10 hover:text-white transition-colors cursor-default shadow-sm tracking-wide">
                                                     #{tag}
                                                 </span>
                                             ))}
@@ -494,7 +500,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                             </div>
 
                             {/* Content & Gallery */}
-                            <div className="lg:col-span-8 space-y-16">
+                            <div className="lg:col-span-8 space-y-20">
 
                                 {/* Prosaic Content */}
                                 <motion.article
@@ -502,7 +508,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     whileInView="visible"
                                     viewport={{ once: true, margin: "-50px" }}
                                     variants={fadeInUp}
-                                    className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-muted-foreground/90 prose-blockquote:border-l-4 prose-blockquote:border-teal-500 prose-blockquote:pl-6 prose-blockquote:italic"
+                                    className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-white prose-p:leading-relaxed prose-p:text-gray-300 prose-p:font-medium prose-blockquote:border-l-4 prose-blockquote:border-[var(--site-secondary)] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-400 prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:rounded-r-xl prose-strong:text-white prose-a:text-[var(--site-secondary)] hover:prose-a:text-teal-400 prose-li:text-gray-300"
                                 >
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {typeof project.content === 'string' ? project.content : ""}
@@ -516,18 +522,18 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                         whileInView="visible"
                                         viewport={{ once: true, margin: "-50px" }}
                                         variants={staggerContainer}
-                                        className="space-y-6"
+                                        className="space-y-8"
                                     >
-                                        <h3 className="text-2xl font-bold flex items-center gap-3">
-                                            <ZoomIn size={24} className="text-teal-500" />
+                                        <h3 className="text-2xl font-extrabold flex items-center gap-3 text-white tracking-tight">
+                                            <ZoomIn size={24} className="text-[var(--site-secondary)]" />
                                             Close-ups & Highlights
                                         </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             {allMedia.map((item, index) => (
                                                 <motion.div
                                                     key={index}
                                                     variants={fadeInUp}
-                                                    className={`relative aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border border-border/50 group shadow-lg hover:shadow-2xl transition-all duration-500 ${activeHeroIndex === index ? "ring-2 ring-teal-500 ring-offset-2 ring-offset-background" : ""}`}
+                                                    className={`relative aspect-square md:aspect-[4/3] rounded-[2rem] overflow-hidden cursor-pointer border border-white/5 group shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:border-white/20 transition-all duration-500 ${activeHeroIndex === index ? "ring-2 ring-[var(--site-secondary)] shadow-[0_0_20px_rgba(20,184,166,0.3)]" : ""}`}
                                                     onClick={() => {
                                                         setActiveHeroIndex(index);
                                                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -558,13 +564,16 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     whileInView="visible"
                                     viewport={{ once: true }}
                                     variants={fadeInUp}
-                                    className="pt-12 border-t border-border"
+                                    className="pt-16 border-t border-white/10"
                                 >
-                                    <h3 className="text-2xl font-bold mb-8">Thought Exchange ({comments.length})</h3>
+                                    <h3 className="text-2xl font-extrabold mb-10 text-white tracking-tight flex items-center gap-3">
+                                        <MessageCircle size={24} className="text-purple-400" />
+                                        Thought Exchange <span className="text-gray-500 text-lg font-medium">({comments.length})</span>
+                                    </h3>
 
                                     {/* Input */}
-                                    <div className="flex gap-4 mb-10">
-                                        <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
+                                    <div className="flex gap-5 mb-12">
+                                        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-sm backdrop-blur-md">
                                             {session?.user?.image ? (
                                                 <Image src={session.user.image} alt="User" width={48} height={48} className="object-cover" />
                                             ) : (
@@ -576,15 +585,15 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                 <textarea
                                                     value={commentText}
                                                     onChange={e => setCommentText(e.target.value)}
-                                                    placeholder={session ? "Write a comment..." : "Login to comment"}
+                                                    placeholder={session ? "Write your thoughts..." : "Login to share your thoughts"}
                                                     disabled={!session}
-                                                    className="w-full bg-muted/20 border border-border/50 rounded-2xl p-5 text-foreground focus:outline-none focus:border-teal-500/50 focus:bg-background focus:ring-4 focus:ring-teal-500/5 transition-all min-h-[80px] resize-y shadow-sm"
+                                                    className="w-full bg-black/20 border border-white/10 rounded-[1.5rem] p-5 lg:p-6 text-white focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-black/40 focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all min-h-[90px] resize-y shadow-inner font-medium placeholder:text-gray-500 pr-16"
                                                     rows={1}
                                                 />
                                                 <button
                                                     type="submit"
                                                     disabled={!commentText.trim() || isSubmittingComment}
-                                                    className="absolute right-3 bottom-3 p-3 rounded-xl bg-teal-500 text-white shadow-lg shadow-teal-500/20 disabled:opacity-0 disabled:translate-y-2 transition-all hover:scale-110 active:scale-90"
+                                                    className="absolute right-4 bottom-4 p-3.5 rounded-xl bg-white/10 text-[var(--site-secondary)] border border-white/5 hover:bg-white/20 shadow-lg disabled:opacity-30 disabled:translate-y-2 disabled:hover:bg-white/10 transition-all hover:scale-105 active:scale-95 backdrop-blur-md"
                                                 >
                                                     <Send size={18} />
                                                 </button>
@@ -593,29 +602,36 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     </div>
 
                                     {/* List */}
-                                    <div className="space-y-6">
-                                        {comments.length > 0 ? comments.map(comment => (
-                                            <div key={comment._id} className="flex gap-4 group p-4 rounded-2xl hover:bg-muted/30 transition-colors border border-transparent hover:border-border/50">
-                                                <div className="w-10 h-10 rounded-full bg-muted border border-border shrink-0 overflow-hidden">
-                                                    {comment.user.image ? (
-                                                        <Image src={comment.user.image} alt={comment.user.username} width={40} height={40} />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-xs font-bold font-mono">
-                                                            {comment.user.username[0]}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-semibold text-sm">{comment.user.username}</span>
-                                                        <span className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</span>
+                                    <div className="space-y-5">
+                                        <AnimatePresence>
+                                            {comments.length > 0 ? comments.map(comment => (
+                                                <motion.div
+                                                    key={comment._id}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="flex gap-4 group p-5 rounded-2xl bg-black/20 border border-white/5 hover:border-white/10 hover:bg-black/30 transition-all shadow-sm backdrop-blur-sm"
+                                                >
+                                                    <div className="w-11 h-11 rounded-full bg-white/5 border border-white/5 shrink-0 overflow-hidden">
+                                                        {comment.user.image ? (
+                                                            <Image src={comment.user.image} alt={comment.user.username} width={40} height={40} />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold font-mono">
+                                                                {comment.user.username[0]}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <p className="text-muted-foreground/80 leading-relaxed text-sm group-hover:text-foreground transition-colors">{comment.text}</p>
-                                                </div>
-                                            </div>
-                                        )) : (
-                                            <p className="text-sm text-muted-foreground italic">No comments yet.</p>
-                                        )}
+                                                    <div className="space-y-1.5 flex-1">
+                                                        <div className="flex items-baseline gap-2">
+                                                            <span className="font-bold text-[15px] text-white tracking-wide">{comment.user.username}</span>
+                                                            <span className="text-[11px] font-medium text-gray-500">{formatDate(comment.createdAt)}</span>
+                                                        </div>
+                                                        <p className="text-gray-300 leading-relaxed text-sm group-hover:text-white transition-colors font-medium">{comment.text}</p>
+                                                    </div>
+                                                </motion.div>
+                                            )) : (
+                                                <p className="text-sm font-medium text-gray-500 bg-white/5 border border-white/5 p-6 rounded-2xl text-center border-dashed">No comments yet. Be the first to share your thoughts!</p>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </motion.div>
 

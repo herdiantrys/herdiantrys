@@ -164,7 +164,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                     <button
                         onClick={handleBookmark}
                         className={`w-8 h-8 rounded-full glass flex items-center justify-center backdrop-blur-md border shadow-lg transition-colors ${isBookmarked
-                            ? "bg-teal-500 border-teal-400 text-white"
+                            ? "bg-[var(--site-secondary)] border-[var(--site-secondary)] text-white"
                             : "bg-black/40 border-white/20 text-white hover:bg-black/60"
                             }`}
                     >
@@ -182,7 +182,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 {/* Skeleton Loader */}
                 {isLoading && (
                     <div className="absolute inset-0 bg-gray-800 animate-pulse z-10 flex items-center justify-center">
-                        <div className="w-12 h-12 border-4 border-teal-500/30 border-t-teal-500 rounded-full animate-spin"></div>
+                        <div className="w-12 h-12 border-4 border-[var(--site-secondary)]/30 border-t-[var(--site-secondary)] rounded-full animate-spin"></div>
                     </div>
                 )}
 
@@ -242,7 +242,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 {/* Content Overlay */}
                 <div className="absolute inset-0 p-3 md:p-6 flex flex-col justify-end opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
                     <div className="transform translate-y-0 md:translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                        <span className="text-[10px] md:text-xs font-bold text-teal-400 uppercase tracking-wider mb-1 md:mb-2 block">
+                        <span className="text-[10px] md:text-xs font-bold text-[var(--site-secondary)] uppercase tracking-wider mb-1 md:mb-2 block">
                             {project.category}
                         </span>
                         <h3 className="text-sm md:text-xl font-bold text-white mb-1 leading-tight">{project.title}</h3>
@@ -254,7 +254,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                                     <button
                                         key={idx}
                                         onClick={(e) => handleThumbnailClick(e, media)}
-                                        className={`relative w-12 h-8 rounded overflow-hidden border transition-all flex-shrink-0 ${activeMedia.url === media.url ? 'border-teal-500 scale-110' : 'border-white/30 hover:border-white/80'}`}
+                                        className={`relative w-12 h-8 rounded overflow-hidden border transition-all flex-shrink-0 ${activeMedia.url === media.url ? 'border-[var(--site-secondary)] scale-110' : 'border-white/30 hover:border-white/80'}`}
                                     >
                                         {media.type === 'video' ? (
                                             <video src={media.url} className="w-full h-full object-cover" />

@@ -119,6 +119,8 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                     setProgress(100);
                     setStatus('success');
 
+                    router.refresh();
+
                     // Reset form after delay
                     setTimeout(() => {
                         setText("");

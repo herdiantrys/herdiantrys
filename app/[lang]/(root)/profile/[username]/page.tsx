@@ -130,7 +130,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ la
 
                     <Link href="/dashboard" className="inline-flex items-center gap-2 text-[var(--glass-text-muted)] hover:text-teal-400 mb-6 transition-colors lg:hidden">
                         <ArrowLeft size={20} />
-                        <span>Back to Dashboard</span>
+                        <span>{dict.profile.back_to_dashboard || "Back to Dashboard"}</span>
                     </Link>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

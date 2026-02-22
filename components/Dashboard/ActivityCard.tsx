@@ -197,10 +197,10 @@ export default function ActivityCard({
             <div className="bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg flex items-center justify-between">
                 <div className="flex items-center gap-3 text-green-600 dark:text-green-400">
                     <ArchiveX size={24} />
-                    <span className="font-medium">Post archived successfully.</span>
+                    <span className="font-medium">{t.post_archived || "Post archived successfully."}</span>
                 </div>
                 <button onClick={() => { setIsArchivedSuccess(false); }} className="text-sm underline text-[var(--glass-text-muted)]">
-                    Undo
+                    {t.undo || "Undo"}
                 </button>
             </div>
         );
@@ -224,7 +224,7 @@ export default function ActivityCard({
                 {/* Repost Header */}
                 <div className="flex items-center gap-2 mb-2 ml-14 sm:ml-20 text-[10px] sm:text-xs font-semibold text-[var(--glass-text-muted)]">
                     <Repeat size={12} className="sm:w-3.5 sm:h-3.5" />
-                    <span>{activity.actor.name} reposted</span>
+                    <span>{activity.actor.name} {t.reposted || "reposted"}</span>
                 </div>
                 {/* Header */}
                 <div className="flex items-start gap-4 mb-4">
@@ -259,6 +259,7 @@ export default function ActivityCard({
                             {activity.type === 'new_user' && (t.joined_community || "joined the community")}
                             {activity.type === 'new_project' && (t.published_project || "published a new project")}
                             {activity.type === 'project_update' && (t.updated_project || "updated a project")}
+                            {activity.type === 'user_post' && (t.published_post || "published a new post")}
                             {activity.type === 'badge_awarded' && (activity.details.description || `earned the ${activity.details.badgeName} badge!`)}
                             {activity.type === 'achievement' && (activity.details.description || `unlocked a new achievement!`)}
                             <span className="mx-1 sm:mx-2 text-[8px] sm:text-xs">•</span>
@@ -277,13 +278,13 @@ export default function ActivityCard({
                             {canArchive && (
                                 <DropdownMenuItem onClick={handleArchiveClick} className="text-red-500 focus:text-red-500 cursor-pointer">
                                     <ArchiveX className="mr-2 h-4 w-4" />
-                                    <span>Archive Post</span>
+                                    <span>{t.archive_post || "Archive Post"}</span>
                                 </DropdownMenuItem>
                             )}
                             {/* Placeholder for future actions */}
                             <DropdownMenuItem className="cursor-pointer" onClick={() => setIsShareOpen(true)}>
                                 <Share2 className="mr-2 h-4 w-4" />
-                                <span>Copy Link</span>
+                                <span>{t.copy_link || "Copy Link"}</span>
                             </DropdownMenuItem>
                             {!isOwnPost && currentUser && (
                                 <DropdownMenuItem
@@ -295,7 +296,7 @@ export default function ActivityCard({
                                     }}
                                 >
                                     <MessageSquare className="mr-2 h-4 w-4" />
-                                    <span>Send Message</span>
+                                    <span>{t.send_message || "Send Message"}</span>
                                 </DropdownMenuItem>
                             )}
                         </DropdownMenuContent>

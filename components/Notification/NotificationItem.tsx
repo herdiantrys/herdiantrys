@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins, Zap, Trophy, Repeat } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-export default function NotificationItem({ notification, onClick }: { notification: any; onClick: () => void }) {
+export default function NotificationItem({ notification, dict, onClick }: { notification: any; dict?: any; onClick: () => void }) {
     const { sender, type, relatedPost, relatedProject, read, createdAt } = notification;
+    const nm = dict?.notifications_messages || {};
 
     const getIcon = () => {
         switch (type) {
@@ -28,18 +29,18 @@ export default function NotificationItem({ notification, onClick }: { notificati
     const getMessage = () => {
         const details = notification.details || {};
         switch (type) {
-            case 'like_post': return <span>liked your post</span>;
-            case 'like_project': return <span>liked your project</span>;
-            case 'comment_post': return <span>commented on your post</span>;
-            case 'comment_project': return <span>commented on your project</span>;
-            case 'repost_post': return <span>reposted your post</span>;
-            case 'follow': return <span>started following you</span>;
-            case 'system': return <span>You received 10 Runes</span>;
-            case 'xp_award': return <span>earned <span className="font-bold text-[var(--site-secondary)]">{details.amount} XP</span> for {details.reason}</span>;
-            case 'coin_award': return <span>{details.amount < 0 ? 'spent' : 'earned'} <span className="font-bold text-yellow-500">{Math.abs(details.amount)} Runes</span> for {details.reason}</span>;
-            case 'badge_awarded': return <span>earned the <span className="font-bold text-yellow-500">{details.badgeName}</span> badge! {details.badgeIcon || ''}</span>;
-            case 'achievement': return <span>unlocked a new achievement: <span className="font-bold text-yellow-500">{details.achievementTitle || 'Achievement'}</span>!</span>;
-            default: return <span>sent a notification</span>;
+            case 'like_post': return <span>{nm.liked_post || "liked your post"}</span>;
+            case 'like_project': return <span>{nm.liked_project || "liked your project"}</span>;
+            case 'comment_post': return <span>{nm.commented_post || "commented on your post"}</span>;
+            case 'comment_project': return <span>{nm.commented_project || "commented on your project"}</span>;
+            case 'repost_post': return <span>{nm.reposted_post || "reposted your post"}</span>;
+            case 'follow': return <span>{nm.followed_you || "started following you"}</span>;
+            case 'system': return <span>{nm.received_runes || "You received"} 10 {nm.runes || "Runes"}</span>;
+            case 'xp_award': return <span>{nm.earned || "earned"} <span className="font-bold text-[var(--site-secondary)]">{details.amount} XP</span> {nm.for || "for"} {details.reason}</span>;
+            case 'coin_award': return <span>{details.amount < 0 ? (nm.spent || 'spent') : (nm.earned || 'earned')} <span className="font-bold text-yellow-500">{Math.abs(details.amount)} {nm.runes || "Runes"}</span> {nm.for || "for"} {details.reason}</span>;
+            case 'badge_awarded': return <span>{nm.earned_badge || "earned the"} <span className="font-bold text-yellow-500">{details.badgeName}</span> {nm.badge || "badge!"} {details.badgeIcon || ''}</span>;
+            case 'achievement': return <span>{nm.unlocked_achievement || "unlocked a new achievement:"} <span className="font-bold text-yellow-500">{details.achievementTitle || nm.achievement || 'Achievement'}</span>!</span>;
+            default: return <span>{nm.sent_notification || "sent a notification"}</span>;
         }
     };
 

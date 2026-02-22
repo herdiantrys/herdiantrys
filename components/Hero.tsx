@@ -22,11 +22,17 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
   const rotateOutline = useTransform(scrollYProgress, [0, 1], [0, 45]);
   const scaleImage = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
-  const roles = Array.isArray(profile?.headline) && profile.headline.length > 0
+  const rawRoles = Array.isArray(profile?.headline) && profile.headline.length > 0
     ? profile.headline
     : (typeof profile?.headline === 'string' && profile.headline.length > 0
       ? [profile.headline]
       : ["Creative Developer", "UI/UX Designer"]);
+
+  const roles = rawRoles.flatMap((role: string) =>
+    typeof role === 'string' && role.includes(",")
+      ? role.split(",").map(r => r.trim()).filter(Boolean)
+      : role
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -65,15 +71,15 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             </span>
           </motion.h1>
 
-          <div className="h-12 mb-8 flex items-center justify-center lg:justify-start overflow-hidden">
+          <div className="h-14 mb-8 flex items-center justify-center lg:justify-start">
             <AnimatePresence mode="wait">
               <motion.h3
                 key={roles[index]}
-                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                initial={{ opacity: 0, y: 15, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-                transition={{ duration: 0.5 }}
-                className="text-2xl lg:text-3xl text-[var(--glass-text-muted)] font-light"
+                exit={{ opacity: 0, y: -15, filter: "blur(12px)" }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="text-2xl lg:text-3xl text-[var(--glass-text-muted)] font-light py-2"
               >
                 {roles[index]}
               </motion.h3>

@@ -87,27 +87,25 @@
 
   /* Site Theme Variables - Driven by Database via ThemeInjector */
   --site-primary: var(--theme-light-primary, #f5f7f8);
-  --site-secondary: var(--theme-light-secondary, #ffffff);
-  --site-accent: var(--theme-light-accent, #14b8a6);
-  /* Default fallbacks for gradients to ensure valid CSS before JS injection or if custom gradient undefined */
-  /* Default fallbacks / mapped variables from ThemeInjector */
-  --site-accent-prev: var(--theme-light-accent-prev, var(--site-accent));
-  --site-accent-next: var(--theme-light-accent-next, var(--site-accent));
+  --site-secondary: var(--theme-secondary, #ffffff);
+  --site-accent: var(--theme-accent, #14b8a6);
+  --site-accent-prev: var(--theme-accent-prev, var(--site-accent));
+  --site-accent-next: var(--theme-accent-next, var(--site-accent));
 
-  --site-button: var(--theme-light-button, #14b8a6);
-  --site-button-text: var(--theme-light-button-text, #ffffff);
+  --site-button: var(--theme-button, #14b8a6);
+  --site-button-text: var(--theme-button-text, #ffffff);
   --site-link: var(--site-secondary);
-  --site-card: var(--theme-light-card, #ffffff);
-  --site-card-text: var(--theme-light-card-text, #1f2937);
+  --site-card: var(--theme-card, #ffffff);
+  --site-card-text: var(--theme-card-text, #1f2937);
 
   --radius: var(--radius, 0.5rem);
 
   /* Sidebar Specific */
-  --site-sidebar-bg: var(--theme-light-sidebar-bg, #ffffff);
-  --site-sidebar-fg: var(--theme-light-sidebar-fg, #1f2937);
-  --site-sidebar-border: var(--theme-light-sidebar-border, #e5e7eb);
-  --site-sidebar-accent: var(--theme-light-sidebar-accent, #14b8a6);
-  --site-sidebar-active: var(--theme-light-sidebar-active, #f0fdfa);
+  --site-sidebar-bg: var(--theme-sidebar-bg, #ffffff);
+  --site-sidebar-fg: var(--theme-sidebar-fg, #1f2937);
+  --site-sidebar-border: var(--theme-sidebar-border, #e5e7eb);
+  --site-sidebar-accent: var(--theme-sidebar-accent, #14b8a6);
+  --site-sidebar-active: var(--theme-sidebar-active, #f0fdfa);
 
   --background: var(--site-primary);
   --foreground: oklch(0.145 0 0);
@@ -151,24 +149,7 @@
 
 .dark {
   --site-primary: var(--theme-dark-primary, #252525);
-  --site-secondary: var(--theme-dark-secondary, #333333);
-  --site-accent: var(--theme-dark-accent, #2dd4bf);
 
-  --site-accent-prev: var(--theme-dark-accent-prev, var(--site-accent));
-  --site-accent-next: var(--theme-dark-accent-next, var(--site-accent));
-
-  --site-button: var(--theme-dark-button, #2dd4bf);
-  --site-button-text: var(--theme-dark-button-text, #1a1a1a);
-  --site-link: var(--site-secondary);
-  --site-card: var(--theme-dark-card, #333333);
-  --site-card-text: var(--theme-dark-card-text, #ffffff);
-
-  /* Sidebar Specific Dark */
-  --site-sidebar-bg: var(--theme-dark-sidebar-bg, #333333);
-  --site-sidebar-fg: var(--theme-dark-sidebar-fg, #ffffff);
-  --site-sidebar-border: var(--theme-dark-sidebar-border, #404040);
-  --site-sidebar-accent: var(--theme-dark-sidebar-accent, #2dd4bf);
-  --site-sidebar-active: var(--theme-dark-sidebar-active, #2d2d2d);
 
   --background: var(--site-primary);
   --foreground: oklch(0.985 0 0);

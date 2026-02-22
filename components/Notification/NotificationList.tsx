@@ -7,9 +7,10 @@ import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/action
 import { CheckCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function NotificationList({ initialNotifications, userId }: { initialNotifications: any[]; userId: string }) {
+export default function NotificationList({ initialNotifications, userId, dict }: { initialNotifications: any[]; userId: string; dict?: any }) {
     const [notifications, setNotifications] = useState(initialNotifications);
     const router = useRouter();
+    const nm = dict?.notifications_messages || {};
 
     const handleMarkAsRead = async (id: string) => {
         // Optimistic update
@@ -27,7 +28,7 @@ export default function NotificationList({ initialNotifications, userId }: { ini
     if (notifications.length === 0) {
         return (
             <div className="text-center py-12 text-[var(--glass-text-muted)]">
-                <p>No notifications yet.</p>
+                <p>{nm.no_notifications || "No notifications yet."}</p>
             </div>
         );
     }
@@ -40,7 +41,7 @@ export default function NotificationList({ initialNotifications, userId }: { ini
                     className="flex items-center gap-1.5 text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
                 >
                     <CheckCheck size={14} />
-                    Mark all as read
+                    {nm.mark_all_read || "Mark all as read"}
                 </button>
             </div>
 
@@ -49,6 +50,7 @@ export default function NotificationList({ initialNotifications, userId }: { ini
                     <NotificationItem
                         key={notification._id}
                         notification={notification}
+                        dict={dict}
                         onClick={() => handleMarkAsRead(notification._id)}
                     />
                 ))}

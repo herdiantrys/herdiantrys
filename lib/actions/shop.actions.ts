@@ -75,6 +75,14 @@ export const seedShopItems = async () => {
             type: "FRAME",
             value: "custom-color",
             icon: "https://cdn.sanity.io/images/q8119565/production/60d81c81062b339486c42935266522c091910609-500x500.png"
+        },
+        {
+            name: "Custom Banner Video",
+            description: "Unlock the ability to display a short looping video on your profile banner.",
+            price: 20000,
+            type: "BANNER_VIDEO",
+            value: "custom-video",
+            icon: "https://cdn.sanity.io/images/q8119565/production/60d81c81062b339486c42935266522c091910609-500x500.png" // Placeholder, can be a film icon
         }
     ];
 
@@ -135,6 +143,8 @@ export const purchaseItem = async (userId: string, itemId: string, price: number
             } else if (type.toUpperCase() === 'BACKGROUND') {
                 updateData.equippedBackground = effectValue;
                 updateData.profileColor = null; // Enforce mutual exclusivity
+            } else if (type.toUpperCase() === 'BANNER_VIDEO') {
+                updateData.equippedBanner = effectValue;
             } else {
                 // Fallback for effects/others
                 updateData.equippedEffect = effectValue;
@@ -194,6 +204,8 @@ export const equipItem = async (userId: string, itemId: string, type: string, ef
         } else if (type.toUpperCase() === 'BACKGROUND') {
             updateData.equippedBackground = effectValue;
             updateData.profileColor = null;
+        } else if (type.toUpperCase() === 'BANNER_VIDEO') {
+            updateData.equippedBanner = effectValue;
         } else {
             updateData.equippedEffect = effectValue;
         }

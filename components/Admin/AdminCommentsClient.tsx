@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -136,14 +136,14 @@ export default function AdminCommentsClient({
                 <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full lg:max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
+                            <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-secondary)] transition-colors" size={18} />
                         </div>
                         <input
                             type="text"
                             placeholder="Search comments..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                         />
                     </div>
 
@@ -246,7 +246,7 @@ export default function AdminCommentsClient({
                                                 {comment.targetType}
                                             </span>
                                             {comment.targetId && (
-                                                <Link href={comment.targetType === 'POST' ? `/feed` : `/projects/${comment.project?.id}`} target="_blank" className="text-gray-400 hover:text-[var(--site-accent)] transition-colors">
+                                                <Link href={comment.targetType === 'POST' ? `/feed` : `/projects/${comment.project?.id}`} target="_blank" className="text-gray-400 hover:text-[var(--site-secondary)] transition-colors">
                                                     <ExternalLink size={14} />
                                                 </Link>
                                             )}
@@ -260,7 +260,7 @@ export default function AdminCommentsClient({
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => setViewComment(comment)} className="p-2 rounded-lg text-gray-400 hover:text-[var(--site-accent)] hover:bg-[var(--site-accent)]/10 transition-colors">
+                                            <button onClick={() => setViewComment(comment)} className="p-2 rounded-lg text-gray-400 hover:text-[var(--site-secondary)] hover:bg-[var(--site-accent)]/10 transition-colors">
                                                 <Eye size={18} />
                                             </button>
                                             <button onClick={() => { setSelectedIds([comment.id]); setIsDeleteModalOpen(true); }} className="p-2 rounded-lg text-red-500 hover:bg-red-500/10 transition-colors">
@@ -367,7 +367,7 @@ export default function AdminCommentsClient({
                                     )}
                                     <div>
                                         <div className="font-bold text-gray-900 dark:text-white">{viewComment.user.name || "Unknown"}</div>
-                                        <div className="text-sm text-gray-500">@{viewComment.user.username} • {formatDate(viewComment.createdAt)}</div>
+                                        <div className="text-sm text-gray-500">@{viewComment.user.username} â€¢ {formatDate(viewComment.createdAt)}</div>
                                     </div>
                                 </div>
 
@@ -423,3 +423,4 @@ export default function AdminCommentsClient({
         </div>
     );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
@@ -226,14 +226,14 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                         {/* Search */}
                         <div className="relative w-full lg:max-w-md group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-accent)] transition-colors" size={18} />
+                                <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-[var(--site-secondary)] transition-colors" size={18} />
                             </div>
                             <input
                                 type="text"
                                 placeholder="Search posts or authors..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -269,7 +269,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
                         </div>
@@ -742,3 +742,4 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
         </div>
     );
 }
+

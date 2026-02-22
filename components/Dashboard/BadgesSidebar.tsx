@@ -19,6 +19,8 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    const t = dict?.dashboard || {};
+
     const userBadges = user.badges || [];
     const unlockedBadges = userBadges.filter((b: any) => b.id);
     const totalBadges = BADGES.length;
@@ -89,9 +91,9 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                         </div>
                         <div>
                             <h3 className="font-bold text-white text-lg tracking-tight leading-none mb-1">
-                                Achievements
+                                {t.tab_achievements || "Achievements"}
                             </h3>
-                            <p className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-widest font-bold">Progress Journey</p>
+                            <p className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-widest font-bold">{t.progress_journey || "Progress Journey"}</p>
                         </div>
                     </div>
                     <div className="flex flex-col items-end">
@@ -160,7 +162,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                             <span className="text-4xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{completionPercent}</span>
                             <span className="text-xs font-bold text-[var(--site-secondary)] absolute -top-1 -right-4">%</span>
                         </div>
-                        <span className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-[0.2em] font-black mt-1">Mastery</span>
+                        <span className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-[0.2em] font-black mt-1">{t.mastery || "Mastery"}</span>
                     </div>
 
                     {/* Orbiting Sparkle Decor */}
@@ -175,7 +177,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                             <div className="flex items-center justify-between px-1">
                                 <h4 className="text-[10px] font-black text-[var(--glass-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
                                     <Sparkles size={12} className="text-[var(--site-secondary)]" />
-                                    Latest Laurels
+                                    {t.latest_laurels || "Latest Laurels"}
                                 </h4>
                             </div>
 
@@ -203,7 +205,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                                         {badge.name}
                                                     </h5>
                                                     <p className="text-[10px] text-[var(--glass-text-muted)] font-medium">
-                                                        Unlocked {formatDate(userBadge.awardedAt)}
+                                                        {t.unlocked || "Unlocked"} {formatDate(userBadge.awardedAt)}
                                                     </p>
                                                 </div>
                                                 <div className="p-1.5 rounded-lg bg-black/20 opacity-0 group-hover/badge:opacity-100 transition-opacity">
@@ -222,7 +224,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                         <div className="space-y-3 pt-4 border-t border-white/5">
                             <h4 className="text-[10px] font-black text-[var(--glass-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Lock size={12} className="text-amber-500/70" />
-                                Within Reach
+                                {t.within_reach || "Within Reach"}
                             </h4>
 
                             <div className="grid grid-cols-1 gap-2">
@@ -254,7 +256,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                                         {badge.name}
                                                     </h5>
                                                     <div className="flex items-center justify-between mt-1">
-                                                        <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-tighter">In Pursuit</span>
+                                                        <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-tighter">{t.in_pursuit || "In Pursuit"}</span>
                                                         <span className="text-[9px] font-mono text-slate-500">{current}/{target}</span>
                                                     </div>
                                                 </div>
@@ -281,7 +283,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--site-secondary)]/20 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                         <span className="text-xs font-black uppercase tracking-[0.2em] text-[var(--site-secondary)] relative z-10 group-hover/btn:scale-105 transition-transform">
-                            Full Hall of Fame
+                            {t.full_hall_of_fame || "Full Hall of Fame"}
                         </span>
                         <ChevronRight size={16} className="text-[var(--site-secondary)] relative z-10 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
