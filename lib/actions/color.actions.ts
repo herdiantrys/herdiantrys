@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 // --- COLORS ---
 
@@ -19,6 +20,11 @@ export async function getAppColors() {
 
 export async function createAppColor(data: { name: string; hex: string; rgb: string; cmyk: string; family: string }) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to create colors" };
+        }
+
         const color = await prisma.appColor.create({
             data,
         });
@@ -33,6 +39,11 @@ export async function createAppColor(data: { name: string; hex: string; rgb: str
 
 export async function updateAppColor(id: string, data: { name: string; hex: string; rgb: string; cmyk: string; family: string }) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to update colors" };
+        }
+
         const color = await prisma.appColor.update({
             where: { id },
             data,
@@ -48,6 +59,11 @@ export async function updateAppColor(id: string, data: { name: string; hex: stri
 
 export async function deleteAppColor(id: string) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to delete colors" };
+        }
+
         await prisma.appColor.delete({
             where: { id },
         });
@@ -62,6 +78,11 @@ export async function deleteAppColor(id: string) {
 
 export async function bulkDeleteAppColors(ids: string[]) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to bulk delete colors" };
+        }
+
         await prisma.appColor.deleteMany({
             where: { id: { in: ids } },
         });
@@ -91,6 +112,11 @@ export async function getAppPalettes() {
 // Simplified Palettes creation for admin
 export async function createAppPalette(data: { name: string; colors: string; tags: string }) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to create palettes" };
+        }
+
         const palette = await prisma.appPalette.create({
             data: {
                 name: data.name,
@@ -109,6 +135,11 @@ export async function createAppPalette(data: { name: string; colors: string; tag
 
 export async function deleteAppPalette(id: string) {
     try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to delete palettes" };
+        }
+
         await prisma.appPalette.delete({
             where: { id },
         });

@@ -3,7 +3,9 @@ module.exports = {
         {
             name: "herdiantrys",
             script: "server.js",
-            env_file: ".env",
+            cwd: "./.next/standalone",
+            env_file: "../../.env",
+            max_memory_restart: "600M",
             env: {
                 NODE_ENV: "production",
                 PORT: 3000,

@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   experimental: {
+    workerThreads: false,
+    cpus: 1,
     serverActions: {
       bodySizeLimit: "10mb",
     },

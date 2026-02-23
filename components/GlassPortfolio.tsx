@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useOptimistic, startTransition } from "react";
+import { useState, useRef, useEffect, useOptimistic, startTransition, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -18,11 +18,15 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
     const ITEMS_PER_PAGE = 15;
 
     // Derive unique categories from projects, excluding "all" to avoid duplicates
-    const categories = ["all", ...Array.from(new Set(projects.map((p) => p.category))).filter(c => c !== "all")];
+    const categories = useMemo(() => {
+        return ["all", ...Array.from(new Set(projects.map((p) => p.category))).filter(c => c !== "all")];
+    }, [projects]);
 
-    const filteredProjects = activeCategory === "all"
-        ? projects
-        : projects.filter(project => project.category === activeCategory);
+    const filteredProjects = useMemo(() => {
+        return activeCategory === "all"
+            ? projects
+            : projects.filter(project => project.category === activeCategory);
+    }, [projects, activeCategory]);
 
     const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
 
