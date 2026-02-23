@@ -85,6 +85,15 @@ export const createComment = async (targetId: string, targetType: "project" | "p
         }
         const userId = session.user.id;
 
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { status: true }
+        });
+
+        if (user?.status === "LIMITED") {
+            return { success: false, error: "Your account has limited posting privileges." };
+        }
+
 
         // VALIDATE: Check if target exists before creating comment
         if (targetType === "project") {

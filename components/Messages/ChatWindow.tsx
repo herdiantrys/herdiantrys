@@ -57,10 +57,10 @@ export default function ChatWindow({
     }
 
     return (
-        <div className="flex-1 flex flex-col min-h-0 bg-transparent relative overflow-hidden">
-            {/* Background Pattern with 50% opacity as requested */}
+        <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30 dark:bg-gray-900/50 relative overflow-hidden">
+            {/* Background Pattern with lower opacity for light mode */}
             <div
-                className="absolute inset-0 z-0 opacity-50 pointer-events-none"
+                className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
                 style={{
                     backgroundImage: "url('/images/chat-bg.png')",
                     backgroundRepeat: "repeat",
@@ -69,12 +69,9 @@ export default function ChatWindow({
                 }}
             />
 
-            {/* Background semi-transparent dark overlay to ensure message contrast */}
-            <div className="absolute inset-0 bg-black/40 pointer-events-none z-0" />
-
             {/* Header info for mobile or just clarity */}
-            <div className="p-6 border-b border-white/5 bg-white/5 backdrop-blur-2xl flex items-center gap-4 relative z-10">
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 relative">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md flex items-center gap-4 relative z-10 shrink-0">
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 relative shadow-sm">
                     <Image
                         src={otherParticipant?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherParticipant?.name || "U")}&background=random`}
                         alt={otherParticipant?.name || "User"}
@@ -83,11 +80,11 @@ export default function ChatWindow({
                     />
                 </div>
                 <div>
-                    <h4 className="text-sm font-bold text-white">{otherParticipant?.name || "User"}</h4>
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">{otherParticipant?.name || "User"}</h4>
                     {otherParticipant?.lastActiveAt && (new Date().getTime() - new Date(otherParticipant.lastActiveAt).getTime()) < 5 * 60 * 1000 ? (
                         <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Active Now</p>
                     ) : (
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
                             {otherParticipant?.lastActiveAt
                                 ? `Last seen ${new Date(otherParticipant.lastActiveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                                 : "Offline"}
@@ -104,8 +101,8 @@ export default function ChatWindow({
                 <div className="space-y-4">
                     <AnimatePresence initial={false}>
                         {messages.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full opacity-40 text-center py-20">
-                                <div className="w-20 h-20 rounded-full bg-white/5 border border-dashed border-white/20 mb-6 flex items-center justify-center">
+                            <div className="flex flex-col items-center justify-center h-full opacity-60 text-center py-20 text-gray-500 dark:text-gray-400">
+                                <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 border border-dashed border-gray-200 dark:border-gray-700 mb-6 flex items-center justify-center shadow-sm">
                                     <motion.div
                                         animate={{ scale: [1, 1.1, 1] }}
                                         transition={{ duration: 2, repeat: Infinity }}
@@ -113,7 +110,7 @@ export default function ChatWindow({
                                         💬
                                     </motion.div>
                                 </div>
-                                <h5 className="text-lg font-bold mb-2">No messages here yet</h5>
+                                <h5 className="text-lg font-bold mb-2 text-gray-900 dark:text-gray-100">No messages here yet</h5>
                                 <p className="text-xs max-w-[200px]">Send a message to start a conversation with {otherParticipant?.name}.</p>
                             </div>
                         ) : (
@@ -129,7 +126,7 @@ export default function ChatWindow({
                                         className={`flex ${isMe ? "justify-end" : "justify-start"} items-end gap-2`}
                                     >
                                         {!isMe && (
-                                            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-white/10 relative">
+                                            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 relative shadow-sm">
                                                 {showAvatar && (
                                                     <Image
                                                         src={msg.sender?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.sender?.name || "U")}&background=random`}
@@ -145,7 +142,7 @@ export default function ChatWindow({
                                             {msg.attachment && (
                                                 <div className="mb-2">
                                                     {msg.attachmentType === "image" ? (
-                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="block relative w-full max-w-[450px] min-h-[100px] rounded-xl overflow-hidden border border-white/10 hover:opacity-90 transition-opacity bg-white/5">
+                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="block relative w-full max-w-[450px] min-h-[100px] rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:opacity-90 transition-opacity bg-white dark:bg-gray-800 shadow-sm">
                                                             <img
                                                                 src={msg.attachment}
                                                                 alt="Attachment"
@@ -158,18 +155,18 @@ export default function ChatWindow({
                                                             href={msg.attachment}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className={`flex items-center gap-3 p-3 rounded-xl border border-white/10 transition-all
-                                                                ${isMe ? "bg-black/10 hover:bg-black/20" : "bg-white/5 hover:bg-white/10"}
+                                                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all shadow-sm
+                                                                ${isMe ? "bg-teal-600/20 border-teal-500/20 hover:bg-teal-600/30 text-white" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-900 dark:text-gray-100"}
                                                             `}
                                                         >
-                                                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-[var(--site-secondary)]">
+                                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isMe ? "bg-white/20" : "bg-gray-100 dark:bg-gray-900 text-teal-600 dark:text-teal-400"}`}>
                                                                 <FileIcon size={20} />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="text-xs font-bold truncate">File Attachment</p>
-                                                                <p className="text-[10px] opacity-60">Click to view/download</p>
+                                                                <p className="text-[10px] opacity-70">Click to view/download</p>
                                                             </div>
-                                                            <FileDown size={16} className="opacity-40" />
+                                                            <FileDown size={16} className="opacity-50" />
                                                         </a>
                                                     )}
                                                 </div>
@@ -187,26 +184,24 @@ export default function ChatWindow({
                                                     );
                                                 }
                                                 return (
-                                                    <div className={`px-4 py-3 rounded-2xl text-sm font-medium leading-relaxed shadow-lg
+                                                    <div className={`px-5 py-3.5 rounded-[20px] text-[15px] font-medium leading-relaxed shadow-sm
                                                         ${isMe
-                                                            ? "bg-gradient-to-br from-[var(--site-secondary)] to-[var(--site-secondary)]/80 text-black rounded-br-none shadow-[0_5px_15px_rgba(var(--site-secondary-rgb),0.2)]"
-                                                            : "bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-bl-none"}
+                                                            ? "bg-teal-500 text-white rounded-br-sm shadow-teal-500/10"
+                                                            : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-sm"}
                                                     `}>
                                                         {msg.content}
                                                     </div>
                                                 );
                                             })()}
 
-                                            <div className="flex items-center gap-1 mt-1 px-1">
-                                                <span className="text-[10px] text-gray-400">
+                                            <div className="flex items-center gap-1.5 mt-1.5 px-1">
+                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold">
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                                 {isMe && (
-                                                    msg.isRead ? (
-                                                        <CheckCheck size={12} className="text-emerald-500" />
-                                                    ) : (
-                                                        <Check size={12} className="text-gray-500" />
-                                                    )
+                                                    <span className={msg.isRead ? "text-teal-500" : "text-gray-300 dark:text-gray-600"}>
+                                                        {msg.isRead ? <CheckCheck size={14} /> : <Check size={14} />}
+                                                    </span>
                                                 )}
                                             </div>
                                         </div>

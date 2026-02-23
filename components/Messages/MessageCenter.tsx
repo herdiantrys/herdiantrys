@@ -167,39 +167,37 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                 }
             }}
             style={{ willChange: "transform, opacity, width, height" }}
-            className={`fixed bottom-4 right-4 z-[200] flex flex-col glass-liquid backdrop-blur-[32px] shadow-2xl overflow-hidden border border-white/20 dark:border-white/10
+            className={`fixed bottom-4 right-4 z-[200] flex flex-col bg-white dark:bg-gray-900 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-black/50 overflow-hidden border border-gray-200 dark:border-gray-800 rounded-2xl
                 ${isExpanded ? "top-4 left-4" : "w-[90vw] md:w-[900px] h-[70vh]"}
             `}
         >
             {/* Header / Toolbar */}
-            <div className="flex items-center justify-between p-4 bg-white/10 dark:bg-black/60 backdrop-blur-xl border-b border-white/10 shrink-0">
+            <div className="flex items-center justify-between p-4 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 shrink-0">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[var(--site-secondary)]/20 flex items-center justify-center text-[var(--site-secondary)]">
+                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
                         <MessageCircle size={18} />
                     </div>
-                    <span className="font-bold tracking-tight">Messaging Hub</span>
+                    <span className="font-bold tracking-tight text-gray-900 dark:text-gray-100">Messaging Hub</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+                        className="p-2 hover:bg-gray-200/50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-200"
                     >
                         {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                     </button>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-white/60 hover:text-red-400"
+                        className="p-2 hover:bg-red-50 dark:hover:bg-red-500/20 focus:outline-none rounded-lg transition-colors text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
                     >
                         <X size={18} />
                     </button>
                 </div>
             </div>
 
-            <div className="flex-1 flex min-h-0 divide-x divide-white/5">
-                {/* Conversations Sidebar - hidden on mobile if chat is open maybe? 
-                    For now keeping simple side-by-side
-                */}
+            <div className="flex-1 flex min-h-0 divide-x divide-gray-100 dark:divide-gray-800">
+                {/* Conversations Sidebar */}
                 <div className={`${activeConvId ? "hidden md:flex" : "flex w-full"} md:w-80 shrink-0`}>
                     <ConversationList
                         conversations={conversations}
@@ -214,10 +212,10 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                     {activeConvId ? (
                         <>
                             {/* Back button for mobile */}
-                            <div className="md:hidden p-2 border-b border-white/5">
+                            <div className="md:hidden p-2 border-b border-gray-100 dark:border-gray-800">
                                 <button
                                     onClick={() => setActiveConvId(null)}
-                                    className="text-xs font-bold uppercase tracking-widest p-2 hover:bg-white/5 rounded-lg flex items-center gap-2"
+                                    className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 p-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg flex items-center gap-2"
                                 >
                                     ← Back to chats
                                 </button>
@@ -231,12 +229,12 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                             <ChatInput onSend={handleSendMessage} />
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-white/[0.02]">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--site-secondary)]/10 via-transparent to-transparent flex items-center justify-center mb-6">
-                                <MessageCircle size={48} className="text-[var(--site-secondary)]/30" />
+                        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gray-50/30 dark:bg-gray-900/50">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500/10 dark:from-teal-500/20 via-transparent to-transparent flex items-center justify-center mb-6">
+                                <MessageCircle size={48} className="text-teal-500/50 dark:text-teal-500/60" />
                             </div>
-                            <h4 className="text-xl font-bold mb-2">Select a conversation</h4>
-                            <p className="text-sm text-gray-500 max-w-xs">Pick a chat from the left or visit someone's profile to start a new direct message.</p>
+                            <h4 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Select a conversation</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Pick a chat from the left or visit someone's profile to start a new direct message.</p>
                         </div>
                     )}
                 </div>

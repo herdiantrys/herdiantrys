@@ -3,7 +3,7 @@
 import ProfileCard from "./ProfileCard";
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, Bell, Bookmark, Settings, LogOut, ShieldCheck, LayoutDashboard, ShoppingBag, Search, Briefcase } from "lucide-react";
+import { Home, Bell, Bookmark, Settings, LogOut, ShieldCheck, LayoutDashboard, ShoppingBag, Search, Briefcase, MessageCircle } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LEVELS } from "@/lib/constants/gamification";
@@ -57,6 +57,18 @@ export default function DashboardSidebar({ user, isPublic = false, dict, showNav
     return (
         <div className="space-y-6">
             <ProfileCard user={user} isPublic={isPublic} dict={dict} />
+
+            {/* Main Navigation / Quick Access */}
+            {!isPublic && (
+                <div className="bg-white/50 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-2xl p-2 shadow-xl shrink-0 space-y-1">
+                    <NavItem
+                        href="/messages"
+                        icon={MessageCircle}
+                        label={t.messages || "Messages"}
+                        active={normalizedPath.startsWith("/messages")}
+                    />
+                </div>
+            )}
 
             {/* Admin Quick Access - For robust visibility */}
             {!isPublic && ['admin', 'superadmin'].includes(user.role?.toLowerCase() || '') && (

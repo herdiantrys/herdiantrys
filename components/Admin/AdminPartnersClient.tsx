@@ -142,9 +142,6 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                         Partners
                     </h1>
-                    <span className="text-gray-400 text-sm mt-1 block">
-                        Manage your partners and sponsors
-                    </span>
                 </div>
 
                 <Link
@@ -198,7 +195,7 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                         <tr>
                             <th className="px-6 py-4 w-10">
                                 <button onClick={toggleSelectAll} className="flex items-center text-gray-400 hover:text-white transition-colors">
-                                    {selectedIds.length === paginatedPartners.length && paginatedPartners.length > 0 ? <CheckSquare size={18} className="text-teal-400" /> : <Square size={18} />}
+                                    {selectedIds.length === paginatedPartners.length && paginatedPartners.length > 0 ? <CheckSquare size={18} className="text-[var(--site-accent)]" /> : <Square size={18} />}
                                 </button>
                             </th>
                             <SortHeader label="Partner" columnKey="name" />
@@ -210,11 +207,11 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedPartners.length > 0 ? (
                             paginatedPartners.map((partner) => (
-                                <tr key={partner.id} className={`hover:bg-[var(--glass-border)] transition-colors ${selectedIds.includes(partner.id) ? "bg-teal-500/5" : ""}`}>
+                                <tr key={partner.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(partner.id) ? "bg-[var(--site-accent)]/5" : ""}`}>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => toggleSelect(partner.id)}
-                                            className={`flex items-center ${selectedIds.includes(partner.id) ? "text-teal-400" : "text-gray-400 hover:text-white"}`}
+                                            className={`flex items-center ${selectedIds.includes(partner.id) ? "text-[var(--site-accent)]" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"}`}
                                         >
                                             {selectedIds.includes(partner.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                                         </button>
@@ -234,7 +231,7 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                                         </div>
                                         <p className="font-semibold text-gray-900 dark:text-white">{partner.name}</p>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-teal-400 max-w-xs truncate">
+                                    <td className="px-6 py-4 text-sm text-[var(--site-accent)] max-w-xs truncate">
                                         {partner.url && (
                                             <a href={partner.url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
                                                 {partner.url}
@@ -246,15 +243,17 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                                         {formatDate(partner.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <Link href={`/admin/partners/${partner.id}`} className="text-sm text-teal-400 hover:text-teal-300 mr-3 font-medium transition-colors">Edit</Link>
+                                        <Link href={`/admin/partners/${partner.id}`} className="text-sm text-[var(--site-accent)] hover:underline mr-3 font-medium transition-colors">Edit</Link>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <Search size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Search size={24} className="opacity-50" />
+                                        </div>
                                         <p className="font-medium">No partners found</p>
                                     </div>
                                 </td>
@@ -276,6 +275,27 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                         >
                             Previous
                         </button>
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let p = i + 1;
+                                if (totalPages > 5 && currentPage > 3) {
+                                    p = currentPage - 2 + i;
+                                    if (p > totalPages) p = totalPages - (4 - i);
+                                }
+                                return (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                            }`}
+                                    >
+                                        {p}
+                                    </button>
+                                );
+                            })}
+                        </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages || totalPages === 0}

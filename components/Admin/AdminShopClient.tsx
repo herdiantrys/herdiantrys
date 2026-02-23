@@ -208,7 +208,7 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
             </div>
 
             {/* Table */}
-            <div className="glass rounded-2xl overflow-hidden overflow-x-auto border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl">
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -218,7 +218,7 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
                                     className="flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                                 >
                                     {paginatedItems.length > 0 && selectedIds.length === paginatedItems.length ? (
-                                        <CheckSquare size={18} className="text-teal-400" />
+                                        <CheckSquare size={18} className="text-[var(--site-accent)]" />
                                     ) : (
                                         <Square size={18} />
                                     )}
@@ -235,14 +235,14 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedItems.length > 0 ? (
                             paginatedItems.map((item: any) => (
-                                <tr key={item.id} className={`transition-colors ${selectedIds.includes(item.id) ? 'bg-teal-500/10 hover:bg-teal-500/20' : 'hover:bg-[var(--glass-border)]'}`}>
+                                <tr key={item.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-white/5 group ${selectedIds.includes(item.id) ? 'bg-[var(--site-accent)]/5' : ''}`}>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => handleSelectRow(item.id)}
                                             className="flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                                         >
                                             {selectedIds.includes(item.id) ? (
-                                                <CheckSquare size={18} className="text-teal-500" />
+                                                <CheckSquare size={18} className="text-[var(--site-accent)]" />
                                             ) : (
                                                 <Square size={18} />
                                             )}
@@ -295,10 +295,10 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={7} className="px-6 py-12 text-center text-[var(--glass-text-muted)]">
+                                <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--glass-border)] flex items-center justify-center mb-2">
-                                            <Package size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Package size={24} className="opacity-50" />
                                         </div>
                                         <p className="font-medium">No items found</p>
                                     </div>
@@ -327,7 +327,7 @@ export default function AdminShopClient({ items, currentUserId }: { items: any[]
                                     key={i + 1}
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === i + 1
-                                        ? "bg-teal-500 text-white shadow-lg shadow-teal-500/20"
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
                                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
                                         }`}
                                 >

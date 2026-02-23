@@ -288,6 +288,26 @@ model ShopItem {
   owners UserInventory[]
 }
 
+model AppColor {
+  id        String   @id @default(cuid())
+  name      String
+  hex       String
+  rgb       String
+  cmyk      String
+  family    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AppPalette {
+  id        String   @id @default(cuid())
+  name      String
+  colors    Json     // Array of HEX strings
+  tags      Json     // Array of tag strings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model UserInventory {
   id         String   @id @default(cuid())
   acquiredAt DateTime @default(now())

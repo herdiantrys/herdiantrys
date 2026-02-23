@@ -38,10 +38,24 @@ export default async function AppsPage({ params }: { params: Promise<{ lang: str
                         </Link>
                     </div>
 
-                    {/* Placeholder Cards */}
-                    {[1, 2].map((item) => (
+                    {/* Color Space Card */}
+                    <div className="bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-2xl p-8 border border-white/20 dark:border-white/10 shadow-lg flex flex-col items-center text-center group hover:-translate-y-1 transition-transform duration-300">
+                        <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl mb-6 shadow-lg shadow-teal-500/20 flex items-center justify-center text-white">
+                            <Sparkles size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-[var(--glass-text)] mb-2">Color Space</h3>
+                        <p className="text-sm text-[var(--glass-text-muted)] mb-6">
+                            A comprehensive database of colors for professional designers. Access HEX, RGB, and CMYK codes instantly.
+                        </p>
+                        <Link href="/apps/color-space" className="px-6 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold hover:shadow-lg hover:shadow-teal-500/25 transition-all">
+                            Open App
+                        </Link>
+                    </div>
+
+                    {/* Placeholder Card */}
+                    {[1].map((item) => (
                         <div key={item} className="bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-2xl p-8 border border-white/20 dark:border-white/10 shadow-lg flex flex-col items-center text-center opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
-                            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl mb-6 shadow-lg shadow-teal-500/20"></div>
+                            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mb-6 shadow-lg shadow-purple-500/20"></div>
                             <h3 className="text-xl font-bold text-[var(--glass-text)] mb-2">Coming Soon</h3>
                             <p className="text-sm text-[var(--glass-text-muted)] mb-6">
                                 More powerful tools are under development. Stay tuned for updates!

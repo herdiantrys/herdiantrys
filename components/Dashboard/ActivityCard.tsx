@@ -435,13 +435,13 @@ export default function ActivityCard({
                     {/* Repost Button */}
                     <button
                         onClick={handleRepost}
-                        disabled={isRepostPending || isOwnPost || isRepostContext}
-                        className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${(isOwnPost || isRepostContext) ? 'opacity-50 cursor-not-allowed' : ''} ${isReposted ? 'text-green-500' : 'text-[var(--glass-text-muted)] hover:text-green-500'}`}
-                        title={isOwnPost ? "Cannot repost your own post" : (isRepostContext ? "Cannot repost a repost" : undefined)}
+                        disabled={isRepostPending || isOwnPost || isRepostContext || currentUser?.status === "LIMITED"}
+                        className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-xs sm:text-sm transition-colors group/btn ${(isOwnPost || isRepostContext || currentUser?.status === "LIMITED") ? 'opacity-50 cursor-not-allowed' : ''} ${isReposted ? 'text-green-500' : 'text-[var(--glass-text-muted)] hover:text-green-500'}`}
+                        title={isOwnPost ? "Cannot repost your own post" : (isRepostContext ? "Cannot repost a repost" : (currentUser?.status === "LIMITED" ? "Reposting restricted" : undefined))}
                     >
-                        <Repeat size={18} className={`sm:w-4 sm:h-4 transition-transform ${isReposted ? 'rotate-180' : 'group-hover/btn:rotate-180'}`} />
+                        <Repeat size={18} className={`sm:w-4 sm:h-4 transition-transform ${isReposted ? 'rotate-180' : 'group-hover/btn:rotate-180'} ${currentUser?.status === "LIMITED" ? 'grayscale' : ''}`} />
                         <span className="font-medium">
-                            {repostsCount > 0 ? repostsCount : <span className="hidden sm:inline">{t.repost || "Repost"}</span>}
+                            {repostsCount > 0 ? repostsCount : <span className="hidden sm:inline">{currentUser?.status === "LIMITED" ? "Locked" : (t.repost || "Repost")}</span>}
                         </span>
                     </button>
                     <button
@@ -481,6 +481,7 @@ export default function ActivityCard({
                             currentUserBackground={currentUser?.equippedBackground}
                             currentUserProfileColor={currentUser?.profileColor}
                             currentUserFrameColor={currentUser?.frameColor}
+                            currentUserStatus={currentUser?.status}
                         />
                     </div>
                 )}

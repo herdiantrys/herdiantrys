@@ -81,6 +81,15 @@ export async function postComment(projectId: string, slug: string, text: string)
     }
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { status: true }
+        });
+
+        if (user?.status === "LIMITED") {
+            return { error: "Your account has limited posting privileges." };
+        }
+
         await prisma.comment.create({
             data: {
                 text,

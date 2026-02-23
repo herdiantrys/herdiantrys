@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useOptimistic, startTransition } from "rea
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 import { ProjectCard, Project } from "@/components/ProjectCard";
 import { ProjectModal } from "@/components/ProjectModal";
@@ -159,6 +160,17 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                         </div>
                     )
                 }
+
+                {/* View All Projects Button */}
+                <div className="mt-16 flex justify-center">
+                    <Link
+                        href="/projects"
+                        className="group flex items-center gap-2 px-8 py-4 rounded-full bg-[var(--site-accent)] text-[var(--site-button-text)] font-bold shadow-lg shadow-[var(--site-accent)]/30 hover:shadow-[var(--site-accent)]/50 hover:-translate-y-1 transition-all duration-300"
+                    >
+                        {dict.portfolio?.view_all || "View All Projects"}
+                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </div>
 
                 <AnimatePresence>
                     {selectedId && (

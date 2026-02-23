@@ -143,9 +143,6 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                         Testimonials
                     </h1>
-                    <span className="text-gray-400 text-sm mt-1 block">
-                        Manage what people say about you
-                    </span>
                 </div>
 
                 <Link
@@ -212,11 +209,11 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedTestimonials.length > 0 ? (
                             paginatedTestimonials.map((testimonial) => (
-                                <tr key={testimonial.id} className={`hover:bg-[var(--glass-border)] transition-colors ${selectedIds.includes(testimonial.id) ? "bg-teal-500/5" : ""}`}>
+                                <tr key={testimonial.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(testimonial.id) ? "bg-[var(--site-accent)]/5" : ""}`}>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => toggleSelect(testimonial.id)}
-                                            className={`flex items-center ${selectedIds.includes(testimonial.id) ? "text-teal-400" : "text-gray-400 hover:text-white"}`}
+                                            className={`flex items-center ${selectedIds.includes(testimonial.id) ? "text-[var(--site-accent)]" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"}`}
                                         >
                                             {selectedIds.includes(testimonial.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                                         </button>
@@ -254,9 +251,11 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <Search size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Search size={24} className="opacity-50" />
+                                        </div>
                                         <p className="font-medium">No testimonials found</p>
                                     </div>
                                 </td>
@@ -278,6 +277,27 @@ export default function AdminTestimonialsClient({ testimonials }: { testimonials
                         >
                             Previous
                         </button>
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let p = i + 1;
+                                if (totalPages > 5 && currentPage > 3) {
+                                    p = currentPage - 2 + i;
+                                    if (p > totalPages) p = totalPages - (4 - i);
+                                }
+                                return (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                            }`}
+                                    >
+                                        {p}
+                                    </button>
+                                );
+                            })}
+                        </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages || totalPages === 0}

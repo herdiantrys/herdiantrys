@@ -148,46 +148,69 @@ export default function AdminCategoriesClient({ initialCategories }: { initialCa
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCategories.map(category => (
-                    <div key={category.id} className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-teal-500 transition-colors">{category.title}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{category.slug}</p>
-                            </div>
-                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => handleOpenModal(category)}
-                                    className="p-2 rounded-lg text-gray-500 hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
-                                >
-                                    <Pencil size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(category.id, category._count.projects)}
-                                    disabled={loadingMap[category.id] || category._count.projects > 0}
-                                    className={`p-2 rounded-lg transition-colors ${category._count.projects > 0
-                                        ? "text-gray-300 cursor-not-allowed"
-                                        : "text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
-                                        }`}
-                                >
-                                    {loadingMap[category.id] ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 line-clamp-2 h-10">
-                            {category.description || "No description provided."}
-                        </p>
-
-                        <div className="flex items-center justify-between text-xs font-medium pt-4 border-t border-gray-100 dark:border-white/5">
-                            <span className="bg-gray-100 dark:bg-white/10 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
-                                {category._count.projects} Projects
-                            </span>
-                            {/* Potential status indicator or date here */}
-                        </div>
-                    </div>
-                ))}
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
+                <table className="w-full text-left min-w-[800px]">
+                    <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th className="px-6 py-4">Category Name</th>
+                            <th className="px-6 py-4">Slug</th>
+                            <th className="px-6 py-4">Projects Count</th>
+                            <th className="px-6 py-4">Description</th>
+                            <th className="px-6 py-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
+                        {filteredCategories.length > 0 ? (
+                            filteredCategories.map((category) => (
+                                <tr key={category.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                                    <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                                        {category.title}
+                                    </td>
+                                    <td className="px-6 py-4 font-mono text-xs text-gray-500 dark:text-gray-400">
+                                        {category.slug}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="bg-teal-500/10 text-teal-500 px-2 py-1 rounded-md text-xs font-bold">
+                                            {category._count.projects} Projects
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                                        {category.description || "-"}
+                                    </td>
+                                    <td className="px-6 py-4 flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleOpenModal(category)}
+                                            className="p-2 rounded-lg text-gray-500 hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
+                                        >
+                                            <Pencil size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(category.id, category._count.projects)}
+                                            disabled={loadingMap[category.id] || category._count.projects > 0}
+                                            className={`p-2 rounded-lg transition-colors ${category._count.projects > 0
+                                                ? "text-gray-300 cursor-not-allowed"
+                                                : "text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                }`}
+                                        >
+                                            {loadingMap[category.id] ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Layers size={24} className="opacity-50" />
+                                        </div>
+                                        <p className="font-medium">No categories found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
 
             {/* Create/Edit Modal */}

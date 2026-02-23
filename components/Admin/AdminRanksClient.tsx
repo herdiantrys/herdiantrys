@@ -227,7 +227,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
             </div>
 
             {/* Table */}
-            <div className="glass rounded-2xl overflow-hidden overflow-x-auto border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl">
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -242,7 +242,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {filteredAndSortedRanks.length > 0 ? (
                             filteredAndSortedRanks.map((rank) => (
-                                <tr key={rank.id} className="hover:bg-[var(--glass-border)] transition-colors">
+                                <tr key={rank.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-700/50 relative flex items-center justify-center">
                                             {rank.image ? (
@@ -282,10 +282,12 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-[var(--glass-text-muted)]">
+                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <Trophy size={32} className="opacity-20 mb-2" />
-                                        <p>No ranks found</p>
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Trophy size={24} className="opacity-50" />
+                                        </div>
+                                        <p className="font-medium">No ranks found</p>
                                     </div>
                                 </td>
                             </tr>

@@ -113,6 +113,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                 { name: dict.nav?.portfolio || "Portfolio", href: "/admin/content", icon: Layout },
                 { name: dict.nav?.services || "Services", href: "/admin/services", icon: Briefcase },
                 { name: dict.nav?.categories || "Categories", href: "/admin/categories", icon: Layers },
+                { name: dict.nav?.colors || "Colors", href: "/admin/colors", icon: Palette },
             ]
         },
         {
@@ -275,25 +276,8 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                     {[
                                         { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
                                         { name: dict.nav?.works || "Works", href: "/projects", icon: Briefcase },
-                                        { name: dict.nav?.about || "About", href: "/about", icon: User },
-                                        { name: dict.nav?.contact || "Contact", href: "/contact", icon: Mail },
-                                    ].map((item) => (
-                                        <SidebarLink
-                                            key={item.href}
-                                            item={item}
-                                            active={isActive(item.href)}
-                                            isExpanded={isExpanded}
-                                            setIsOpen={setIsOpen}
-                                            setIsCollapsed={setIsCollapsed}
-                                        />
-                                    ))}
-                                </SidebarSection>
-
-                                <SidebarSection label={dict.nav?.tools || "Tools"} isExpanded={isExpanded} show={true}>
-                                    {[
                                         { name: dict.nav?.shop || "Shop", href: "/shop", icon: ShoppingBag },
-                                        { name: dict.nav?.app_store || "App Store", href: "/apps", icon: Layout },
-                                        { name: dict.nav?.search || "Search", href: "/search", icon: Search },
+                                        { name: dict.nav?.app_store || "Apps", href: "/apps", icon: Layout },
                                     ].map((item) => (
                                         <SidebarLink
                                             key={item.href}

@@ -217,8 +217,8 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                     </div>
                 </div>
 
-                {/* Search and Filters Card md:flex-row */}
-                <div className="glass-liquid p-5 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-colors">
+                {/* Filters Box */}
+                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
 
                         {/* Search Input */}
@@ -229,10 +229,10 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                             <input
                                 id="user-search-input"
                                 type="text"
-                                placeholder="Search by name, email, or username..."
+                                placeholder="Search users..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-black/5 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-[#0A0D14]/80 focus:border-[var(--site-secondary)]/50 focus:shadow-[0_0_15px_color-mix(in_srgb,var(--site-secondary)_20%,transparent)] transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -248,7 +248,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                     id="user-role-filter"
                                     value={filterRole}
                                     onChange={(e) => setFilterRole(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-black/5 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 focus:shadow-[0_0_15px_color-mix(in_srgb,var(--site-secondary)_20%,transparent)] appearance-none cursor-pointer hover:bg-white dark:hover:bg-[#0A0D14]/80 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 >
                                     <option value="ALL">All Roles</option>
                                     <option value="USER">User</option>
@@ -269,7 +269,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                     id="user-status-filter"
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-black/5 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent-prev)]/50 focus:shadow-[0_0_15px_color-mix(in_srgb,var(--site-accent-prev)_20%,transparent)] appearance-none cursor-pointer hover:bg-white dark:hover:bg-[#0A0D14]/80 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent-prev)]/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 >
                                     <option value="ALL">All Status</option>
                                     <option value="ACTIVE">Active</option>
@@ -282,7 +282,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 </div>
                             </div>
 
-                            {/* Pagination Controls in Filter Box */}
+                            {/* Pagination Controls */}
                             <div className="relative w-full sm:w-32 group">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Show</span>
@@ -293,7 +293,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-black/5 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 focus:shadow-[0_0_15px_color-mix(in_srgb,var(--site-secondary)_20%,transparent)] appearance-none hover:bg-white dark:hover:bg-[#0A0D14]/80 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
 
@@ -301,12 +301,13 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                     </div>
                 </div>
 
+
                 {/* Bulk Actions (Only visible when items selected) - REMOVED INLINE */}
                 <div className="h-0"> {/* Kept for layout stability if needed, or remove */}
                 </div>
             </div>
 
-            <div className="glass-liquid rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-colors overflow-x-auto">
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -334,13 +335,13 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                 const canEditStatus = isEditable && !(isSuperAdmin && isSelf);
 
                                 return (
-                                    <tr key={user.id} className={`hover:bg-[var(--glass-border)] transition-colors group ${selectedIds.includes(user.id) ? "bg-[var(--site-accent)]/5" : ""} ${!isEditable ? "opacity-60" : ""}`}>
+                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(user.id) ? "bg-[var(--site-accent)]/5" : ""} ${!isEditable ? "opacity-60" : ""}`}>
                                         <td className="px-6 py-4">
                                             <button
                                                 id={`select-user-${user.id}`}
                                                 onClick={() => toggleSelect(user.id, user)}
                                                 disabled={!isEditable}
-                                                className={`flex items-center ${selectedIds.includes(user.id) ? "text-[var(--site-accent)]" : "text-[var(--glass-text-muted)] hover:text-white"} ${!isEditable ? "cursor-not-allowed opacity-50" : ""}`}
+                                                className={`flex items-center ${selectedIds.includes(user.id) ? "text-[var(--site-accent)]" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"} ${!isEditable ? "cursor-not-allowed opacity-50" : ""}`}
                                             >
                                                 {selectedIds.includes(user.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                                             </button>
@@ -409,13 +410,13 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                             })
                         ) : (
                             <tr>
-                                <td colSpan={7} className="px-6 py-12 text-center text-[var(--glass-text-muted)]">
+                                <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--glass-border)] flex items-center justify-center mb-2">
-                                            <Search size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Search size={24} className="opacity-50" />
                                         </div>
                                         <p className="font-medium">No users found</p>
-                                        <p className="text-xs">Try adjusting your search or filters</p>
+                                        <p className="text-xs">Try adjusting your filters</p>
                                     </div>
                                 </td>
                             </tr>
@@ -424,7 +425,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                 </table>
 
                 {/* Pagination Footer */}
-                <div className="px-6 py-4 border-t border-black/5 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+                <div className="px-6 py-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                         Showing <span className="font-bold text-gray-900 dark:text-white">{(currentPage - 1) * rowsPerPage + 1}</span> to <span className="font-bold text-gray-900 dark:text-white">{Math.min(currentPage * rowsPerPage, filteredAndSortedUsers.length)}</span> of <span className="font-bold text-gray-900 dark:text-white">{filteredAndSortedUsers.length}</span> users
                     </div>
@@ -450,7 +451,7 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                                         key={p}
                                         onClick={() => setCurrentPage(p)}
                                         className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-[var(--site-accent)] text-[var(--site-button-text)] shadow-[0_0_15px_color-mix(in_srgb,var(--site-secondary)_20%,transparent)]"
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
                                             : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
                                             }`}
                                     >
@@ -497,11 +498,11 @@ export default function AdminUsersClient({ users, currentUser }: { users: any[],
                         exit={{ y: 100, opacity: 0 }}
                         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
                     >
-                        <div className="glass-liquid border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-full px-6 py-3 flex items-center gap-6 backdrop-blur-xl">
+                        <div className="bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-full px-6 py-3 flex items-center gap-6 backdrop-blur-xl">
                             <div className="flex items-center gap-3 border-r border-white/10 pr-6">
                                 <span className="text-[var(--site-accent)] font-bold">{selectedIds.length}</span>
-                                <span className="text-[var(--glass-text-muted)] text-sm">Selected</span>
-                                <button onClick={() => setSelectedIds([])} className="bg-white/5 hover:bg-white/10 p-1 rounded-full transition-colors ml-2">
+                                <span className="text-gray-400 text-sm">Selected</span>
+                                <button onClick={() => setSelectedIds([])} className="bg-white/10 hover:bg-white/20 p-1 rounded-full transition-colors ml-2">
                                     <X size={14} className="text-white" />
                                 </button>
                             </div>

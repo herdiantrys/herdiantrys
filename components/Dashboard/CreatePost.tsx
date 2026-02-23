@@ -85,8 +85,11 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
         if (videoInputRef.current) videoInputRef.current.value = "";
     }
 
+    const isLimited = user?.status === "LIMITED";
+
     const handleSubmit = async () => {
         if (!text.trim() && !imageFile && !videoFile) return;
+        if (isLimited) return;
 
         setStatus('uploading');
         setProgress(0);
@@ -176,13 +179,20 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                             ref={textareaRef}
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            disabled={status !== 'idle'}
-                            placeholder={t.whats_on_your_mind || "What's on your mind?"}
+                            disabled={status !== 'idle' || isLimited}
+                            placeholder={isLimited ? (t.limited_account_notice || "Your account has limited posting privileges.") : (t.whats_on_your_mind || "What's on your mind?")}
                             className="w-full h-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-[var(--glass-text)] placeholder-[var(--glass-text-muted)] text-lg resize-none p-0 disabled:opacity-50"
                             rows={3}
                             style={{ overflow: 'hidden', minHeight: '120px' }}
                         />
                     </div>
+
+                    {isLimited && (
+                        <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                            <AlertCircle size={16} />
+                            {t.limited_account_hint || "You can still browse and like posts, but creating new content is restricted."}
+                        </div>
+                    )}
 
                     <AnimatePresence>
                         {imagePreview && (
@@ -272,45 +282,37 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                                 disabled={status !== 'idle'}
                             />
                             <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={!isLimited ? { scale: 1.1 } : {}}
+                                whileTap={!isLimited ? { scale: 0.9 } : {}}
                                 onClick={() => fileInputRef.current?.click()}
-                                disabled={status !== 'idle'}
-                                className="p-2.5 rounded-full hover:bg-[var(--site-secondary)]/10 text-[var(--site-secondary)]/80 hover:text-[var(--site-secondary)] transition-colors disabled:opacity-50"
-                                title="Add Image"
+                                disabled={status !== 'idle' || isLimited}
+                                className="p-2.5 rounded-full hover:bg-[var(--site-secondary)]/10 text-[var(--site-secondary)]/80 hover:text-[var(--site-secondary)] transition-colors disabled:opacity-50 disabled:grayscale"
+                                title={isLimited ? "Posting restricted" : "Add Image"}
                             >
                                 <ImageIcon size={22} />
                             </motion.button>
 
-                            <input
-                                type="file"
-                                ref={videoInputRef}
-                                onChange={handleVideoSelect}
-                                accept="video/*"
-                                className="hidden"
-                                disabled={status !== 'idle'}
-                            />
                             <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={!isLimited ? { scale: 1.1 } : {}}
+                                whileTap={!isLimited ? { scale: 0.9 } : {}}
                                 onClick={() => videoInputRef.current?.click()}
-                                disabled={status !== 'idle'}
-                                className="p-2.5 rounded-full hover:bg-purple-500/10 text-purple-500/80 hover:text-purple-500 transition-colors disabled:opacity-50"
-                                title="Add Video"
+                                disabled={status !== 'idle' || isLimited}
+                                className="p-2.5 rounded-full hover:bg-purple-500/10 text-purple-500/80 hover:text-purple-500 transition-colors disabled:opacity-50 disabled:grayscale"
+                                title={isLimited ? "Posting restricted" : "Add Video"}
                             >
                                 <Video size={22} />
                             </motion.button>
                         </div>
 
                         <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={!isLimited ? { scale: 1.02 } : {}}
+                            whileTap={!isLimited ? { scale: 0.98 } : {}}
                             onClick={handleSubmit}
-                            disabled={(!text.trim() && !imageFile && !videoFile) || status !== 'idle'}
+                            disabled={(!text.trim() && !imageFile && !videoFile) || status !== 'idle' || isLimited}
                             className={`
                                 relative px-6 py-2.5 rounded-xl font-medium text-white shadow-lg transition-all overflow-hidden flex items-center gap-2
                                 ${status === 'success' ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-site-accent-prev to-site-accent-next hover:opacity-90'}
-                                disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                                disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none ${isLimited ? 'grayscale opacity-70' : ''}
                             `}
                         >
                             <AnimatePresence mode="wait">
@@ -351,29 +353,31 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                             </AnimatePresence>
                         </motion.button>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
 
             {/* Success Overlay Flash */}
             <AnimatePresence>
-                {status === 'success' && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-green-500/10 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-3xl"
-                    >
+                {
+                    status === 'success' && (
                         <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 1.2, opacity: 0 }}
-                            className="bg-white dark:bg-black rounded-full p-4 shadow-2xl text-green-500"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-green-500/10 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-3xl"
                         >
-                            <CheckCircle2 size={48} />
+                            <motion.div
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 1.2, opacity: 0 }}
+                                className="bg-white dark:bg-black rounded-full p-4 shadow-2xl text-green-500"
+                            >
+                                <CheckCircle2 size={48} />
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+                    )
+                }
+            </AnimatePresence >
+        </div >
     );
 }

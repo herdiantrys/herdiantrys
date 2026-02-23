@@ -1,6 +1,6 @@
 
 import NextAuth, { DefaultSession } from "next-auth"
-import { Role } from "@prisma/client"
+import { Role, UserStatus } from "@prisma/client"
 
 declare module "next-auth" {
     /**
@@ -10,12 +10,14 @@ declare module "next-auth" {
         user: {
             /** The user's role. */
             role: Role
+            status: UserStatus
             language?: string
         } & DefaultSession["user"]
     }
 
     interface User {
         role: Role
+        status: UserStatus
         language?: string
     }
 }
@@ -23,6 +25,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
     interface JWT {
         role: Role
+        status: UserStatus
         language?: string
     }
 }

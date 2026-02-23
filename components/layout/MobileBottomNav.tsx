@@ -18,8 +18,8 @@ export default function MobileBottomNav({ user, dict }: { user: any; dict: any }
 
     const navItems: NavItem[] = [
         { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
-        { name: dict.nav?.search || "Search", href: "/search", icon: Search },
-        { name: dict.nav?.projects || "Projects", href: "/projects", icon: Briefcase },
+        { name: dict.nav?.projects || "Works", href: "/projects", icon: Briefcase },
+        { name: dict.nav?.shop || "Shop", href: "/shop", icon: ShoppingBag },
         { name: dict.nav?.profile || "Profile", href: user ? `/profile/${user.username || user.id}` : "/login", icon: User },
     ];
 

@@ -42,6 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           image: user.image,
           role: user.role, // Fix lint error
+          status: user.status,
         }
       }
     })
@@ -98,6 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role as any;
+        session.user.status = token.status as any;
         session.user.language = token.language as string || "en";
       }
       return session;
@@ -109,12 +111,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (dbUser) {
           token.sub = dbUser.id;
           token.role = dbUser.role;
+          token.status = dbUser.status; // Include status for social logins
           const prefs: any = dbUser.preferences || {};
           token.language = prefs.language || "en";
         }
       } else if (user) {
         token.sub = user.id;
         token.role = user.role;
+        token.status = user.status; // Include status for credentials login
         // Search user to get preferences since credentials login only returns basic fields via authorize
         const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
         if (dbUser) {

@@ -14,6 +14,14 @@ export const createPost = async (userId: string, formData: FormData, path: strin
         const audioFile = formData.get("audio") as File | null;
         const videoFile = formData.get("video") as File | null;
         const authorId = formData.get("authorId") as string || userId;
+        const author = await prisma.user.findUnique({
+            where: { id: authorId },
+            select: { status: true }
+        });
+
+        if (author?.status === "LIMITED") {
+            return serializeForClient({ success: false, error: "Your account has limited posting privileges." });
+        }
 
         let imageUrl = null;
         let videoUrl = null;

@@ -278,7 +278,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
             </div>
 
             {/* Table */}
-            <div className="glass rounded-2xl overflow-hidden overflow-x-auto border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl">
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -304,14 +304,14 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedPosts.length > 0 ? (
                             paginatedPosts.map((post: any) => (
-                                <tr key={post.id} className={`transition-colors ${selectedIds.includes(post.id) ? 'bg-teal-500/10 hover:bg-teal-500/20' : 'hover:bg-[var(--glass-border)]'}`}>
+                                <tr key={post.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-white/5 group ${selectedIds.includes(post.id) ? 'bg-[var(--site-accent)]/5' : ''}`}>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => handleSelectRow(post.id)}
                                             className="flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                                         >
                                             {selectedIds.includes(post.id) ? (
-                                                <CheckSquare size={18} className="text-teal-500" />
+                                                <CheckSquare size={18} className="text-[var(--site-accent)]" />
                                             ) : (
                                                 <Square size={18} />
                                             )}
@@ -388,11 +388,11 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-[var(--glass-text-muted)]">
                                     <div className="flex flex-col items-center gap-2">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--glass-border)] flex items-center justify-center mb-2">
-                                            <FileText size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <FileText size={24} className="opacity-50" />
                                         </div>
                                         <p className="font-medium">No posts found</p>
-                                        <p className="text-xs">Try adjusting your search or filters</p>
+                                        <p className="text-xs">Try adjusting your filters</p>
                                     </div>
                                 </td>
                             </tr>
@@ -425,7 +425,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         key={p}
                                         onClick={() => setCurrentPage(p)}
                                         className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-teal-500 text-white shadow-lg shadow-teal-500/20"
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
                                             : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
                                             }`}
                                     >

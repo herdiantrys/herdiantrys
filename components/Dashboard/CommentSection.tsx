@@ -19,9 +19,10 @@ interface CommentSectionProps {
     currentUserBackground?: string;
     currentUserProfileColor?: string;
     currentUserFrameColor?: string;
+    currentUserStatus?: string;
 }
 
-export default function CommentSection({ targetId, targetType, userId, currentUserImage, currentUserEffect, currentUserFrame, currentUserBackground, currentUserProfileColor, currentUserFrameColor }: CommentSectionProps) {
+export default function CommentSection({ targetId, targetType, userId, currentUserImage, currentUserEffect, currentUserFrame, currentUserBackground, currentUserProfileColor, currentUserFrameColor, currentUserStatus }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
@@ -39,7 +40,7 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() || currentUserStatus === "LIMITED") return;
 
         const tempId = `temp-${Date.now()}`;
         const tempComment: Comment = {
@@ -107,9 +108,9 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                         type="text"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..."
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-[var(--glass-text)] focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all pr-10"
-                        disabled={isSubmitting}
+                        placeholder={currentUserStatus === "LIMITED" ? "Commenting restricted" : "Write a comment..."}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-[var(--glass-text)] focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all pr-10 disabled:opacity-50"
+                        disabled={isSubmitting || currentUserStatus === "LIMITED"}
                     />
                     <button
                         type="submit"

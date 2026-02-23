@@ -331,7 +331,7 @@ export default function AdminNotificationsClient({
                                         onClick={() => handlePageChange(p)}
                                         disabled={isPending}
                                         className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === pagination.currentPage
-                                            ? "bg-[var(--site-accent)] text-white shadow-lg shadow-[var(--site-accent)]/30"
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
                                             : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
                                             }`}
                                     >

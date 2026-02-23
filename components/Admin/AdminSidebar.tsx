@@ -20,7 +20,8 @@ import {
     Layout,
     ChevronLeft,
     ChevronRight,
-    Trophy
+    Trophy,
+    Palette
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/lib/actions/contact.actions";
 import { useEffect, useState } from "react";
@@ -48,6 +49,7 @@ const menuGroups = [
             { name: "Posts", href: "/admin/posts", icon: FileText },
             { name: "Portfolio", href: "/admin/content", icon: Layout },
             { name: "Services", href: "/admin/services", icon: Briefcase },
+            { name: "Colors", href: "/admin/colors", icon: Palette },
         ]
     },
     {

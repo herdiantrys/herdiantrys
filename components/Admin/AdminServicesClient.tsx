@@ -144,9 +144,6 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                         Services
                     </h1>
-                    <span className="text-gray-400 text-sm mt-1 block">
-                        Manage your service offerings
-                    </span>
                 </div>
 
                 <Link
@@ -213,11 +210,11 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-700 dark:text-gray-300">
                         {paginatedServices.length > 0 ? (
                             paginatedServices.map((service) => (
-                                <tr key={service.id} className={`hover:bg-[var(--glass-border)] transition-colors ${selectedIds.includes(service.id) ? "bg-teal-500/5" : ""}`}>
+                                <tr key={service.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.includes(service.id) ? "bg-[var(--site-accent)]/5" : ""}`}>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => toggleSelect(service.id)}
-                                            className={`flex items-center ${selectedIds.includes(service.id) ? "text-teal-400" : "text-gray-400 hover:text-white"}`}
+                                            className={`flex items-center ${selectedIds.includes(service.id) ? "text-[var(--site-accent)]" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"}`}
                                         >
                                             {selectedIds.includes(service.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                                         </button>
@@ -253,9 +250,11 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div className="flex flex-col items-center gap-2">
-                                        <Search size={24} opacity={0.5} />
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                            <Search size={24} className="opacity-50" />
+                                        </div>
                                         <p className="font-medium">No services found</p>
                                     </div>
                                 </td>
@@ -277,6 +276,27 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                         >
                             Previous
                         </button>
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let p = i + 1;
+                                if (totalPages > 5 && currentPage > 3) {
+                                    p = currentPage - 2 + i;
+                                    if (p > totalPages) p = totalPages - (4 - i);
+                                }
+                                return (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                            }`}
+                                    >
+                                        {p}
+                                    </button>
+                                );
+                            })}
+                        </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages || totalPages === 0}

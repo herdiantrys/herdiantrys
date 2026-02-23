@@ -203,7 +203,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
 
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!session) {
+        if (!session || (session.user as any).status === "LIMITED") {
             router.push("/login");
             return;
         }
@@ -585,15 +585,15 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                 <textarea
                                                     value={commentText}
                                                     onChange={e => setCommentText(e.target.value)}
-                                                    placeholder={session ? "Write your thoughts..." : "Login to share your thoughts"}
-                                                    disabled={!session}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-[1.5rem] p-5 lg:p-6 text-white focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-black/40 focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all min-h-[90px] resize-y shadow-inner font-medium placeholder:text-gray-500 pr-16"
+                                                    placeholder={!session ? (dict.projects?.login_to_comment || "Login to share your thoughts") : ((session as any).user?.status === "LIMITED" ? (dict.projects?.commenting_restricted || "Commenting restricted") : (dict.projects?.write_thoughts || "Write your thoughts..."))}
+                                                    disabled={!session || (session as any).user?.status === "LIMITED"}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-[1.5rem] p-5 lg:p-6 text-white focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-black/40 focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all min-h-[90px] resize-y shadow-inner font-medium placeholder:text-gray-500 pr-16 disabled:opacity-50"
                                                     rows={1}
                                                 />
                                                 <button
                                                     type="submit"
-                                                    disabled={!commentText.trim() || isSubmittingComment}
-                                                    className="absolute right-4 bottom-4 p-3.5 rounded-xl bg-white/10 text-[var(--site-secondary)] border border-white/5 hover:bg-white/20 shadow-lg disabled:opacity-30 disabled:translate-y-2 disabled:hover:bg-white/10 transition-all hover:scale-105 active:scale-95 backdrop-blur-md"
+                                                    disabled={!commentText.trim() || isSubmittingComment || (session as any)?.user?.status === "LIMITED"}
+                                                    className="absolute right-4 bottom-4 p-3.5 rounded-xl bg-white/10 text-[var(--site-secondary)] border border-white/5 hover:bg-white/20 shadow-lg disabled:opacity-30 disabled:translate-y-2 disabled:hover:bg-white/10 transition-all hover:scale-105 active:scale-95 backdrop-blur-md disabled:grayscale"
                                                 >
                                                     <Send size={18} />
                                                 </button>

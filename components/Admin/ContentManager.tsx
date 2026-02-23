@@ -109,8 +109,8 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id
-                            ? "bg-teal-500 text-white shadow-lg shadow-teal-500/20"
-                            : "bg-[var(--glass-border)] text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-[var(--glass-border)]/80"
+                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                            : "bg-white/5 dark:bg-black/20 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/5"
                             }`}
                     >
                         <tab.icon size={16} />
@@ -119,7 +119,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                 ))}
             </div>
 
-            <div className="glass p-8 rounded-3xl border-[var(--glass-border)]">
+            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-8 rounded-3xl shadow-xl transition-colors">
                 {/* General Tab */}
                 {activeTab === "general" && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
@@ -412,7 +412,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg shadow-teal-500/20 hover:scale-[1.02] transition-transform flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-3 rounded-xl bg-[var(--site-button)] text-[var(--site-button-text)] font-bold shadow-lg shadow-[var(--site-accent)]/20 hover:scale-[1.02] transition-transform flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Save size={18} />
                         {loading ? "Saving..." : "Save Changes"}
