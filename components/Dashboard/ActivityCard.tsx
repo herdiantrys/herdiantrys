@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns";
 import { User, FileText, Edit, MessageSquare, Heart, Share2, Bookmark, BookmarkCheck, ArchiveX, MoreHorizontal, Repeat, Trophy } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
 import AvatarWithEffect from "../AvatarWithEffect";
 import {
     DropdownMenu,
@@ -220,7 +219,7 @@ export default function ActivityCard({
 
     return (
         <>
-            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg transition-transform hover:scale-[1.01] overflow-hidden">
+            <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md border border-black/5 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg transition-transform hover:scale-[1.01] overflow-hidden">
                 {/* Repost Header */}
                 <div className="flex items-center gap-2 mb-2 ml-14 sm:ml-20 text-[10px] sm:text-xs font-semibold text-[var(--glass-text-muted)]">
                     <Repeat size={12} className="sm:w-3.5 sm:h-3.5" />
@@ -230,7 +229,7 @@ export default function ActivityCard({
                 <div className="flex items-start gap-4 mb-4">
                     <Link href={`/profile/${displayActor.username}`} className="relative group cursor-pointer block shrink-0">
                         <AvatarWithEffect
-                            src={typeof displayActor.image === 'string' ? displayActor.image : (displayActor.image ? urlFor(displayActor.image).url() : undefined)}
+                            src={typeof displayActor.image === 'string' ? displayActor.image : (displayActor.image ? displayActor.image : undefined)}
                             alt={displayActor.name || "User"}
                             size={40}
                             effect={(displayActor as any).equippedEffect}
@@ -239,7 +238,7 @@ export default function ActivityCard({
                             profileColor={(displayActor as any).profileColor}
                             frameColor={(displayActor as any).frameColor}
                         />
-                        <div className="absolute -bottom-1 -right-1 p-0.5 sm:p-1 rounded-full bg-gray-900 border border-gray-700 text-white shadow-sm z-20">
+                        <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 p-1 rounded-full bg-white dark:bg-gray-900 border border-black/10 dark:border-gray-700 shadow-sm z-20 flex items-center justify-center">
                             {activity.type === 'new_user' && <User size={10} className="sm:w-3 sm:h-3 text-[var(--site-secondary)]" />}
                             {activity.type === 'new_project' && <FileText size={10} className="sm:w-3 sm:h-3 text-purple-400" />}
                             {activity.type === 'project_update' && <Edit size={10} className="sm:w-3 sm:h-3 text-blue-400" />}
@@ -315,9 +314,9 @@ export default function ActivityCard({
                     {activity.type === 'new_project' && (
                         <Link href={`/projects/${activity.details.slug}`} className="mt-2 block group cursor-pointer">
                             {activity.details.image && (
-                                <div className="relative w-full aspect-video sm:h-64 rounded-xl overflow-hidden mb-4 border border-white/10">
+                                <div className="relative w-full aspect-video sm:h-64 rounded-xl overflow-hidden mb-4 border border-black/5 dark:border-white/10">
                                     <Image
-                                        src={urlFor(activity.details.image).width(800).url()}
+                                        src={activity.details.image}
                                         alt={activity.details.title || "Project Image"}
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -366,9 +365,9 @@ export default function ActivityCard({
                                     </div>
                                 )}
                                 {activity.details.image && (
-                                    <div className="mt-3 rounded-xl overflow-hidden border border-white/10 bg-black/50">
+                                    <div className="mt-3 rounded-xl overflow-hidden border border-black/5 dark:border-white/10 bg-black/5 dark:bg-black/50">
                                         <Image
-                                            src={urlFor(activity.details.image).width(1200).url()}
+                                            src={activity.details.image}
                                             alt="Post Image"
                                             width={1200}
                                             height={800}
@@ -395,9 +394,9 @@ export default function ActivityCard({
                                     </div>
                                 )}
                                 {activity.details.image && (
-                                    <div className="mt-3 rounded-xl overflow-hidden border border-white/10 bg-black/50">
+                                    <div className="mt-3 rounded-xl overflow-hidden border border-black/5 dark:border-white/10 bg-black/5 dark:bg-black/50">
                                         <Image
-                                            src={urlFor(activity.details.image).width(1200).url()}
+                                            src={activity.details.image}
                                             alt="Post Image"
                                             width={1200}
                                             height={800}
@@ -411,7 +410,7 @@ export default function ActivityCard({
                 </div>
 
                 {/* Action Footer */}
-                <div className="mt-4 sm:ml-20 flex items-center justify-between sm:justify-start gap-1 sm:gap-6 border-t border-white/5 pt-3 overflow-x-auto scrollbar-hide">
+                <div className="mt-4 sm:ml-20 flex items-center justify-between sm:justify-start gap-1 sm:gap-6 border-t border-black/5 dark:border-white/5 pt-3 overflow-x-auto scrollbar-hide">
                     <button
                         onClick={handleLike}
                         disabled={isLikePending}

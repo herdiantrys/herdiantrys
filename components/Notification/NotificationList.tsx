@@ -27,7 +27,7 @@ export default function NotificationList({ initialNotifications, userId, dict }:
 
     if (notifications.length === 0) {
         return (
-            <div className="text-center py-12 text-[var(--glass-text-muted)]">
+            <div className="text-center py-12 text-slate-500 dark:text-[var(--glass-text-muted)]">
                 <p>{nm.no_notifications || "No notifications yet."}</p>
             </div>
         );

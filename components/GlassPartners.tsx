@@ -34,9 +34,14 @@ const GlassPartners = ({ partners, dict }: { partners: Partner[], dict: any }) =
                     }}
                 >
                     {extendedPartners.map((partner, index) => (
-                        <div
+                        <motion.div
                             key={`${partner.name}-${index}`}
-                            className="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity duration-300 cursor-default"
+                            variants={{
+                                hidden: { opacity: 0, scale: 0.8 },
+                                visible: { opacity: 0.6, scale: 1 }
+                            }}
+                            whileHover={{ opacity: 1, scale: 1.1 }}
+                            className="flex items-center gap-3 transition-opacity duration-300 cursor-default"
                         >
                             <div className="p-3 rounded-xl glass bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-md w-14 h-14 flex items-center justify-center relative">
                                 {partner.icon && (
@@ -61,7 +66,7 @@ const GlassPartners = ({ partners, dict }: { partners: Partner[], dict: any }) =
                             <span className="text-lg md:text-xl font-bold text-[var(--glass-text)] hidden md:block">
                                 {partner.name}
                             </span>
-                        </div>
+                        </motion.div>
                     ))}
                 </motion.div>
             </div>

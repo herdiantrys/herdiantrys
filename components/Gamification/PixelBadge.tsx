@@ -24,8 +24,8 @@ export default function PixelBadge({ badge, size = 'md' }: PixelBadgeProps) {
             <div
                 className={`
                     ${sizeClasses[size]} 
-                    bg-slate-800 relative flex items-center justify-center
-                    font-mono text-white cursor-default select-none
+                    bg-slate-200 dark:bg-slate-800 relative flex items-center justify-center
+                    font-mono text-slate-800 dark:text-white cursor-default select-none
                     transition-transform active:scale-95 active:translate-y-1
                 `}
                 style={{

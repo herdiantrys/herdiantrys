@@ -4,7 +4,6 @@ import WorksHero from "@/components/WorksHero";
 import { getDictionary } from "@/get-dictionary";
 import { auth } from "@/auth";
 
-import { urlFor } from "@/sanity/lib/image";
 
 export default async function ProjectsPage({ params }: { params: Promise<{ lang: string }> }) {
     const { lang: langParam } = await params;
@@ -25,7 +24,7 @@ export default async function ProjectsPage({ params }: { params: Promise<{ lang:
                 if (typeof randomProject.image === 'string') {
                     bgImage = randomProject.image;
                 } else if (randomProject.image && typeof randomProject.image === 'object' && (randomProject.image as any).asset) {
-                    bgImage = urlFor(randomProject.image).url();
+                    bgImage = randomProject.image;
                 } else if ((randomProject as any).imageUrl) {
                     bgImage = (randomProject as any).imageUrl;
                 }

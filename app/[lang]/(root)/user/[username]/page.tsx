@@ -1,4 +1,3 @@
-import { defineQuery } from "next-sanity";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";

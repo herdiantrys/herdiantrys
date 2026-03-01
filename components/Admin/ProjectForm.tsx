@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Save, Upload, User as UserIcon, Link as LinkIcon, FileText, Image as ImageIcon, Video, Tag, Folder, Star, X } from "lucide-react";
-import { createProject, updateProject, getCategories, getAuthors } from "@/lib/actions/project.actions";
+import { createProject, updateProject, getCategories, getAuthors, uploadProjectAsset } from "@/lib/actions/project.actions";
 
 interface ProjectFormProps {
     initialData?: any;
@@ -144,15 +144,11 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
         form.append("file", file);
         form.append("type", type);
 
-        const uploadPromise = fetch("/api/sanity/upload", {
-            method: "POST",
-            body: form,
-        }).then(async (res) => {
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || "Upload failed");
+        const uploadPromise = uploadProjectAsset(form).then((res) => {
+            if (!res.success) {
+                throw new Error(res.error || "Upload failed");
             }
-            return res.json();
+            return res;
         });
 
         toast.promise(uploadPromise, {
@@ -435,15 +431,11 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                                     form.append("file", file);
                                                     form.append("type", type);
 
-                                                    const uploadPromise = fetch("/api/sanity/upload", {
-                                                        method: "POST",
-                                                        body: form,
-                                                    }).then(async (res) => {
-                                                        if (!res.ok) {
-                                                            const error = await res.json();
-                                                            throw new Error(error.error || "Upload failed");
+                                                    const uploadPromise = uploadProjectAsset(form).then((res) => {
+                                                        if (!res.success) {
+                                                            throw new Error(res.error || "Upload failed");
                                                         }
-                                                        return res.json();
+                                                        return res;
                                                     });
 
                                                     toast.promise(uploadPromise, {

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { signIn, signOut } from "next-auth/react";
 import NotificationDropdown from "@/components/Notification/NotificationDropdown";
 import { usePathname, useRouter } from "next/navigation";
+import { ModeToggle } from "@/components/mode-toggle";
 
 type UserLike = {
     name?: string | null;
@@ -75,7 +76,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
     };
 
     return (
-        <header className="sticky top-0 z-30 h-20 w-full bg-white/50 dark:bg-black/20 backdrop-blur-2xl border-b border-white/20 dark:border-white/5 flex items-center justify-between px-6 md:px-8 transition-colors">
+        <header className="sticky top-0 z-30 h-20 w-full bg-white/75 dark:bg-black/20 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 flex items-center justify-between px-6 md:px-8 transition-colors">
             <div className="flex items-center gap-6">
                 {/* Mobile Menu Toggle */}
                 <button
@@ -111,12 +112,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
                 </div>
 
                 {/* Theme Toggle */}
-                <button
-                    onClick={handleThemeToggle}
-                    className="w-10 h-10 rounded-full bg-white/40 dark:bg-white/5 border border-white/20 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-105 transition-all shadow-sm"
-                >
-                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                </button>
+                <ModeToggle />
 
                 {/* Notifications */}
                 <NotificationDropdown
@@ -137,16 +133,20 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
                             className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full bg-white/40 dark:bg-white/5 border border-white/20 dark:border-white/10 hover:border-teal-500/30 transition-all hover:shadow-md group"
                         >
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-400 to-cyan-500 p-[2px] group-hover:rotate-12 transition-transform">
-                                <div className="w-full h-full rounded-full bg-white dark:bg-black overflow-hidden relative">
-                                    {user.image ? (
-                                        <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-teal-600 font-bold bg-teal-50">
-                                            {user.name?.[0]?.toUpperCase()}
-                                        </div>
-                                    )}
+                            <div className="relative">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-400 to-cyan-500 p-[2px] group-hover:rotate-12 transition-transform">
+                                    <div className="w-full h-full rounded-full bg-white dark:bg-black overflow-hidden relative">
+                                        {user.image ? (
+                                            <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-teal-600 font-bold bg-teal-50">
+                                                {user.name?.[0]?.toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+                                {/* Online Status Indicator */}
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#0a0a0a] rounded-full z-10 translate-x-1/4 translate-y-1/4" />
                             </div>
                             <div className="text-left hidden sm:block pr-2">
                                 <p className="text-xs font-bold text-gray-800 dark:text-white leading-tight">{user.name?.split(" ")[0]}</p>
@@ -162,7 +162,7 @@ export default function TopBar({ user, dict, onMenuClick }: TopBarProps) {
                                     exit={{ opacity: 0, y: 10, scale: 0.95, rotateX: 10 }}
                                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                     style={{ transformOrigin: "top right" }}
-                                    className="absolute right-0 mt-3 w-72 glass-liquid rounded-3xl shadow-2xl p-2 z-50 ring-1 ring-white/20 dark:ring-white/5"
+                                    className="absolute right-0 mt-3 w-72 glass-liquid backdrop-blur-3xl bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.3)] rounded-3xl p-2 z-50 ring-1 ring-white/10"
                                 >
                                     <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50/50 to-white/50 dark:from-white/5 dark:to-white/0 mb-2">
                                         <div className="flex items-center gap-3">

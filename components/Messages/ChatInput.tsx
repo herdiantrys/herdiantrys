@@ -13,16 +13,16 @@ interface ChatInputProps {
     placeholder?: string;
 }
 
-export default function ChatInput({ onSend, disabled, placeholder = "Type a message..." }: ChatInputProps) {
+export default function ChatInput({ onSend, disabled, placeholder = "Write a message..." }: ChatInputProps) {
     const [content, setContent] = useState("");
     const [isEmojiOpen, setIsEmojiOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [attachment, setAttachment] = useState<{ url: string; type: string; name: string } | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiRef = useRef<HTMLDivElement>(null);
 
-    // Close emoji picker when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (emojiRef.current && !emojiRef.current.contains(event.target as Node)) {
@@ -35,56 +35,39 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
 
     const handleSend = () => {
         if ((!content.trim() && !attachment) || disabled || isUploading) return;
-
-        // Pass attachment info if present
         (onSend as any)(content.trim(), attachment?.url, attachment?.type);
-
         setContent("");
         setAttachment(null);
         setIsEmojiOpen(false);
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("File size exceeds 5MB limit");
-            return;
-        }
-
+        if (file.size > 5 * 1024 * 1024) { toast.error("File size exceeds 5MB"); return; }
         setIsUploading(true);
         const formData = new FormData();
         formData.append("file", file);
-
         try {
             const res = await uploadMessageAttachment(formData);
             if (res.success) {
-                setAttachment({
-                    url: res.url!,
-                    type: res.type!,
-                    name: file.name
-                });
-                toast.success("File uploaded successfully");
+                setAttachment({ url: res.url!, type: res.type!, name: file.name });
+                toast.success("File uploaded");
             } else {
-                toast.error(res.error || "Failed to upload file");
+                toast.error(res.error || "Failed to upload");
             }
-        } catch (error) {
-            toast.error("An error occurred during upload");
-        } finally {
+        } catch { toast.error("Upload error"); }
+        finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
     };
 
-    // Auto-resize textarea
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
@@ -92,71 +75,53 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
         }
     }, [content]);
 
-    const [isDragging, setIsDragging] = useState(false);
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleDrop = async (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file) {
-            const mockEvent = { target: { files: [file] } } as any;
-            handleFileChange(mockEvent);
-        }
-    };
+    const canSend = (content.trim() || attachment) && !disabled && !isUploading;
 
     return (
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md relative shrink-0">
-            {/* Uploading State Overlay */}
+        <div className="px-4 py-3 border-t border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)]/95 backdrop-blur-md shrink-0 relative">
+
+            {/* Uploading overlay */}
             <AnimatePresence>
                 {isUploading && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center gap-3"
+                        className="absolute inset-0 z-50 bg-[var(--site-sidebar-bg)]/80 backdrop-blur-sm flex items-center justify-center gap-2.5 rounded-b-2xl"
                     >
-                        <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs font-bold text-teal-600 tracking-wider uppercase">Uploading File...</span>
+                        <div className="w-4 h-4 border-2 border-[var(--site-secondary)] border-t-transparent rounded-full animate-spin" />
+                        <span className="text-xs font-bold text-[var(--site-secondary)] tracking-wider uppercase">Uploading...</span>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Attachment Preview */}
+            {/* Attachment preview */}
             <AnimatePresence>
                 {attachment && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute bottom-full left-4 mb-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl flex items-center gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-black/50 min-w-[200px]"
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                        className="absolute bottom-full left-4 mb-2 p-3 bg-[var(--site-sidebar-bg)] border border-[var(--site-sidebar-border)] rounded-2xl flex items-center gap-3 shadow-xl shadow-black/15 min-w-[200px]"
                     >
                         {attachment.type === "image" ? (
-                            <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-[var(--site-sidebar-border)]">
                                 <img src={attachment.url} alt="Preview" className="w-full h-full object-cover" />
                             </div>
                         ) : (
-                            <div className="w-14 h-14 rounded-xl bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center border border-teal-100 dark:border-teal-500/20 text-teal-600 dark:text-teal-400">
-                                <FileIcon size={24} />
+                            <div className="w-12 h-12 rounded-xl bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 flex items-center justify-center text-[var(--site-secondary)]">
+                                <FileIcon size={20} />
                             </div>
                         )}
                         <div className="flex-1 min-w-0 pr-6">
-                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">{attachment.name}</p>
-                            <p className="text-[10px] text-teal-600 dark:text-teal-400 font-bold uppercase tracking-widest">{attachment.type}</p>
+                            <p className="text-xs font-bold text-[var(--glass-text)] truncate">{attachment.name}</p>
+                            <p className="text-[10px] text-[var(--site-secondary)] font-semibold uppercase tracking-wider">{attachment.type}</p>
                         </div>
                         <button
                             onClick={() => setAttachment(null)}
-                            className="absolute top-2 right-2 p-1.5 bg-gray-100 dark:bg-gray-900 hover:bg-red-50 dark:hover:bg-red-500/20 hover:text-red-500 dark:hover:text-red-400 rounded-full transition-all text-gray-500 dark:text-gray-400"
+                            className="absolute top-2 right-2 p-1 bg-[var(--site-sidebar-active)] hover:bg-red-500/10 hover:text-red-500 rounded-full transition-all text-[var(--glass-text-muted)]"
                         >
-                            <X size={14} />
+                            <X size={12} />
                         </button>
                     </motion.div>
                 )}
@@ -167,9 +132,9 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
                 {isEmojiOpen && (
                     <motion.div
                         ref={emojiRef}
-                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        initial={{ opacity: 0, scale: 0.9, y: 8 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 8 }}
                         className="absolute bottom-full right-4 mb-2 z-50 origin-bottom-right"
                     >
                         <EmojiPicker onSelect={(emoji: string) => {
@@ -179,13 +144,20 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
                 )}
             </AnimatePresence>
 
+            {/* Input row */}
             <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`relative flex items-end gap-2 max-w-4xl mx-auto rounded-3xl border transition-all duration-300 p-2 shadow-sm
-                    ${isDragging ? "border-teal-500 bg-teal-50 dark:bg-teal-500/10 scale-[1.02]" : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus-within:bg-white dark:focus-within:bg-gray-800 focus-within:ring-4 focus-within:ring-teal-500/10 dark:focus-within:ring-teal-500/20 focus-within:border-teal-500/50 dark:focus-within:border-teal-500/50"}
-                `}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={async (e) => {
+                    e.preventDefault(); setIsDragging(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleFileChange({ target: { files: [file] } } as any);
+                }}
+                className={`relative flex items-end gap-2 rounded-2xl border transition-all duration-200 p-2
+                    ${isDragging
+                        ? "border-[var(--site-secondary)]/50 bg-[var(--site-secondary)]/5 scale-[1.01]"
+                        : "border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] focus-within:border-[var(--site-secondary)]/35 focus-within:ring-2 focus-within:ring-[var(--site-secondary)]/10"
+                    }`}
             >
                 <input
                     type="file"
@@ -195,15 +167,21 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
                     accept="image/*,.pdf,.doc,.docx,.txt"
                 />
 
-                <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading || disabled}
-                    className={`p-2.5 rounded-full transition-all ${isUploading ? "animate-pulse text-teal-500" : "text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700"}`}
-                    title="Attach File"
-                >
-                    <Paperclip size={20} />
-                </button>
+                {/* Tools */}
+                <div className="flex gap-0.5 pl-1 pb-0.5 shrink-0 text-[var(--glass-text-muted)]/40">
+                    <motion.button
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading || disabled}
+                        className="p-1.5 hover:text-[var(--glass-text)] hover:bg-[var(--site-sidebar-border)]/40 rounded-lg transition-all"
+                        title="Attach file"
+                    >
+                        <Paperclip size={17} />
+                    </motion.button>
+                </div>
 
+                {/* Textarea */}
                 <textarea
                     ref={textareaRef}
                     value={content}
@@ -211,29 +189,51 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
                     onKeyDown={handleKeyDown}
                     placeholder={isDragging ? "Drop your file here..." : placeholder}
                     rows={1}
-                    className="flex-1 min-h-[44px] bg-transparent border-none outline-none resize-none py-3 px-2 text-[15px] text-gray-800 dark:text-gray-200 font-medium placeholder:text-gray-400 dark:placeholder:text-gray-500 max-h-[120px] custom-scrollbar"
+                    className="flex-1 min-h-[40px] max-h-[120px] bg-transparent border-none outline-none resize-none py-2.5 px-1 text-[14px] text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/35 font-normal leading-relaxed scrollbar-thin scrollbar-thumb-[var(--site-sidebar-border)]"
                     disabled={disabled || isUploading}
                 />
 
-                <div className="flex items-center gap-1.5 p-0.5">
-                    <button
+                {/* Right actions */}
+                <div className="flex items-center gap-1 pb-0.5 pr-0.5 shrink-0">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => setIsEmojiOpen(!isEmojiOpen)}
-                        className={`p-2 rounded-full transition-all ${isEmojiOpen ? "text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10" : "text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700"}`}
-                    >
-                        <Smile size={20} />
-                    </button>
-                    <button
-                        onClick={handleSend}
-                        disabled={(!content.trim() && !attachment) || disabled || isUploading}
-                        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-md ${((content.trim() || attachment) && !disabled && !isUploading)
-                            ? "bg-teal-500 text-white shadow-teal-500/25 active:scale-95"
-                            : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 shadow-none"
+                        className={`p-1.5 rounded-lg transition-all ${isEmojiOpen
+                            ? "text-[var(--site-secondary)] bg-[var(--site-secondary)]/10"
+                            : "text-[var(--glass-text-muted)]/40 hover:text-[var(--glass-text)] hover:bg-[var(--site-sidebar-border)]/40"
                             }`}
                     >
-                        <Send size={18} className="translate-x-0.5" />
-                    </button>
+                        <Smile size={17} />
+                    </motion.button>
+
+                    <AnimatePresence mode="wait">
+                        <motion.button
+                            key={canSend ? "send-active" : "send-idle"}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                            whileHover={canSend ? { scale: 1.08 } : {}}
+                            whileTap={canSend ? { scale: 0.92 } : {}}
+                            onClick={handleSend}
+                            disabled={!canSend}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
+                                ${canSend
+                                    ? "bg-[var(--site-accent)] text-white shadow-lg shadow-[var(--site-accent)]/30 hover:opacity-90"
+                                    : "bg-[var(--site-sidebar-border)]/40 text-[var(--glass-text-muted)]/30 cursor-not-allowed"
+                                }`}
+                        >
+                            <Send size={16} className={canSend ? "translate-x-0.5" : ""} />
+                        </motion.button>
+                    </AnimatePresence>
                 </div>
             </div>
+
+            {/* Hint */}
+            <p className="text-[10px] text-[var(--glass-text-muted)]/25 text-center mt-1.5 font-medium">
+                Enter to send · Shift+Enter for new line
+            </p>
         </div>
     );
 }

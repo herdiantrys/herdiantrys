@@ -38,6 +38,7 @@ export async function createCategory(data: { title: string; description?: string
         });
 
         revalidatePath("/admin/categories");
+        revalidatePath("/admin/projects/categories");
         revalidatePath("/admin/projects");
         return { success: true, data: category };
     } catch (error: any) {
@@ -67,6 +68,7 @@ export async function updateCategory(id: string, data: { title: string; descript
         });
 
         revalidatePath("/admin/categories");
+        revalidatePath("/admin/projects/categories");
         revalidatePath("/admin/projects");
         return { success: true, data: category };
     } catch (error: any) {
@@ -89,6 +91,7 @@ export async function deleteCategory(id: string) {
         });
 
         revalidatePath("/admin/categories");
+        revalidatePath("/admin/projects/categories");
         revalidatePath("/admin/projects");
         return { success: true };
     } catch (error: any) {

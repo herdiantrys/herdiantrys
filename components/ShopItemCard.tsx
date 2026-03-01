@@ -76,8 +76,8 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             whileHover={{ y: -5 }}
             className={`group relative flex flex-col h-full rounded-2xl border transition-all duration-500 overflow-hidden
                 ${optimisticOwned
-                    ? "bg-white/10 border-site-secondary/30 shadow-[0_0_20px_var(--site-secondary)]/10"
-                    : "bg-white/[0.03] border-white/10 hover:border-purple-500/40 hover:bg-white/5 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+                    ? "bg-[var(--glass-bg)] border-[var(--site-secondary)]/30 shadow-[0_8px_32px_rgba(0,0,0,0.05)] shadow-[var(--site-secondary)]/10"
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:border-purple-500/40 hover:bg-[var(--site-sidebar-bg)]/80 hover:shadow-[0_8px_32px_rgba(168,85,247,0.12)]"
                 }`}
         >
             {/* Glossy Reflection Effect */}
@@ -92,8 +92,8 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             <div className="relative z-10 p-4 flex justify-between items-start">
                 <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border backdrop-blur-md
                     ${optimisticOwned
-                        ? 'bg-site-secondary/10 border-site-secondary/20 text-site-secondary'
-                        : 'bg-white/5 border-white/10 text-[var(--glass-text-muted)] group-hover:text-purple-400 group-hover:border-purple-500/30'
+                        ? 'bg-[var(--site-secondary)]/10 border-[var(--site-secondary)]/20 text-[var(--site-secondary)]'
+                        : 'bg-[var(--site-sidebar-active)]/50 border-[var(--site-sidebar-border)] text-[var(--glass-text-muted)] group-hover:text-purple-400 group-hover:border-purple-500/30'
                     }`}>
                     {itemTypeLabel}
                 </div>
@@ -110,7 +110,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             <div className="relative px-6 pb-6 flex items-center justify-center">
                 <div className="w-full aspect-square relative flex items-center justify-center">
                     {/* Inner Circle Base */}
-                    <div className="absolute w-32 h-32 rounded-full border border-white/5 bg-black/40 backdrop-blur-md shadow-inner" />
+                    <div className="absolute w-32 h-32 rounded-full border border-[var(--glass-border)] bg-[var(--site-sidebar-active)]/80 dark:bg-black/40 backdrop-blur-md shadow-inner" />
 
                     {/* Pulse Effect */}
                     <AnimatePresence>
@@ -127,7 +127,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                     <div className={`absolute w-[100px] h-[100px] rounded-full p-[3px] transition-all duration-500
                         ${optimisticOwned ? 'bg-gradient-to-tr ' + item.value : 'bg-white/5 group-hover:bg-gradient-to-tr group-hover:rotate-45 ' + item.value}
                     `}>
-                        <div className="w-full h-full bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
+                        <div className="w-full h-full bg-[var(--site-sidebar-bg)]/90 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
                             {/* Avatar Silhouette */}
                             <div className="relative z-10 flex flex-col items-center opacity-30 group-hover:opacity-50 transition-opacity">
                                 <span className="text-[10px] font-black tracking-widest text-white/50">BIO-DATA</span>
@@ -157,7 +157,7 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
             {/* Content Section */}
             <div className="relative z-10 px-6 pb-6 flex flex-col flex-1">
                 <div className="mb-4">
-                    <h3 className="text-lg font-bold text-white mb-1.5 line-clamp-1 group-hover:text-purple-400 transition-colors">
+                    <h3 className="text-lg font-bold text-[var(--glass-text)] mb-1.5 line-clamp-1 group-hover:text-purple-400 transition-colors">
                         {item.name}
                     </h3>
                     <p className="text-[13px] text-[var(--glass-text-muted)] leading-relaxed line-clamp-2 h-[40px]">
@@ -216,8 +216,8 @@ export default function ShopItemCard({ item, userPoints, isOwned, userId, userna
                             disabled={(!canAfford && item.type !== 'SAAS_TEMPLATE') || isLoading}
                             className={`relative w-full h-11 rounded-xl font-black text-sm tracking-widest overflow-hidden transition-all duration-300 active:scale-[0.98]
                                 ${(canAfford || item.type === 'SAAS_TEMPLATE')
-                                    ? "bg-white text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                                    : "bg-white/5 text-white/20 cursor-not-allowed"
+                                    ? "bg-[var(--glass-text)] text-[var(--site-sidebar-bg)] hover:shadow-xl dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:opacity-90"
+                                    : "bg-[var(--glass-text)]/5 text-[var(--glass-text)]/20 cursor-not-allowed"
                                 }`}
                         >
                             {isLoading ? (

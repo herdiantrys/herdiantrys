@@ -107,7 +107,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
         variants={navVariants}
         initial="hidden"
         animate={hidden ? "hidden" : "visible"}
-        className="fixed inset-x-0 top-0 z-50 mx-auto w-full backdrop-blur-xl bg-white/60 dark:bg-neutral-900/60 border-b border-black/5 dark:border-white/10"
+        className="fixed inset-x-0 top-0 z-50 mx-auto w-full backdrop-blur-xl bg-white/75 dark:bg-neutral-900/60 border-b border-black/5 dark:border-white/10"
         role="navigation"
         aria-label="Primary"
       >
@@ -196,7 +196,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: prefersReducedMotion ? 0 : 0.28 }}
-            className="fixed right-0 top-0 z-50 h-full w-[84%] max-w-sm overflow-y-auto border-l border-white/10 bg-white/80 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80"
+            className="fixed right-0 top-0 z-50 h-full w-[84%] max-w-sm overflow-y-auto border-l border-black/5 bg-white/85 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80"
             aria-label="Mobile navigation"
           >
             <div className="flex items-center justify-between">
@@ -238,9 +238,9 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <button
                 onClick={() => signIn("google")}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-violet-500 px-4 py-2 text-sm font-semibold text-black shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/30"
-                >
+              >
                 Login
-                </button>
+              </button>
             </div>
           </motion.aside>
         )}

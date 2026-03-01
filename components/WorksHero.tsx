@@ -35,8 +35,8 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     />
                 ) : (
                     <>
-                        <div className="absolute top-[-20%] left-0 w-[500px] h-[500px] bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                        <div className="absolute top-[-20%] left-0 w-[500px] h-[500px] bg-[var(--site-secondary)]/10 dark:bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[var(--site-secondary)]/10 dark:bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
                     </>
                 )}
                 <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 brightness-100 contrast-150"></div>
@@ -49,10 +49,10 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass bg-white/5 border border-[var(--site-secondary)]/30 text-[var(--site-secondary)] mb-6"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 text-[var(--site-secondary)] mb-6 shadow-sm"
                 >
                     <Sparkles size={16} />
-                    <span className="text-sm font-medium tracking-wide uppercase">
+                    <span className="text-sm font-bold tracking-wide uppercase">
                         {projectCount} Featured Projects
                     </span>
                 </motion.div>
@@ -61,7 +61,7 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
-                    className="text-5xl md:text-7xl font-bold mb-6 text-white text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] via-white to-[var(--site-secondary)]"
+                    className="text-5xl md:text-7xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] via-[var(--glass-text)] to-[var(--site-secondary)]"
                 >
                     {dict.portfolio.title}
                 </motion.h1>

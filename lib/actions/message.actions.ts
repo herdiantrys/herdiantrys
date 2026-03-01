@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 
 /**
  * Fetch all conversations for the current logged-in user.
@@ -210,14 +210,11 @@ export async function uploadMessageAttachment(formData: FormData) {
         const isImage = file.type.startsWith("image/");
         const assetType = isImage ? "image" : "file";
 
-        const asset = await writeClient.assets.upload(assetType, file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "messages");
 
         return {
             success: true,
-            url: asset.url,
+            url,
             type: assetType
         };
     } catch (error) {

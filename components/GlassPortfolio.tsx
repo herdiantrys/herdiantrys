@@ -80,9 +80,9 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                                 setActiveCategory(category);
                                 setCurrentPage(1);
                             }}
-                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
-                                ? "bg-[var(--glass-text)] text-[var(--background)] border-[var(--glass-text)] shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                                : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] border-[var(--glass-border)] hover:border-[var(--glass-text)]"
+                            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 border ${activeCategory === category
+                                ? "bg-[var(--site-button)] text-[var(--site-button-text)] border-[var(--site-button)] shadow-[0_4px_20px_rgba(20,184,166,0.3)] scale-105"
+                                : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] border-[var(--glass-border)] hover:border-[var(--glass-text)] bg-[var(--glass-bg)]/50 shadow-sm hover:shadow-md"
                                 }`}
                         >
                             {category === "all" ? dict.portfolio.all : category as string}
@@ -93,10 +93,21 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`${activeCategory}-${effectivePage}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-10%" }}
+                        variants={{
+                            hidden: { opacity: 0, y: 20 },
+                            visible: {
+                                opacity: 1,
+                                y: 0,
+                                transition: {
+                                    duration: 0.3,
+                                    staggerChildren: 0.1
+                                }
+                            },
+                        }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
                         className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
                     >
                         {paginatedProjects.length > 0 ? (
@@ -104,11 +115,13 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                                 <motion.div
                                     key={project.id}
                                     variants={{
-                                        hidden: { opacity: 0, y: 20 },
-                                        show: {
+                                        hidden: { opacity: 0, y: 30, scale: 0.98, filter: "blur(8px)" },
+                                        visible: {
                                             opacity: 1,
                                             y: 0,
-                                            transition: { type: "spring", bounce: 0.2 }
+                                            scale: 1,
+                                            filter: "blur(0px)",
+                                            transition: { type: "spring", bounce: 0.2, duration: 1.2 }
                                         }
                                     }}
                                     className="break-inside-avoid mb-6"
@@ -134,7 +147,7 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="p-3 rounded-full glass hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white"
+                                className="p-3 rounded-full glass hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[var(--glass-text)] border-[var(--glass-border)] shadow-sm"
                             >
                                 <ChevronLeft size={24} />
                             </button>
@@ -144,9 +157,9 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                                     <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${effectivePage === page
-                                            ? "bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-secondary)]/30"
-                                            : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/10"
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${effectivePage === page
+                                            ? "bg-[var(--site-secondary)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-secondary)]/30 scale-110"
+                                            : "glass text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/20 border-[var(--glass-border)]"
                                             }`}
                                     >
                                         {page}
@@ -157,7 +170,7 @@ const GlassPortfolio = ({ projects, dict }: { projects: Project[], dict: any }) 
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="p-3 rounded-full glass hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white"
+                                className="p-3 rounded-full glass hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[var(--glass-text)] border-[var(--glass-border)] shadow-sm"
                             >
                                 <ChevronRight size={24} />
                             </button>

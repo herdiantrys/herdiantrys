@@ -23,7 +23,6 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
     const [loading, setLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Polling interval ref
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const fetchConvs = useCallback(async () => {
@@ -38,44 +37,36 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
         const res = await getMessages(id);
         if (res.success) {
             setMessages(res.messages || []);
-            // Mark as read when opening a conversation
             await markAsRead(id);
         }
         if (!silent) setLoading(false);
     }, []);
 
-    // Initial load and periodic refresh of conversations
     useEffect(() => {
         if (!isOpen) return;
         fetchConvs();
-        const interval = setInterval(fetchConvs, 10000); // Poll conversations list every 10s
+        const interval = setInterval(fetchConvs, 10000);
         return () => clearInterval(interval);
     }, [isOpen, fetchConvs]);
 
-    // Polling messages for active conversation
     useEffect(() => {
         if (!activeConvId || !isOpen) {
             if (pollingRef.current) clearInterval(pollingRef.current);
             return;
         }
-
-        // Silent poll messages every 3 seconds for a "live" feel
         pollingRef.current = setInterval(() => {
             fetchMsgs(activeConvId, true);
         }, 3000);
-
         return () => {
             if (pollingRef.current) clearInterval(pollingRef.current);
         };
     }, [activeConvId, isOpen, fetchMsgs]);
 
-    // Handle selecting a conversation
     const handleSelectConversation = useCallback(async (id: string | null, recipientId?: string) => {
         if (id) {
             setActiveConvId(id);
             fetchMsgs(id);
         } else if (recipientId) {
-            // Try to find a conversation with this recipient first
             const existing = conversations.find(c =>
                 c.participants.some((p: any) => p.id === recipientId)
             );
@@ -83,14 +74,12 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                 setActiveConvId(existing.id);
                 fetchMsgs(existing.id);
             } else {
-                // Pre-select a "new" conversation state (handle in UI)
                 setActiveConvId(`new-${recipientId}`);
                 setMessages([]);
             }
         }
     }, [conversations, fetchMsgs]);
 
-    // Listen for custom event to open chat
     useEffect(() => {
         const handleOpenDM = (e: any) => {
             const { recipientId } = e.detail;
@@ -103,7 +92,6 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
         return () => window.removeEventListener('open-direct-message' as any, handleOpenDM);
     }, [onOpen, handleSelectConversation]);
 
-    // Handle sending a message
     const handleSendMessage = async (content: string, attachment?: string, attachmentType?: string) => {
         if (!activeConvId) return;
 
@@ -120,7 +108,6 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
             recipientId = recipient.id;
         }
 
-        // Optimistic update
         const tempId = `temp-${Date.now()}`;
         const newMessage = {
             id: tempId,
@@ -129,7 +116,7 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
             attachmentType,
             createdAt: new Date().toISOString(),
             senderId: currentUserId,
-            sender: { id: currentUserId } // Minimal for UI
+            sender: { id: currentUserId }
         };
         setMessages(prev => [...prev, newMessage]);
 
@@ -138,12 +125,11 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
             toast.error("Failed to send message");
             setMessages(prev => prev.filter(m => m.id !== tempId));
         } else {
-            // Replace temp message with real one
             setMessages(prev => prev.map(m => m.id === tempId ? res.message : m));
             if (isNew) {
                 setActiveConvId(res.conversationId);
             }
-            fetchConvs(); // Refresh list to update preview
+            fetchConvs();
         }
     };
 
@@ -155,50 +141,61 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: "100%", scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, y: "100%" }}
+            exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{
-                duration: 0.4,
-                ease: [0.4, 0, 0.2, 1],
-                layout: {
-                    duration: 0.4,
-                    ease: [0.4, 0, 0.2, 1]
-                }
+                duration: 0.35,
+                ease: [0.32, 0.72, 0, 1],
+                layout: { duration: 0.35, ease: [0.32, 0.72, 0, 1] }
             }}
-            style={{ willChange: "transform, opacity, width, height" }}
-            className={`fixed bottom-4 right-4 z-[200] flex flex-col bg-white dark:bg-gray-900 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-black/50 overflow-hidden border border-gray-200 dark:border-gray-800 rounded-2xl
-                ${isExpanded ? "top-4 left-4" : "w-[90vw] md:w-[900px] h-[70vh]"}
+            style={{ willChange: "transform, opacity" }}
+            className={`fixed bottom-4 right-4 z-[200] flex flex-col overflow-hidden
+                bg-[var(--site-sidebar-bg)] border border-[var(--site-sidebar-border)]
+                shadow-2xl shadow-black/20 rounded-2xl
+                ${isExpanded ? "top-4 left-4" : "w-[92vw] md:w-[860px] h-[70vh]"}
             `}
         >
-            {/* Header / Toolbar */}
-            <div className="flex items-center justify-between p-4 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 shrink-0">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
-                        <MessageCircle size={18} />
+            {/* ─── Header ─── */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] backdrop-blur-md shrink-0">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--site-secondary)]/10 flex items-center justify-center text-[var(--site-secondary)]">
+                        <MessageCircle size={17} />
                     </div>
-                    <span className="font-bold tracking-tight text-gray-900 dark:text-gray-100">Messaging Hub</span>
+                    <div>
+                        <span className="font-bold text-sm text-[var(--glass-text)] tracking-tight">Messaging Hub</span>
+                        {conversations.length > 0 && (
+                            <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--site-secondary)]/10 text-[var(--site-secondary)]">
+                                {conversations.length}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <button
+                <div className="flex items-center gap-1">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="p-2 hover:bg-gray-200/50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-200"
+                        className="p-2 hover:bg-[var(--site-sidebar-active)] rounded-xl transition-colors text-[var(--glass-text-muted)] hover:text-[var(--glass-text)]"
                     >
-                        {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-                    </button>
-                    <button
+                        {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={onClose}
-                        className="p-2 hover:bg-red-50 dark:hover:bg-red-500/20 focus:outline-none rounded-lg transition-colors text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+                        className="p-2 hover:bg-red-500/10 rounded-xl transition-colors text-[var(--glass-text-muted)] hover:text-red-500"
                     >
-                        <X size={18} />
-                    </button>
+                        <X size={16} />
+                    </motion.button>
                 </div>
             </div>
 
-            <div className="flex-1 flex min-h-0 divide-x divide-gray-100 dark:divide-gray-800">
+            {/* ─── Body ─── */}
+            <div className="flex-1 flex min-h-0 divide-x divide-[var(--site-sidebar-border)]">
                 {/* Conversations Sidebar */}
-                <div className={`${activeConvId ? "hidden md:flex" : "flex w-full"} md:w-80 shrink-0`}>
+                <div className={`${activeConvId ? "hidden md:flex" : "flex w-full"} md:w-[280px] shrink-0`}>
                     <ConversationList
                         conversations={conversations}
                         activeId={activeConvId || undefined}
@@ -211,13 +208,13 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                 <div className={`flex-1 flex flex-col min-w-0 ${!activeConvId ? "hidden md:flex" : "flex"}`}>
                     {activeConvId ? (
                         <>
-                            {/* Back button for mobile */}
-                            <div className="md:hidden p-2 border-b border-gray-100 dark:border-gray-800">
+                            {/* Mobile back */}
+                            <div className="md:hidden p-2 border-b border-[var(--site-sidebar-border)]">
                                 <button
                                     onClick={() => setActiveConvId(null)}
-                                    className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 p-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg flex items-center gap-2"
+                                    className="text-xs font-bold uppercase tracking-widest text-[var(--glass-text-muted)] p-2 hover:bg-[var(--site-sidebar-active)] rounded-lg flex items-center gap-2 transition-colors"
                                 >
-                                    ← Back to chats
+                                    ← Back
                                 </button>
                             </div>
                             <ChatWindow
@@ -229,13 +226,23 @@ export default function MessageCenter({ currentUserId, isOpen = false, onClose, 
                             <ChatInput onSend={handleSendMessage} />
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gray-50/30 dark:bg-gray-900/50">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500/10 dark:from-teal-500/20 via-transparent to-transparent flex items-center justify-center mb-6">
-                                <MessageCircle size={48} className="text-teal-500/50 dark:text-teal-500/60" />
-                            </div>
-                            <h4 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Select a conversation</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Pick a chat from the left or visit someone's profile to start a new direct message.</p>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex-1 flex flex-col items-center justify-center p-12 text-center"
+                        >
+                            <motion.div
+                                animate={{ y: [0, -6, 0] }}
+                                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-20 h-20 rounded-2xl bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 flex items-center justify-center mb-5"
+                            >
+                                <MessageCircle size={36} className="text-[var(--site-secondary)]/60" />
+                            </motion.div>
+                            <h4 className="text-base font-bold mb-2 text-[var(--glass-text)]">Select a conversation</h4>
+                            <p className="text-sm text-[var(--glass-text-muted)] max-w-xs">
+                                Pick a chat from the left or visit someone's profile to start a new direct message.
+                            </p>
+                        </motion.div>
                     )}
                 </div>
             </div>

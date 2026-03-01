@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Briefcase, GraduationCap } from "lucide-react";
 import { PortableText } from "@portabletext/react";
-import { urlFor } from "@/sanity/lib/image";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { formatDate } from "@/lib/utils";
 
@@ -32,6 +31,12 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
         { name: "Desain UI/UX", proficiency: 90 },
     ];
 
+    const getImageUrl = (image: any) => {
+        if (!image) return null;
+        if (typeof image === 'string') return image;
+        return image.asset?.url || image.url || null;
+    };
+
     return (
         <section className="py-20 relative z-10">
             <div className="container mx-auto px-4">
@@ -58,17 +63,29 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     {/* Left Column: Image & Skills */}
                     <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-10%" }}
+                        variants={{
+                            hidden: { opacity: 0, x: -30, filter: "blur(10px)" },
+                            visible: {
+                                opacity: 1,
+                                x: 0,
+                                filter: "blur(0px)",
+                                transition: {
+                                    duration: 1.2,
+                                    ease: [0.22, 1, 0.36, 1],
+                                    staggerChildren: 0.1
+                                }
+                            }
+                        }}
                         className="lg:col-span-4 space-y-8"
                     >
                         {/* Profile Image Card */}
-                        <div className="glass p-4 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] relative group overflow-hidden">
+                        <div className="glass p-4 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] relative group overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             <div className="aspect-[3/4] rounded-2xl overflow-hidden relative">
                                 <img
-                                    src={profile?.aboutImage ? urlFor(profile.aboutImage).url() : (profile?.profileImage ? urlFor(profile.profileImage).url() : "/placeholder-user.jpg")}
+                                    src={getImageUrl(profile?.aboutImage) || getImageUrl(profile?.profileImage) || "/placeholder-user.jpg"}
                                     alt={profile?.fullName || "Profile"}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
@@ -81,7 +98,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                         </div>
 
                         {/* Skills */}
-                        <div className="glass p-8 rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl">
+                        <div className="glass p-8 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             <h3 className="text-xl font-bold text-[var(--glass-text)] mb-6">{dict.about.skills_title}</h3>
                             <div className="space-y-6">
                                 {skills.map((skill: any, index: number) => (
@@ -108,22 +125,41 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                     {/* Right Column: Bio & Experience */}
                     <div className="lg:col-span-8">
                         <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: "-10%" }}
+                            variants={{
+                                hidden: { opacity: 0, y: 30, filter: "blur(10px)" },
+                                visible: {
+                                    opacity: 1,
+                                    y: 0,
+                                    filter: "blur(0px)",
+                                    transition: {
+                                        duration: 1.2,
+                                        ease: [0.22, 1, 0.36, 1],
+                                        staggerChildren: 0.1
+                                    }
+                                }
+                            }}
                         >
                             {/* Desktop Stats */}
                             <div className="hidden md:grid grid-cols-4 gap-4 mb-12">
                                 {stats.map((stat, index) => (
-                                    <div key={index} className="glass p-6 rounded-2xl border-[var(--glass-border)] bg-[var(--glass-bg)]/30 text-center hover:bg-[var(--glass-bg)]/50 transition-colors">
+                                    <motion.div
+                                        key={index}
+                                        variants={{
+                                            hidden: { opacity: 0, y: 20, scale: 0.9 },
+                                            visible: { opacity: 1, y: 0, scale: 1 }
+                                        }}
+                                        className="glass p-6 rounded-2xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)]/30 text-center hover:bg-[var(--glass-bg)]/50 transition-all hover:scale-105 shadow-sm hover:shadow-md"
+                                    >
                                         <span className="block text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] to-[var(--site-secondary)] mb-2">
                                             {stat.value}
                                         </span>
                                         <span className="text-xs text-[var(--glass-text-muted)] uppercase tracking-wider font-semibold">
                                             {stat.label}
                                         </span>
-                                    </div>
+                                    </motion.div>
                                 ))}
                             </div>
 
@@ -178,8 +214,15 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                             const end = exp.isCurrent ? dict.about.present : exp.endDate ? formatDate(exp.endDate) : '';
 
                                             return (
-                                                <div key={index} className="relative pl-8 group">
-                                                    <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[var(--site-secondary)] shadow-[0_0_10px_var(--site-secondary)]/50 group-hover:scale-150 transition-transform" />
+                                                <motion.div
+                                                    key={index}
+                                                    variants={{
+                                                        hidden: { opacity: 0, x: -20, filter: "blur(5px)" },
+                                                        visible: { opacity: 1, x: 0, filter: "blur(0px)" }
+                                                    }}
+                                                    className="relative pl-8 group"
+                                                >
+                                                    <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[var(--site-secondary)] shadow-[0_0_15px_var(--site-secondary)] group-hover:scale-150 transition-transform" />
 
                                                     <h4 className="text-lg font-bold text-[var(--glass-text)] group-hover:text-[var(--site-secondary)] transition-colors">{exp.position}</h4>
                                                     <p className="text-sm font-medium text-[var(--glass-text-muted)] mb-2">{exp.company} • {start} - {end}</p>
@@ -194,7 +237,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                                             )}
                                                         </div>
                                                     )}
-                                                </div>
+                                                </motion.div>
                                             );
                                         })}
                                     </div>
@@ -214,7 +257,14 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                             const end = edu.endDate ? formatDate(edu.endDate) : dict.about.present;
 
                                             return (
-                                                <div key={index} className="relative pl-8 group">
+                                                <motion.div
+                                                    key={index}
+                                                    variants={{
+                                                        hidden: { opacity: 0, x: -20, filter: "blur(5px)" },
+                                                        visible: { opacity: 1, x: 0, filter: "blur(0px)" }
+                                                    }}
+                                                    className="relative pl-8 group"
+                                                >
                                                     <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[var(--site-secondary)] shadow-[0_0_10px_var(--site-secondary)]/50 group-hover:scale-150 transition-transform" />
 
                                                     <h4 className="text-lg font-bold text-[var(--glass-text)] group-hover:text-[var(--site-secondary)] transition-colors">{edu.degree}</h4>
@@ -230,7 +280,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                                             )}
                                                         </div>
                                                     )}
-                                                </div>
+                                                </motion.div>
                                             );
                                         })}
                                     </div>

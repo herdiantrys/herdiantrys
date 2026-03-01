@@ -148,8 +148,12 @@ const ParticleWave = () => {
             const cols = Math.floor(canvas.width / spacing);
             const rows = Math.floor(canvas.height / spacing);
 
+            // Fetch current theme colors dynamically for Light Mode
+            const rootStyle = getComputedStyle(document.documentElement);
+            const secondaryColor = rootStyle.getPropertyValue('--site-secondary').trim() || "#ffffff";
+
             // Use opaque colors as base
-            const color = theme === "dark" ? "#ffffff" : "#0096D1"; // Darker purple for light mode
+            const color = theme === "dark" ? "#ffffff" : secondaryColor;
 
             for (let i = 0; i < cols; i++) {
                 for (let j = 0; j < rows; j++) {

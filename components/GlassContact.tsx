@@ -54,7 +54,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="space-y-8"
                     >
-                        <div className="glass p-8 rounded-2xl border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xs">
+                        <div className="glass p-8 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">{dict.contact.contact_info}</h3>
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4 group">
@@ -89,7 +89,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                             </div>
                         </div>
 
-                        <div className="glass bg-[var(--glass-bg)] p-8 rounded-2xl border-[var(--glass-border)] backdrop-blur-xs">
+                        <div className="glass bg-[var(--glass-bg)] p-8 rounded-3xl border-white/60 dark:border-[var(--glass-border)] backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             <h3 className="text-2xl font-bold text-[var(--glass-text)] mb-6">{dict.contact.follow_me}</h3>
                             <div className="flex gap-4 flex-wrap">
                                 {socialLinks.map((social: any, index: number) => (
@@ -133,7 +133,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                 }
                             }}
                             id="contact-form"
-                            className="glass p-8 rounded-2xl border-[var(--glass-border)] space-y-6 backdrop-blur-xs relative overflow-hidden"
+                            className="glass p-8 rounded-3xl border-white/60 dark:border-[var(--glass-border)] space-y-6 backdrop-blur-md relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none"
                         >
                             <AnimatePresence>
                                 {success && (
@@ -164,7 +164,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                     name="name"
                                     type="text"
                                     required
-                                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all"
+                                    className="w-full bg-[var(--glass-bg)]/50 border border-white/40 dark:border-[var(--glass-border)] rounded-xl px-4 py-4 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-[var(--site-secondary)] focus:bg-white/80 dark:focus:bg-[var(--glass-border)] transition-all shadow-sm"
                                     placeholder={dict.contact.form.name_placeholder}
                                 />
                             </div>
@@ -174,7 +174,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all"
+                                    className="w-full bg-[var(--glass-bg)]/50 border border-white/40 dark:border-[var(--glass-border)] rounded-xl px-4 py-4 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-[var(--site-secondary)] focus:bg-white/80 dark:focus:bg-[var(--glass-border)] transition-all shadow-sm"
                                     placeholder={dict.contact.form.email_placeholder}
                                 />
                             </div>
@@ -184,7 +184,7 @@ const GlassContact = ({ profile, dict }: { profile: any, dict: any }) => {
                                     name="message"
                                     rows={4}
                                     required
-                                    className="w-full bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl px-4 py-3 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-teal-500 focus:bg-[var(--glass-border)] transition-all resize-none"
+                                    className="w-full bg-[var(--glass-bg)]/50 border border-white/40 dark:border-[var(--glass-border)] rounded-xl px-4 py-4 text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)]/50 focus:outline-none focus:border-[var(--site-secondary)] focus:bg-white/80 dark:focus:bg-[var(--glass-border)] transition-all resize-none shadow-sm"
                                     placeholder={dict.contact.form.message_placeholder}
                                 />
                             </div>

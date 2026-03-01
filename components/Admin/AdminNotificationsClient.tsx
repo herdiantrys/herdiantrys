@@ -11,6 +11,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatDate } from "@/lib/utils";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 interface Notification {
     id: string;
@@ -142,7 +143,7 @@ export default function AdminNotificationsClient({
     return (
         <div className="relative">
             {/* Toolbar */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors mb-6">
+            <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors mb-6">
                 <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full lg:max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -153,7 +154,7 @@ export default function AdminNotificationsClient({
                             placeholder="Search user..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/40 dark:focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                         />
                     </div>
 
@@ -166,7 +167,7 @@ export default function AdminNotificationsClient({
                             <select
                                 value={filterType}
                                 onChange={(e) => setFilterType(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                             >
                                 <option value="ALL">All Types</option>
                                 <option value="like_post">Likes</option>
@@ -181,7 +182,7 @@ export default function AdminNotificationsClient({
                             <select
                                 value={filterRead}
                                 onChange={(e) => setFilterRead(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                             >
                                 <option value="ALL">All Status</option>
                                 <option value="READ">Read</option>
@@ -197,7 +198,7 @@ export default function AdminNotificationsClient({
                             <select
                                 value={rowsPerPage}
                                 onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                             >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
@@ -210,7 +211,7 @@ export default function AdminNotificationsClient({
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto relative min-h-[400px]">
+            <div className="bg-white/90 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 rounded-2xl overflow-hidden shadow-md dark:shadow-xl transition-colors overflow-x-auto relative min-h-[400px]">
                 {isPending && (
                     <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center">
                         <Loader2 className="animate-spin text-[var(--site-accent)]" size={32} />
@@ -252,7 +253,7 @@ export default function AdminNotificationsClient({
                                             <div className="flex items-center gap-1.5" title={`From: ${notification.sender.username}`}>
                                                 {notification.sender.image ? (
                                                     <div className="w-6 h-6 rounded-full overflow-hidden relative border border-gray-200 dark:border-white/10">
-                                                        <Image src={notification.sender.image} alt="S" fill className="object-cover" />
+                                                        <img src={notification.sender.image} alt="S" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                     </div>
                                                 ) : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />}
                                                 <span className="text-xs font-medium max-w-[80px] truncate">{notification.sender.username}</span>
@@ -262,7 +263,7 @@ export default function AdminNotificationsClient({
                                             <div className="flex items-center gap-1.5" title={`To: ${notification.recipient.username}`}>
                                                 {notification.recipient.image ? (
                                                     <div className="w-6 h-6 rounded-full overflow-hidden relative border border-gray-200 dark:border-white/10">
-                                                        <Image src={notification.recipient.image} alt="R" fill className="object-cover" />
+                                                        <img src={notification.recipient.image} alt="R" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                     </div>
                                                 ) : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />}
                                                 <span className="text-xs font-medium max-w-[80px] truncate">{notification.recipient.username}</span>
@@ -317,28 +318,19 @@ export default function AdminNotificationsClient({
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                                let p = i + 1;
-                                if (pagination.totalPages > 5) {
-                                    if (pagination.currentPage > 3) p = pagination.currentPage - 2 + i;
-                                    if (p > pagination.totalPages) p = pagination.totalPages - (4 - i);
-                                }
-                                if (p < 1 || p > pagination.totalPages) return null;
-
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => handlePageChange(p)}
-                                        disabled={isPending}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === pagination.currentPage
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(pagination.currentPage, pagination.totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => handlePageChange(p)}
+                                    disabled={isPending}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === pagination.currentPage
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => handlePageChange(pagination.currentPage + 1)}

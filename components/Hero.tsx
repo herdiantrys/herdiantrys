@@ -4,7 +4,6 @@ import NextImage from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { urlFor } from "@/sanity/lib/image";
 
 export default function HeroSection({ profile, dict }: { profile: any, dict: any }) {
   const [index, setIndex] = useState(0);
@@ -41,6 +40,12 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
     return () => clearInterval(interval);
   }, [roles.length]);
 
+  const getImageUrl = (image: any) => {
+    if (!image) return null;
+    if (typeof image === 'string') return image;
+    return image.asset?.url || image.url || null;
+  };
+
   return (
     <section ref={containerRef} className="relative min-h-screen flex flex-col-reverse lg:block dark:text-white overflow-hidden mt-[-64px] pt-40 lg:pt-48">
       <div className="relative z-10 container mx-auto px-6 lg:px-10 flex flex-col justify-center lg:grid lg:grid-cols-2 gap-12 items-center text-center lg:text-left min-h-[50vh] lg:min-h-[calc(100vh-300px)]">
@@ -53,7 +58,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full glass-liquid text-[var(--site-secondary)] dark:text-[var(--site-secondary)] mb-6 font-semibold shadow-[0_0_20px_var(--site-secondary)]"
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-full glass-liquid text-[var(--site-secondary)] dark:text-[var(--site-secondary)] mb-6 font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_var(--site-secondary)] border-white/50"
           >
             <Sparkles size={16} className="animate-pulse" />
             <span className="text-sm font-medium tracking-wide uppercase">{dict.hero.creative_role}</span>
@@ -110,7 +115,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             </button>
             <button
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 glass-liquid text-[var(--glass-text)] font-semibold hover:scale-105 hover:bg-white/40 dark:hover:bg-black/50 transition-all duration-300"
+              className="px-8 py-4 glass-liquid text-[var(--glass-text)] font-semibold hover:scale-105 hover:bg-white/60 dark:hover:bg-black/50 transition-all duration-300 shadow-sm hover:shadow-md"
             >
               {dict.hero.contact_me}
             </button>
@@ -128,22 +133,22 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
           {/* Animated outline box behind image */}
           <motion.div
             style={{ rotate: rotateOutline }}
-            className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-[var(--site-secondary)]/50 bg-white/5 backdrop-blur-sm"
+            className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-[var(--site-secondary)]/50 bg-white/10 dark:bg-white/5 backdrop-blur-sm shadow-xl shadow-[var(--site-secondary)]/20 dark:shadow-none"
           ></motion.div>
 
           {profile?.bannerImage ? (
             <NextImage
               id="hero-banner"
-              src={profile.bannerImage}
+              src={getImageUrl(profile.bannerImage)!}
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
               className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
               priority
             />
-          ) : profile?.profileImage ? (
+          ) : getImageUrl(profile?.profileImage) ? (
             <NextImage
-              src={urlFor(profile.profileImage).url()}
+              src={getImageUrl(profile.profileImage)!}
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
@@ -164,7 +169,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
       </motion.div>
 
       {/* 3/4 background */}
-      <div className="absolute top-0 bottom-0 right-0 w-[45%] bg-gradient-to-b from-[var(--site-secondary)]/50 to-transparent rounded-l-full hidden lg:block pointer-events-none"></div>
+      <div className="absolute top-0 bottom-0 right-0 w-[45%] bg-gradient-to-b from-[var(--site-secondary)]/30 dark:from-[var(--site-secondary)]/50 to-transparent rounded-l-full hidden lg:block pointer-events-none -z-10"></div>
 
     </section>
   );

@@ -80,27 +80,24 @@ export const updateSiteContent = async (data: any) => {
 };
 
 // Reuse image upload logic but target SiteContent
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 
 export const uploadSiteImage = async (type: "profile" | "banner", formData: FormData) => {
     try {
         const file = formData.get("image") as File;
         if (!file) return { success: false, error: "No file uploaded" };
 
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "site_content");
 
         const field = type === "profile" ? "profileImage" : "bannerImage";
 
         await prisma.siteContent.update({
             where: { id: "main" },
-            data: { [field]: asset.url }
+            data: { [field]: url }
         });
 
         revalidatePath("/");
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: url };
     } catch (error) {
         console.error(`Error uploading site ${type} image:`, error);
         return { success: false, error: "Upload failed" };

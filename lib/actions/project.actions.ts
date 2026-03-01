@@ -4,7 +4,7 @@ import { ProjectType, ProjectStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 
 // Get all potential authors (users)
 export async function getAuthors() {
@@ -153,12 +153,9 @@ export async function uploadProjectAsset(formData: FormData) {
 
         if (!file) return { success: false, error: "No file uploaded" };
 
-        const asset = await writeClient.assets.upload(type === "image" ? "image" : "file", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, type === "image" ? "project_images" : "project_files");
 
-        return { success: true, url: asset.url, assetId: asset._id };
+        return { success: true, url: url, assetId: url }; // Return url as assetId for backward compatibility
     } catch (error: any) {
         console.error("Upload project asset error:", error);
         return { success: false, error: error.message || "Upload failed" };

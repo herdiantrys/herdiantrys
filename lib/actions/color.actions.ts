@@ -144,10 +144,34 @@ export async function deleteAppPalette(id: string) {
             where: { id },
         });
         revalidatePath("/apps/color-space");
-        revalidatePath("/admin/colors");
+        revalidatePath("/admin/color-palettes");
         return { success: true };
     } catch (error: any) {
         console.error("Error deleting palette:", error);
         return { success: false, error: "Failed to delete palette" };
+    }
+}
+
+export async function updateAppPalette(id: string, data: { name: string; colors: string; tags: string }) {
+    try {
+        const session = await auth();
+        if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+            return { success: false, error: "Unauthorized to update palettes" };
+        }
+
+        const palette = await prisma.appPalette.update({
+            where: { id },
+            data: {
+                name: data.name,
+                colors: JSON.parse(data.colors),
+                tags: JSON.parse(data.tags),
+            },
+        });
+        revalidatePath("/apps/color-space");
+        revalidatePath("/admin/color-palettes");
+        return { success: true, data: palette };
+    } catch (error: any) {
+        console.error("Error updating palette:", error);
+        return { success: false, error: "Failed to update palette! Make sure colors/tags are valid JSON strings." };
     }
 }

@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { getUserByEmail } from "@/lib/actions/user.actions";
-import { urlFor } from "@/sanity/lib/image";
 import Shell from "./layout/Shell";
 
 export default async function AppLayoutAdapter({
@@ -22,12 +21,8 @@ export default async function AppLayoutAdapter({
     let resolvedImage = null;
     if (userData) {
         if (userData.profileImage) {
-            try {
-                resolvedImage = urlFor(userData.profileImage).width(100).url();
-            } catch (error) {
-                // If urlFor fails (e.g. not a Sanity asset), fallback to the raw URL
-                resolvedImage = userData.imageURL || userData.profileImage?.asset?.url;
-            }
+            // Fallback to the raw URL or asset URL
+            resolvedImage = userData.imageURL || userData.profileImage?.asset?.url || userData.profileImage;
         } else {
             resolvedImage = userData.imageURL;
         }

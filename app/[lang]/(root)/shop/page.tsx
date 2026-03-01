@@ -3,10 +3,7 @@ import { Sparkles, ShoppingBag, Coins } from "lucide-react";
 import { getShopItems, seedShopItems } from "@/lib/actions/shop.actions";
 import { auth } from "@/auth";
 import { getUserByEmail } from "@/lib/actions/user.actions";
-import { client } from "@/sanity/lib/client";
-import { defineQuery } from "next-sanity";
 import ShopGrid from "@/components/Shop/ShopGrid";
-
 export default async function ShopPage({
     params,
     searchParams
@@ -53,15 +50,15 @@ export default async function ShopPage({
         <main className="min-h-screen pt-28 pb-12 relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-amber-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-amber-500/10 dark:bg-amber-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass bg-white/5 border border-purple-500/30 text-purple-400 mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 text-[var(--site-secondary)] mb-6 shadow-sm">
                         <ShoppingBag size={16} />
-                        <span className="text-sm font-medium tracking-wide uppercase">{dict.shop.profile_shop}</span>
+                        <span className="text-sm font-bold tracking-wide uppercase">{dict.shop.profile_shop}</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-400">
                         {dict.shop.customize_look}

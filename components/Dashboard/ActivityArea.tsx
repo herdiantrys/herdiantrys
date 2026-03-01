@@ -128,7 +128,7 @@ export default function ActivityArea({
                             onClick={() => handleTabChange(tab.id as any)}
                             className={`relative group flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-3 min-w-[90px] sm:min-w-auto rounded-t-xl sm:rounded-t-2xl text-xs sm:text-sm font-medium transition-all duration-200 ease-out whitespace-nowrap backdrop-blur-xl
                                 ${isActive
-                                    ? "bg-white/80 dark:bg-black/40 text-[var(--site-secondary)] border-t border-x border-white/40 dark:border-white/10 mb-[-1px] pb-3 sm:pb-4 z-30 shadow-sm dark:shadow-none"
+                                    ? "bg-white/90 dark:bg-black/40 text-[var(--site-secondary)] border-t border-x border-black/5 dark:border-white/10 mb-[-1px] pb-3 sm:pb-4 z-30 shadow-sm dark:shadow-none"
                                     : "bg-transparent text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-black/5 dark:hover:border-white/5 mb-0 pb-2.5 sm:pb-3"
                                 }`}
                         >
@@ -145,7 +145,7 @@ export default function ActivityArea({
             </div>
 
             {/* Content Area - Connected Folder Pane */}
-            <div className="relative z-0 min-h-[400px] bg-white/80 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl transition-all duration-500">
+            <div className="relative z-0 min-h-[400px] bg-white/90 dark:bg-black/40 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl transition-all duration-500">
 
                 {/* Decorative gradients for liquid feel */}
                 <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[var(--site-secondary)]/5 via-transparent to-[var(--site-accent)]/5 rounded-3xl pointer-events-none" />

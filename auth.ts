@@ -60,6 +60,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           if (!existingUser) {
+            // Check if this is the first user
+            const userCount = await prisma.user.count();
+            const role = userCount === 0 ? 'SUPER_ADMIN' : 'USER';
+
             // Only create if user doesn't exist
             await prisma.user.create({
               data: {
@@ -69,7 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 // imageURL: image, // Disabled to prevent client mismatch
                 image: image,    // Map to profileImage
                 points: 0,
-                role: 'USER',
+                role: role,
               }
             });
           } else {

@@ -49,7 +49,7 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
         <div className="space-y-8">
             {/* Category Tabs */}
             <div className="flex flex-wrap gap-2 justify-center mb-8">
-                <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
+                <div className="flex flex-wrap gap-2 p-1.5 bg-[var(--site-sidebar-active)] backdrop-blur-md rounded-2xl border border-[var(--site-sidebar-border)] shadow-lg">
                     {CATEGORIES.map((cat) => {
                         const Icon = cat.icon;
                         const isActive = activeCategory === cat.id;
@@ -59,7 +59,7 @@ export default function ShopGrid({ items, userPoints, userInventory, userId, use
                                 onClick={() => setActiveCategory(cat.id)}
                                 className={`
                                     relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300
-                                    ${isActive ? "text-white shadow-md" : "text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/5"}
+                                    ${isActive ? "text-white shadow-md" : "text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-[var(--site-sidebar-bg)]/50"}
                                 `}
                             >
                                 {isActive && (

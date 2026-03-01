@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { writeClient } from "@/sanity/lib/write-client"; // Keep for image upload
+import { uploadLocalFile } from "@/lib/upload";
 import { revalidatePath } from "next/cache";
 import { trackFirstBannerSetup } from "./gamification.actions";
 import { serializeForClient } from "@/lib/utils";
@@ -148,17 +148,13 @@ export const uploadProfileImage = async (userId: string, formData: FormData) => 
         const file = formData.get("image") as File;
         if (!file) return { success: false, error: "No file uploaded" };
 
-        // 1. Upload to Sanity (Asset Store)
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const imageUrl = await uploadLocalFile(file, "profiles");
 
         // 2. Update URL in Prisma
         await prisma.user.update({
             where: { id: userId },
             data: {
-                image: asset.url
+                image: imageUrl
             }
         });
 
@@ -168,7 +164,7 @@ export const uploadProfileImage = async (userId: string, formData: FormData) => 
             revalidatePath(`/profile/${user.username}`);
         }
 
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: imageUrl };
     } catch (error) {
         console.error("Error uploading profile image:", error);
         return { success: false, error: "Failed to upload image" };
@@ -199,27 +195,31 @@ export const uploadBannerImage = async (userId: string, formData: FormData) => {
         const file = formData.get("image") as File;
         if (!file) return { success: false, error: "No file uploaded" };
 
-        // 1. Upload to Sanity
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
+        const imageUrl = await uploadLocalFile(file, "banners");
+
+        // Update bannerImage AND reset equippedBanner if it was set to custom-video
+        const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { equippedBanner: true, username: true }
         });
 
-        // 2. Update Prisma
         await prisma.user.update({
             where: { id: userId },
-            data: { bannerImage: asset.url }
+            data: {
+                bannerImage: imageUrl,
+                // If user was using custom-video banner, reset it so image shows
+                ...(currentUser?.equippedBanner === 'custom-video' ? { equippedBanner: null } : {})
+            }
         });
 
-        const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user) {
-            revalidatePath(`/user/${user.username}`);
+        if (currentUser?.username) {
+            revalidatePath(`/profile/${currentUser.username}`);
         }
 
         // Track Achievement
         trackFirstBannerSetup(userId).catch(err => console.error("First Banner Track Error:", err));
 
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: imageUrl };
     } catch (error) {
         console.error("Error uploading banner image:", error);
         return { success: false, error: "Failed to upload image" };
@@ -254,16 +254,12 @@ export const uploadBannerVideo = async (userId: string, formData: FormData) => {
             return { success: false, error: "Video exceeds 10MB limit" };
         }
 
-        // 1. Upload to Sanity as file/video
-        const asset = await writeClient.assets.upload("file", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const videoUrl = await uploadLocalFile(file, "banners_video");
 
         // 2. Update Prisma
         await prisma.user.update({
             where: { id: userId },
-            data: { bannerVideo: asset.url }
+            data: { bannerVideo: videoUrl }
         });
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
@@ -272,7 +268,7 @@ export const uploadBannerVideo = async (userId: string, formData: FormData) => {
             revalidatePath(`/user/${user.username}`);
         }
 
-        return { success: true, videoUrl: asset.url };
+        return { success: true, videoUrl: videoUrl };
     } catch (error) {
         console.error("Error uploading banner video:", error);
         return { success: false, error: "Failed to upload video" };
@@ -284,11 +280,7 @@ export const uploadCustomBackground = async (userId: string, formData: FormData)
         const file = formData.get("image") as File;
         if (!file) return { success: false, error: "No file uploaded" };
 
-        // 1. Upload to Sanity
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const imageUrl = await uploadLocalFile(file, "backgrounds");
 
         // 2. Fetch current preferences to preserve other data
         const currentUser = await prisma.user.findUnique({
@@ -302,11 +294,11 @@ export const uploadCustomBackground = async (userId: string, formData: FormData)
         await prisma.user.update({
             where: { id: userId },
             data: {
-                equippedBackground: asset.url,
+                equippedBackground: imageUrl,
                 profileColor: null, // Enforce mutual exclusivity
                 preferences: {
                     ...currentPreferences,
-                    customBackgroundUrl: asset.url // Persist the URL so we can re-equip later
+                    customBackgroundUrl: imageUrl // Persist the URL so we can re-equip later
                 }
             }
         });
@@ -316,7 +308,7 @@ export const uploadCustomBackground = async (userId: string, formData: FormData)
             revalidatePath(`/user/${user.username}`);
         }
 
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: imageUrl };
     } catch (error) {
         console.error("Error uploading custom background:", error);
         return { success: false, error: "Failed to upload image" };

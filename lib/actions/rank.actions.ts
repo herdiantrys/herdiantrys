@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { serializeForClient } from "@/lib/utils";
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 
 export const getRanks = async () => {
     try {
@@ -83,12 +83,9 @@ export const uploadRankImage = async (formData: FormData) => {
         const file = formData.get("image") as File;
         if (!file) return serializeForClient({ success: false, error: "No file uploaded" });
 
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "ranks");
 
-        return serializeForClient({ success: true, imageUrl: asset.url });
+        return serializeForClient({ success: true, imageUrl: url });
     } catch (error) {
         console.error("Error uploading rank image:", error);
         return serializeForClient({ success: false, error: "Failed to upload image" });

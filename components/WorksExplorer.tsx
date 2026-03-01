@@ -106,7 +106,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
         <section className="relative z-10 w-full">
             {/* Floating Search and Filters Dock */}
             <div className="sticky top-24 z-[45] container mx-auto px-4 mb-10">
-                <div className="bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl p-2 md:p-3 transition-all duration-300">
+                <div className="bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] shadow-2xl rounded-2xl p-2 md:p-3 transition-all duration-300">
                     <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
 
                         {/* Search Input */}
@@ -117,7 +117,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                 placeholder={dict.portfolio?.search_placeholder || "Search..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-[var(--site-secondary)]/30 rounded-full py-2.5 pl-11 pr-8 text-sm text-gray-800 dark:text-white focus:outline-none focus:bg-white/50 dark:focus:bg-white/10 transition-all placeholder:text-gray-500"
+                                className="w-full bg-[var(--site-sidebar-active)]/50 border border-[var(--site-sidebar-border)] focus:border-[var(--site-secondary)]/30 rounded-full py-2.5 pl-11 pr-8 text-sm text-[var(--glass-text)] focus:outline-none focus:bg-[var(--glass-bg)] transition-all placeholder:text-[var(--glass-text-muted)]"
                             />
                             {searchQuery && (
                                 <button
@@ -136,9 +136,9 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                     <button
                                         key={category as string}
                                         onClick={() => setActiveCategory(category)}
-                                        className={`px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-all whitespace-nowrap border ${activeCategory === category
+                                        className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all whitespace-nowrap border ${activeCategory === category
                                             ? "bg-[var(--site-secondary)] text-white border-[var(--site-secondary)] shadow-lg shadow-[var(--site-secondary)]/20"
-                                            : "bg-transparent text-gray-600 dark:text-gray-400 border-transparent hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
+                                            : "bg-transparent text-[var(--glass-text-muted)] border-transparent hover:bg-[var(--site-sidebar-active)] hover:text-[var(--glass-text)]"
                                             }`}
                                     >
                                         {category as string}
@@ -168,7 +168,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                                 className={`p-2.5 rounded-xl border transition-all ${isFilterOpen || activeTags.length > 0
                                     ? "bg-[var(--site-secondary)] text-white border-[var(--site-secondary)] shadow-md"
-                                    : "bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-transparent hover:bg-black/10 dark:hover:bg-white/10"
+                                    : "bg-[var(--site-sidebar-active)]/50 text-[var(--glass-text-muted)] border-[var(--site-sidebar-border)] hover:bg-[var(--site-sidebar-active)] hover:text-[var(--glass-text)]"
                                     }`}
                                 title="Filter by Tags"
                             >
@@ -194,7 +194,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                                                 onClick={() => toggleTag(tag)}
                                                 className={`px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider font-bold transition-all border ${activeTags.includes(tag)
                                                     ? "bg-[var(--site-secondary)] text-white border-[var(--site-secondary)]"
-                                                    : "bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-transparent hover:border-[var(--site-secondary)]/30 hover:text-[var(--site-secondary)]"
+                                                    : "bg-[var(--site-sidebar-active)]/50 text-[var(--glass-text-muted)] border-[var(--site-sidebar-border)] hover:border-[var(--site-secondary)]/30 hover:text-[var(--site-secondary)]"
                                                     }`}
                                             >
                                                 {tag}
@@ -243,11 +243,11 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                 {/* Empty State */}
                 {filteredProjects.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="w-20 h-20 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
-                            <Search size={32} className="text-gray-400 dark:text-gray-500" />
+                        <div className="w-20 h-20 bg-[var(--site-sidebar-active)] rounded-full flex items-center justify-center mb-6 border border-[var(--site-sidebar-border)] shadow-inner">
+                            <Search size={32} className="text-[var(--glass-text-muted)]/50" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">No projects found</h3>
-                        <p className="text-gray-400 max-w-md">
+                        <h3 className="text-xl font-bold text-[var(--glass-text)] mb-2">No projects found</h3>
+                        <p className="text-[var(--glass-text-muted)] max-w-md">
                             We couldn't find any projects matching your search or filters. Try adjusting your criteria.
                         </p>
                         <button

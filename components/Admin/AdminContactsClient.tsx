@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
     const router = useRouter();
@@ -178,10 +179,10 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                    <h1 className="text-3xl font-bold text-slate-800 dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-gray-400">
                         Messages
                     </h1>
-                    <span className="text-gray-400 text-sm mt-1 block">
+                    <span className="text-slate-400 dark:text-gray-400 text-sm mt-1 block">
                         Inbox management
                     </span>
                 </div>
@@ -189,7 +190,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
 
             <div className="flex flex-col gap-4 mb-6">
                 {/* Search and Filters Card */}
-                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
+                <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
@@ -201,7 +202,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                                 placeholder="Search sender, email, or content..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-teal-500/50 transition-all"
+                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50 transition-all"
                             />
                         </div>
 
@@ -210,7 +211,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                                className="px-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:border-teal-500/50 cursor-pointer"
+                                className="px-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50 cursor-pointer"
                             >
                                 <option value="ALL">All Messages</option>
                                 <option value="UNREAD">Unread Only</option>
@@ -223,7 +224,7 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                                 max="100"
                                 value={rowsPerPage}
                                 onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                className="w-20 pl-4 pr-2 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:border-teal-500/50"
+                                className="w-20 pl-4 pr-2 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50"
                                 title="Rows per page"
                             />
                         </div>
@@ -325,25 +326,18 @@ export default function AdminContactsClient({ contacts }: { contacts: any[] }) {
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let p = i + 1;
-                                if (totalPages > 5 && currentPage > 3) {
-                                    p = currentPage - 2 + i;
-                                    if (p > totalPages) p = totalPages - (4 - i);
-                                }
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setCurrentPage(p)}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(currentPage, totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setCurrentPage(p)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

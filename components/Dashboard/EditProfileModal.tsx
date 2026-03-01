@@ -5,7 +5,6 @@ import { X, Save, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-rea
 import { Portal } from "@/components/Portal";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateUserProfile, uploadBannerImage, uploadProfileImage, uploadCustomBackground, removeCustomBackground, updateUsername, uploadBannerVideo } from "@/lib/actions/user.actions";
-import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import { toast } from "sonner";
 import ImageCropper from "../ImageCropper";
@@ -60,7 +59,7 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         if (typeof image === 'string') return image;
         if (image?.asset?.url) return image.asset.url;
         try {
-            return urlFor(image).width(width).url();
+            return image;
         } catch (e) {
             return null;
         }
@@ -215,12 +214,12 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
         }, 300);
 
         try {
-            // Upload images or videos
-            if (user.equippedBanner === 'custom-video' && bannerVideoFile) {
+            // Upload banner: video takes priority, but image also works regardless of equippedBanner type
+            if (bannerVideoFile) {
                 const videoFormData = new FormData();
                 videoFormData.append("video", bannerVideoFile);
                 await uploadBannerVideo(user._id, videoFormData);
-            } else if (bannerFile && user.equippedBanner !== 'custom-video') {
+            } else if (bannerFile) {
                 const bannerFormData = new FormData();
                 bannerFormData.append("image", bannerFile);
                 await uploadBannerImage(user._id, bannerFormData);

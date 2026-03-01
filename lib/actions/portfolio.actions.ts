@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 
 export const getPortfolioConfig = async (userId: string) => {
     try {
@@ -204,26 +204,23 @@ export const uploadPortfolioHeroImage = async (userId: string, formData: FormDat
             return { success: false, error: "No file uploaded" };
         }
 
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "portfolio_heroes");
 
         const config = await prisma.portfolioConfig.upsert({
             where: { userId },
             create: {
                 userId,
-                heroImage: asset.url
+                heroImage: url
             },
             update: {
-                heroImage: asset.url
+                heroImage: url
             }
         });
 
         revalidatePath(`/profile/${userId}`);
         revalidatePath("/dashboard/portfolio");
 
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: url };
     } catch (error: any) {
         console.error("Error uploading hero image:", error);
         return { success: false, error: "Failed to upload image" };
@@ -250,26 +247,23 @@ export const uploadPortfolioLogo = async (userId: string, formData: FormData) =>
             return { success: false, error: "No file uploaded" };
         }
 
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "portfolio_logos");
 
         const config = await prisma.portfolioConfig.upsert({
             where: { userId },
             create: {
                 userId,
-                logo: asset.url
+                logo: url
             },
             update: {
-                logo: asset.url
+                logo: url
             }
         });
 
         revalidatePath(`/profile/${userId}`);
         revalidatePath("/dashboard/portfolio");
 
-        return { success: true, imageUrl: asset.url };
+        return { success: true, imageUrl: url };
     } catch (error: any) {
         console.error("Error uploading logo:", error);
         return { success: false, error: "Failed to upload image" };
@@ -296,18 +290,16 @@ export const uploadPortfolioGalleryImage = async (userId: string, formData: Form
             return { success: false, error: "No file uploaded" };
         }
 
-        const asset = await writeClient.assets.upload("image", file, {
-            contentType: file.type,
-            filename: file.name,
-        });
+        const url = await uploadLocalFile(file, "portfolio_galleries");
 
         const newImage = {
-            url: asset.url,
+            url: url,
             title: formData.get("title") as string || "",
             description: formData.get("description") as string || "",
-            width: asset.metadata?.dimensions?.width,
-            height: asset.metadata?.dimensions?.height,
-            id: asset._id
+            // Provide arbitrary dims for local images unless image/size parsing logic is added
+            width: 800,
+            height: 600,
+            id: url
         };
 
         const currentConfig = await prisma.portfolioConfig.findUnique({ where: { userId } });

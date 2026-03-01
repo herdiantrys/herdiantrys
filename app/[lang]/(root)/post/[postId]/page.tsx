@@ -53,7 +53,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ lan
     const activity: Activity = {
         id: `post-${post.id}`,
         type: "user_post",
-        timestamp: post.createdAt.toISOString(),
+        timestamp: typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString(),
         actor: {
             name: post.author.name || "Unknown",
             username: post.author.username || "unknown",

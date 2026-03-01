@@ -83,9 +83,9 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                         exit={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
                         transition={{ duration: 0.3, ease: [0.19, 1.0, 0.22, 1.0] }}
-                        className="absolute right-[-100px] sm:right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-96 rounded-[32px] glass-liquid backdrop-blur-[40px] border border-white/20 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.5)] overflow-hidden z-50 ring-1 ring-white/5"
+                        className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-4 sm:w-96 rounded-[24px] sm:rounded-[32px] backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/40 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.25)] overflow-hidden z-[100] ring-1 ring-white/20 dark:ring-white/5"
                     >
-                        <div className="px-5 py-4 border-b border-white/5 bg-white/5 backdrop-blur-3xl">
+                        <div className="px-5 py-4 border-b border-white/10 bg-white/10">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-black text-xl tracking-tighter text-foreground flex items-center gap-2">
                                     {dict?.dashboard?.notifications_nav || nm.page_title || "Notifications"}
@@ -177,7 +177,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                         </div>
 
                         {/* Footer */}
-                        <div className="p-3 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 text-center backdrop-blur-lg">
+                        <div className="p-3 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-center">
                             <button
                                 onClick={() => {
                                     router.push('/notifications');

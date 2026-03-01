@@ -11,7 +11,6 @@ import { XPToast } from "@/components/Gamification/XPToast";
 import { formatViewCount } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { urlFor } from "@/sanity/lib/image";
 
 export type Project = {
     id: string | number;
@@ -163,14 +162,14 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 <div className="absolute top-3 right-3 z-20 flex gap-2">
                     <button
                         onClick={handleBookmark}
-                        className={`w-8 h-8 rounded-full glass flex items-center justify-center backdrop-blur-md border shadow-lg transition-colors ${isBookmarked
+                        className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md border shadow-lg transition-colors ${isBookmarked
                             ? "bg-[var(--site-secondary)] border-[var(--site-secondary)] text-white"
-                            : "bg-black/40 border-white/20 text-white hover:bg-black/60"
+                            : "bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--glass-text)] hover:bg-[var(--site-sidebar-active)]"
                             }`}
                     >
                         <Bookmark size={14} fill={isBookmarked ? "currentColor" : "none"} />
                     </button>
-                    <div className="w-8 h-8 rounded-full glass flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/20 shadow-lg text-white">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)] shadow-lg text-[var(--glass-text)]">
                         {project.type === 'video' ? (
                             <Video size={14} />
                         ) : (
@@ -181,7 +180,7 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
 
                 {/* Skeleton Loader */}
                 {isLoading && (
-                    <div className="absolute inset-0 bg-gray-800 animate-pulse z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[var(--site-sidebar-active)] animate-pulse z-10 flex items-center justify-center">
                         <div className="w-12 h-12 border-4 border-[var(--site-secondary)]/30 border-t-[var(--site-secondary)] rounded-full animate-spin"></div>
                     </div>
                 )}
@@ -200,15 +199,15 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                     // If active media is video, we still render the thumbnail image underneath to hold height
                     <img
                         ref={imgRef}
-                        src={project.thumbnail || project.image}
+                        src={project.thumbnail}
                         alt={project.title}
                         onLoad={() => setIsLoading(false)}
                         onError={() => setIsLoading(false)}
                         className="w-full h-auto object-cover"
                     />
                 ) : (
-                    <div className="w-full h-64 bg-gray-900 flex items-center justify-center">
-                        <ImageIcon className="text-gray-700" size={48} />
+                    <div className="w-full h-64 bg-[var(--site-sidebar-active)] flex items-center justify-center">
+                        <ImageIcon className="text-[var(--glass-text-muted)]/20" size={48} />
                     </div>
                 )}
 
@@ -233,8 +232,8 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                 {/* Play Icon for Videographer (only if not playing) */}
                 {project.type === 'video' && !showVideoPreview && activeMedia.type !== 'video' && !isLoading && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                        <div className="w-12 h-12 rounded-full glass flex items-center justify-center bg-black/30 backdrop-blur-sm border border-white/20 group-hover:scale-110 transition-transform duration-300">
-                            <Play size={20} className="text-white fill-white ml-1" />
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                            <Play size={20} className="text-[var(--glass-text)] fill-current ml-1" />
                         </div>
                     </div>
                 )}
@@ -271,13 +270,13 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                             </div>
                         )}
 
-                        <div className="flex items-center gap-3 text-xs text-gray-300 mt-3">
+                        <div className="flex items-center gap-3 text-xs text-white/80 mt-3">
                             <span className="flex items-center gap-1">
                                 <Eye size={14} /> {formatViewCount(project.views || 0)}
                             </span>
                             <button
                                 onClick={handleLike}
-                                className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                className="flex items-center gap-1 hover:text-red-400 transition-colors"
                             >
                                 <Heart size={14} className={optimisticProject.isLiked ? "fill-red-500 text-red-500" : ""} /> {optimisticProject.likes || 0}
                             </button>

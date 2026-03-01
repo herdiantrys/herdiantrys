@@ -3,15 +3,11 @@ import { getDictionary } from "@/get-dictionary";
 import { redirect } from "next/navigation";
 import { getRecentActivities } from "@/lib/actions/activity.actions";
 import { getUserByEmail } from "@/lib/actions/user.actions";
-import { client } from "@/sanity/lib/client";
-import { defineQuery } from "next-sanity";
-import ActivityFeed from "@/components/Dashboard/ActivityFeed";
-import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
+import ActivityFeed from "@/components/Dashboard/ActivityFeed"; import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import TrendingSidebar from "@/components/Dashboard/TrendingSidebar";
 // ProfileTabs import removed
 import CreatePost from "@/components/Dashboard/CreatePost";
 import { getTrendingPosts } from "@/lib/actions/trending.actions";
-import { urlFor } from "@/sanity/lib/image";
 import ActivityArea from "@/components/Dashboard/ActivityArea";
 import PortfolioWidget from "@/components/Dashboard/PortfolioWidget";
 import { getBookmarkedProjects } from "@/lib/actions/bookmark.actions";

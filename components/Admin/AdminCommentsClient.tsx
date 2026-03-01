@@ -11,6 +11,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatDate } from "@/lib/utils";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 interface Comment {
     id: string;
@@ -132,7 +133,7 @@ export default function AdminCommentsClient({
     return (
         <div className="relative">
             {/* Toolbar */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors mb-6">
+            <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors mb-6">
                 <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full lg:max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -143,7 +144,7 @@ export default function AdminCommentsClient({
                             placeholder="Search comments..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/40 dark:focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                         />
                     </div>
 
@@ -156,7 +157,7 @@ export default function AdminCommentsClient({
                             <select
                                 value={filterTarget}
                                 onChange={(e) => setFilterTarget(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                             >
                                 <option value="ALL">All Targets</option>
                                 <option value="POST">Posts</option>
@@ -172,7 +173,7 @@ export default function AdminCommentsClient({
                             <select
                                 value={rowsPerPage}
                                 onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                             >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
@@ -185,7 +186,7 @@ export default function AdminCommentsClient({
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto relative min-h-[400px]">
+            <div className="bg-white/90 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 rounded-2xl overflow-hidden shadow-md dark:shadow-xl transition-colors overflow-x-auto relative min-h-[400px]">
                 {isPending && (
                     <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center">
                         <Loader2 className="animate-spin text-[var(--site-accent)]" size={32} />
@@ -225,7 +226,7 @@ export default function AdminCommentsClient({
                                         <div className="flex items-center gap-2">
                                             {comment.user.image || comment.user.imageURL ? (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <Image src={comment.user.imageURL || comment.user.image || ""} alt={comment.user.name || "User"} fill className="object-cover" />
+                                                    <img src={comment.user.imageURL || comment.user.image || ""} alt={comment.user.name || "User"} onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                 </div>
                                             ) : (
                                                 <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
@@ -294,34 +295,19 @@ export default function AdminCommentsClient({
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                                // Logic to show relevant pages (e.g. 1, 2, ... current ... last) could go here
-                                // For now, simple logic: if pages > 5, show first 5 (simplified)
-                                // Better logic: window around current page
-                                let p = i + 1;
-                                if (pagination.totalPages > 5) {
-                                    if (pagination.currentPage > 3) p = pagination.currentPage - 2 + i;
-                                    if (p > pagination.totalPages) p = pagination.totalPages - (4 - i);
-                                }
-
-                                // Boundary check
-                                if (p < 1) return null;
-                                if (p > pagination.totalPages) return null;
-
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => handlePageChange(p)}
-                                        disabled={isPending}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === pagination.currentPage
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(pagination.currentPage, pagination.totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => handlePageChange(p)}
+                                    disabled={isPending}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === pagination.currentPage
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => handlePageChange(pagination.currentPage + 1)}
@@ -361,7 +347,7 @@ export default function AdminCommentsClient({
 
                                 <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
                                     {viewComment.user.image || viewComment.user.imageURL ? (
-                                        <Image src={viewComment.user.imageURL || viewComment.user.image || ""} alt="" width={40} height={40} className="rounded-full" />
+                                        <img src={viewComment.user.imageURL || viewComment.user.image || ""} alt="" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-10 h-10 rounded-full object-cover" />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600" />
                                     )}

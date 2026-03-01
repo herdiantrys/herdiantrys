@@ -1,6 +1,5 @@
 "use client";
 
-import { urlFor } from "@/sanity/lib/image";
 
 interface UserBannerProps {
     user: any;
@@ -13,7 +12,7 @@ export default function UserBanner({ user, isOwner }: UserBannerProps) {
         if (typeof image === 'string') return image;
         if (image?.asset?.url) return image.asset.url;
         try {
-            return urlFor(image).width(1200).url();
+            return image;
         } catch (e) {
             return null;
         }
@@ -42,18 +41,18 @@ export default function UserBanner({ user, isOwner }: UserBannerProps) {
                     className="w-full h-full object-cover opacity-50 md:opacity-100"
                 />
             ) : (
-                <div className="w-full h-full bg-slate-900 relative">
+                <div className="w-full h-full bg-slate-200 dark:bg-slate-900 relative">
                     <img
                         src="/images/default-banner.jpg"
                         alt="Default Banner"
                         className="w-full h-full object-cover opacity-80"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/40 dark:from-black/60 to-transparent" />
                 </div>
             )}
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/50 dark:from-black/50 to-transparent pointer-events-none" />
         </div>
     );
 }

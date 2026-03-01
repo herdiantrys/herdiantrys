@@ -1,6 +1,5 @@
 "use client";
 
-import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import { Heart, MessageSquare, UserPlus, Bell, Gift, Coins, Zap, Trophy, Repeat } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -53,7 +52,7 @@ export default function NotificationItem({ notification, dict, onClick }: { noti
         if (!image) return fallbackUrl;
         if (image.asset?._ref || (typeof image === 'object' && image._type === 'image')) {
             try {
-                return urlFor(image).width(100).url();
+                return image;
             } catch (e) {
                 return fallbackUrl;
             }
@@ -69,8 +68,8 @@ export default function NotificationItem({ notification, dict, onClick }: { noti
             href={linkHref}
             onClick={onClick}
             className={`flex items-start gap-4 p-3 rounded-xl transition-all relative overflow-hidden group border border-transparent ${read
-                ? "bg-transparent hover:bg-white/5 opacity-70 hover:opacity-100"
-                : "bg-white/5 hover:bg-white/10 border-white/5"
+                ? "bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 opacity-70 hover:opacity-100"
+                : "bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none"
                 }`}
         >
             {!read && (
@@ -78,42 +77,42 @@ export default function NotificationItem({ notification, dict, onClick }: { noti
             )}
 
             <div className="relative shrink-0">
-                <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-800 ring-2 ${!read ? 'ring-[var(--site-secondary)]/50' : 'ring-transparent'}`}>
+                <div className={`w-10 h-10 rounded-full overflow-hidden bg-slate-200 dark:bg-gray-800 ring-2 ${!read ? 'ring-[var(--site-secondary)]/50' : 'ring-transparent'}`}>
                     <img
                         src={avatarUrl}
                         alt={sender.username}
                         className="w-full h-full object-cover"
                     />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#1a1a1a] rounded-full p-1 shadow-md border border-gray-100 dark:border-white/10">
+                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#1a1a1a] rounded-full p-1 shadow-md border border-slate-200 dark:border-white/10">
                     {getIcon()}
                 </div>
             </div>
 
             <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-[var(--glass-text)] leading-snug">
+                <p className="text-xs sm:text-sm text-slate-900 dark:text-[var(--glass-text)] leading-snug">
                     {type !== 'system' && !['xp_award', 'coin_award', 'achievement', 'badge_awarded'].includes(type) && (
-                        <span className="font-bold text-white mr-1 group-hover:underline decoration-[var(--site-secondary)] decoration-2 underline-offset-2">
+                        <span className="font-bold text-slate-900 dark:text-white mr-1 group-hover:underline decoration-[var(--site-secondary)] decoration-2 underline-offset-2">
                             {sender.fullName}
                         </span>
                     )}
-                    <span className="text-[var(--glass-text-muted)]">{getMessage()}</span>
+                    <span className="text-slate-500 dark:text-[var(--glass-text-muted)]">{getMessage()}</span>
                 </p>
                 {relatedPost && relatedPost.text && (
-                    <div className="mt-1.5 pl-2 border-l-2 border-white/10">
-                        <p className="text-xs text-[var(--glass-text-muted)] italic line-clamp-1">
+                    <div className="mt-1.5 pl-2 border-l-2 border-slate-200 dark:border-white/10">
+                        <p className="text-xs text-slate-500 dark:text-[var(--glass-text-muted)] italic line-clamp-1">
                             "{relatedPost.text}"
                         </p>
                     </div>
                 )}
                 {relatedProject && (
-                    <div className="mt-1.5 pl-2 border-l-2 border-white/10">
-                        <p className="text-xs text-[var(--glass-text-muted)] font-bold line-clamp-1">
+                    <div className="mt-1.5 pl-2 border-l-2 border-slate-200 dark:border-white/10">
+                        <p className="text-xs text-slate-500 dark:text-[var(--glass-text-muted)] font-bold line-clamp-1">
                             {relatedProject.title}
                         </p>
                     </div>
                 )}
-                <p className="text-[10px] text-[var(--glass-text-muted)] mt-1.5 font-medium opacity-60">
+                <p className="text-[10px] text-slate-500 dark:text-[var(--glass-text-muted)] mt-1.5 font-medium opacity-60">
                     {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
                 </p>
             </div>

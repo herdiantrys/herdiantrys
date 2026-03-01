@@ -120,14 +120,24 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--site-secondary)]/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="container mx-auto px-4">
-                <SectionTitle
-                    title={dict.services.title}
-                    subtitle={dict.services.description}
-                    alignment="center"
-                    className="mb-20"
-                />
-
-                <div className="relative max-w-7xl mx-auto">
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-10%" }}
+                    variants={{
+                        visible: {
+                            transition: {
+                                staggerChildren: 0.08
+                            }
+                        }
+                    }}
+                >
+                    <SectionTitle
+                        title={dict.services.title}
+                        subtitle={dict.services.description}
+                        alignment="center"
+                        className="mb-20"
+                    />
 
                     <div className="relative max-w-7xl mx-auto">
                         <div className="relative">
@@ -161,12 +171,22 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                     }}
                                 >
                                     {extendedServices.map((service, index) => (
-                                        <div
+                                        <motion.div
                                             key={`${service._id}-${index}`}
+                                            variants={{
+                                                hidden: { opacity: 0, y: 30, scale: 0.98, filter: "blur(10px)" },
+                                                visible: {
+                                                    opacity: 1,
+                                                    y: 0,
+                                                    scale: 1,
+                                                    filter: "blur(0px)",
+                                                    transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] }
+                                                }
+                                            }}
                                             className="w-full px-4"
                                             style={{ width: `${100 / extendedServices.length}%` }}
                                         >
-                                            <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-300 relative group flex flex-col">
+                                            <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-500 relative group flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-white/60 dark:border-white/10">
                                                 {/* Image */}
                                                 <div className="relative h-56 w-full overflow-hidden">
                                                     {service.imageUrl ? (
@@ -181,7 +201,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                             <span className="text-gray-500">{dict.services.no_image}</span>
                                                         </div>
                                                     )}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
                                                 </div>
 
                                                 {/* Content */}
@@ -216,14 +236,14 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
 
                                                     <a
                                                         href={service.orderLink || "#contact"}
-                                                        className="w-full inline-flex items-center justify-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-xl hover:bg-teal-50 transition-all duration-300 group shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]"
+                                                        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--site-button)] text-[var(--site-button-text)] font-bold py-3.5 px-6 rounded-2xl hover:bg-teal-600 dark:hover:bg-teal-400 transition-all duration-300 group shadow-[0_10px_20px_rgba(20,184,166,0.2)] hover:shadow-[0_15px_30px_rgba(20,184,166,0.4)]"
                                                     >
                                                         {service.buttonText || dict.services.order_now}
                                                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                                     </a>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </motion.div>
                             </div>
@@ -245,7 +265,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                             </button>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
 

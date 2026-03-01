@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { writeClient } from "@/sanity/lib/write-client";
+import { uploadLocalFile } from "@/lib/upload";
 import { revalidatePath } from "next/cache";
 import { serializeForClient } from "@/lib/utils";
 import { createNotification } from "./notification.actions";
@@ -28,24 +28,15 @@ export const createPost = async (userId: string, formData: FormData, path: strin
         let audioUrl = null;
 
         if (imageFile && imageFile.size > 0) {
-            const asset = await writeClient.assets.upload("image", imageFile, {
-                filename: imageFile.name,
-            });
-            imageUrl = asset.url;
+            imageUrl = await uploadLocalFile(imageFile, "post_images");
         }
 
         if (audioFile && audioFile.size > 0) {
-            const asset = await writeClient.assets.upload("file", audioFile, {
-                filename: audioFile.name,
-            });
-            audioUrl = asset.url;
+            audioUrl = await uploadLocalFile(audioFile, "post_audio");
         }
 
         if (videoFile && videoFile.size > 0) {
-            const asset = await writeClient.assets.upload("file", videoFile, {
-                filename: videoFile.name,
-            });
-            videoUrl = asset.url;
+            videoUrl = await uploadLocalFile(videoFile, "post_videos");
         }
 
         await prisma.post.create({
@@ -328,18 +319,18 @@ export const updatePost = async (postId: string, formData: FormData, userId: str
         };
 
         if (imageFile && imageFile.size > 0) {
-            const asset = await writeClient.assets.upload("image", imageFile, { filename: imageFile.name });
-            updateData.image = asset.url;
+            const url = await uploadLocalFile(imageFile, "post_images");
+            updateData.image = url;
         }
 
         if (audioFile && audioFile.size > 0) {
-            const asset = await writeClient.assets.upload("file", audioFile, { filename: audioFile.name });
-            updateData.audio = asset.url;
+            const url = await uploadLocalFile(audioFile, "post_audio");
+            updateData.audio = url;
         }
 
         if (videoFile && videoFile.size > 0) {
-            const asset = await writeClient.assets.upload("file", videoFile, { filename: videoFile.name });
-            updateData.video = asset.url;
+            const url = await uploadLocalFile(videoFile, "post_videos");
+            updateData.video = url;
         }
 
         // 2. Update Post

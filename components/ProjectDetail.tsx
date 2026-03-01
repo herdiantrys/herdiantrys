@@ -11,7 +11,6 @@ import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { urlFor } from "@/sanity/lib/image";
 import { toggleLike, postComment } from "@/app/[lang]/(root)/projects/[slug]/actions";
 import { toggleBookmark } from "@/lib/actions/bookmark.actions";
 import { toast } from "sonner";
@@ -103,7 +102,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
         if (image.url) return image.url;
         if (image.asset?.url) return image.asset.url;
         try {
-            return urlFor(image).url();
+            return image;
         } catch (e) {
             return "";
         }
@@ -256,7 +255,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans selection:bg-teal-500/30">
+        <div className="min-h-screen bg-[var(--site-sidebar-bg)] text-[var(--glass-text)] font-sans selection:bg-[var(--site-secondary)]/30">
             <Lightbox
                 isOpen={lightboxOpen}
                 onClose={() => setLightboxOpen(false)}
@@ -277,7 +276,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
 
             {/* --- MUSEUM STAGE HERO --- */}
             {/* Parallax Container */}
-            <header className="relative w-full h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-[#050505] group/stage">
+            <header className="relative w-full h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-black dark:bg-[#050505] group/stage">
 
                 {/* 1. Ambient Background (Parallax + Scale) */}
                 <motion.div
@@ -303,7 +302,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                             priority
                         />
                     )}
-                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
                 </motion.div>
 
                 {/* 2. Main Artwork Container (Parallax Y) */}
@@ -318,7 +317,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                         className="relative z-10 w-full h-full p-2 flex items-center justify-center"
                     >
                         <div
-                            className="relative flex items-center justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] group cursor-zoom-in rounded-sm md:rounded-lg overflow-hidden ring-1 ring-white/10"
+                            className="relative flex items-center justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,0.8)] group cursor-zoom-in rounded-sm md:rounded-lg overflow-hidden ring-1 ring-white/10 dark:ring-white/5"
                             onClick={() => openLightbox(activeHeroIndex)}
                         >
                             {activeMedia.type === 'video' ? (
@@ -336,13 +335,13 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                         alt={project.title}
                                         width={1920}
                                         height={1080}
-                                        className="w-full h-full max-h-[90vh] object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.02]"
+                                        className="w-full h-full max-h-[90vh] object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
                                         priority
                                     />
 
                                     {/* Hover Expand Hint with Glass Effect */}
                                     <div className="absolute bottom-6 right-6 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                                        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl text-white border border-white/20 text-sm font-semibold shadow-xl tracking-wide hover:bg-white/20 transition-colors">
+                                        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/20 text-sm font-bold shadow-xl tracking-wide hover:bg-black/60 transition-colors">
                                             <Maximize2 size={16} /> Expand
                                         </div>
                                     </div>
@@ -359,7 +358,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8, duration: 0.8 }}
                         style={{ y: useTransform(scrollY, [0, 400], [0, 100]) }} // Move out faster on scroll
-                        className="absolute bottom-8 z-30 flex items-center gap-3 p-2.5 rounded-2xl bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl"
+                        className="absolute bottom-8 z-30 flex items-center gap-3 p-2.5 rounded-2xl bg-black/40 dark:bg-black/60 backdrop-blur-2xl border border-white/10 shadow-2xl"
                     >
                         {allMedia.map((item, index) => (
                             <button
@@ -394,12 +393,12 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                 >
                     <Link
                         href="/projects"
-                        className="flex items-center gap-3 group opacity-70 hover:opacity-100 transition-opacity"
+                        className="flex items-center gap-3 group transition-opacity"
                     >
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full border border-white/30 backdrop-blur-md group-hover:bg-white/10 transition-all">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full border border-white/30 backdrop-blur-md bg-black/20 group-hover:bg-black/40 transition-all">
                             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                         </div>
-                        <span className="font-medium tracking-wide hidden md:block">Back to Projects</span>
+                        <span className="font-bold tracking-wide hidden md:block drop-shadow-lg">Back to Projects</span>
                     </Link>
                 </motion.div>
 
@@ -422,11 +421,11 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                 <div className="container mx-auto px-4 lg:px-8 pb-32">
 
                     {/* Liquid Glass Container */}
-                    <div className="relative bg-[#050505]/60 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-8 lg:p-16 overflow-hidden ring-1 ring-white/5">
+                    <div className="relative bg-[var(--glass-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--glass-border)] shadow-2xl p-8 lg:p-16 overflow-hidden ring-1 ring-[var(--glass-border)]">
 
                         {/* Decorative Liquid Gradient Backgrounds */}
-                        <div className="absolute top-0 right-0 w-[80%] h-[80%] bg-gradient-to-br from-[var(--site-secondary)]/10 via-primary/5 to-transparent blur-[120px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
-                        <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-purple-500/10 via-transparent to-transparent blur-[100px] pointer-events-none -z-10" />
+                        <div className="absolute top-0 right-0 w-[80%] h-[80%] bg-gradient-to-br from-[var(--site-secondary)]/10 via-[var(--site-accent)]/5 to-transparent blur-[120px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
+                        <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-[var(--site-secondary)]/10 via-transparent to-transparent blur-[100px] pointer-events-none -z-10" />
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
 
@@ -449,7 +448,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                             </span>
                                         </div>
 
-                                        <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] mb-6 text-white drop-shadow-md">
+                                        <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6 text-[var(--glass-text)]">
                                             {project.title}
                                         </h1>
 
@@ -480,7 +479,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                         </button>
                                         <button
                                             onClick={() => setIsShareOpen(true)}
-                                            className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 font-extrabold text-white tracking-wide transition-all flex items-center justify-center gap-3 backdrop-blur-md shadow-lg hover:scale-[1.02]"
+                                            className="w-full py-4 rounded-2xl bg-[var(--site-sidebar-active)]/50 border border-[var(--site-sidebar-border)] hover:bg-[var(--site-sidebar-active)] font-extrabold text-[var(--glass-text)] tracking-wide transition-all flex items-center justify-center gap-3 backdrop-blur-md shadow-lg hover:scale-[1.02]"
                                         >
                                             <Share2 size={20} /> Share Project
                                         </button>
@@ -488,9 +487,9 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
 
                                     {/* Tags */}
                                     {project.tags && project.tags.length > 0 && (
-                                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-2.5 pt-8 border-t border-white/10">
+                                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-2.5 pt-8 border-t border-[var(--site-sidebar-border)]">
                                             {project.tags.map(tag => (
-                                                <span key={tag} className="px-3 py-1.5 bg-white/5 rounded-lg text-[11px] font-semibold text-gray-300 border border-white/10 hover:bg-white/10 hover:text-white transition-colors cursor-default shadow-sm tracking-wide">
+                                                <span key={tag} className="px-3 py-1.5 bg-[var(--site-sidebar-active)]/60 rounded-lg text-[11px] font-bold text-[var(--glass-text-muted)] border border-[var(--site-sidebar-border)] hover:border-[var(--site-secondary)]/30 hover:text-[var(--site-secondary)] transition-colors cursor-default shadow-sm tracking-wide">
                                                     #{tag}
                                                 </span>
                                             ))}
@@ -508,7 +507,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     whileInView="visible"
                                     viewport={{ once: true, margin: "-50px" }}
                                     variants={fadeInUp}
-                                    className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-white prose-p:leading-relaxed prose-p:text-gray-300 prose-p:font-medium prose-blockquote:border-l-4 prose-blockquote:border-[var(--site-secondary)] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-400 prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:rounded-r-xl prose-strong:text-white prose-a:text-[var(--site-secondary)] hover:prose-a:text-teal-400 prose-li:text-gray-300"
+                                    className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-[var(--glass-text)] prose-p:leading-relaxed prose-p:text-[var(--glass-text-muted)] prose-p:font-medium prose-blockquote:border-l-4 prose-blockquote:border-[var(--site-secondary)] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-[var(--glass-text-muted)] prose-blockquote:bg-[var(--site-sidebar-active)]/40 prose-blockquote:py-2 prose-blockquote:rounded-r-xl prose-strong:text-[var(--glass-text)] prose-a:text-[var(--site-secondary)] hover:prose-a:text-[var(--site-accent)] prose-li:text-[var(--glass-text-muted)]"
                                 >
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {typeof project.content === 'string' ? project.content : ""}
@@ -524,7 +523,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                         variants={staggerContainer}
                                         className="space-y-8"
                                     >
-                                        <h3 className="text-2xl font-extrabold flex items-center gap-3 text-white tracking-tight">
+                                        <h3 className="text-2xl font-black flex items-center gap-3 text-[var(--glass-text)] tracking-tight">
                                             <ZoomIn size={24} className="text-[var(--site-secondary)]" />
                                             Close-ups & Highlights
                                         </h3>
@@ -533,7 +532,7 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                 <motion.div
                                                     key={index}
                                                     variants={fadeInUp}
-                                                    className={`relative aspect-square md:aspect-[4/3] rounded-[2rem] overflow-hidden cursor-pointer border border-white/5 group shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:border-white/20 transition-all duration-500 ${activeHeroIndex === index ? "ring-2 ring-[var(--site-secondary)] shadow-[0_0_20px_rgba(20,184,166,0.3)]" : ""}`}
+                                                    className={`relative aspect-square md:aspect-[4/3] rounded-[2rem] overflow-hidden cursor-pointer border border-[var(--site-sidebar-border)] group shadow-lg hover:shadow-[0_0_30px_rgba(var(--site-secondary-rgb),0.1)] hover:border-[var(--site-secondary)]/30 transition-all duration-500 ${activeHeroIndex === index ? "ring-2 ring-[var(--site-secondary)] shadow-[0_0_20px_rgba(20,184,166,0.3)]" : ""}`}
                                                     onClick={() => {
                                                         setActiveHeroIndex(index);
                                                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -549,8 +548,8 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                             className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                                                         />
                                                     )}
-                                                    <div className="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                                        <span className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white text-sm border border-white/20">View on Stage</span>
+                                                    <div className="absolute inset-0 bg-black/50 dark:bg-black/70 group-hover:bg-transparent transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                        <span className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm border border-white/20 font-bold">View on Stage</span>
                                                     </div>
                                                 </motion.div>
                                             ))}
@@ -566,18 +565,18 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                     variants={fadeInUp}
                                     className="pt-16 border-t border-white/10"
                                 >
-                                    <h3 className="text-2xl font-extrabold mb-10 text-white tracking-tight flex items-center gap-3">
-                                        <MessageCircle size={24} className="text-purple-400" />
-                                        Thought Exchange <span className="text-gray-500 text-lg font-medium">({comments.length})</span>
+                                    <h3 className="text-2xl font-black mb-10 text-[var(--glass-text)] tracking-tight flex items-center gap-3">
+                                        <MessageCircle size={24} className="text-[var(--site-secondary)]" />
+                                        Thought Exchange <span className="text-[var(--glass-text-muted)] text-lg font-bold">({comments.length})</span>
                                     </h3>
 
                                     {/* Input */}
                                     <div className="flex gap-5 mb-12">
-                                        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-sm backdrop-blur-md">
-                                            {session?.user?.image ? (
-                                                <Image src={session.user.image} alt="User" width={48} height={48} className="object-cover" />
+                                        <div className="w-12 h-12 rounded-full bg-[var(--site-sidebar-active)] border border-[var(--site-sidebar-border)] flex items-center justify-center shrink-0 overflow-hidden shadow-sm backdrop-blur-md">
+                                            {session?.user?.id ? (
+                                                <img src={session.user.image || "/placeholder.jpg"} alt="User" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                             ) : (
-                                                <UserIcon size={24} className="text-muted-foreground" />
+                                                <UserIcon size={24} className="text-[var(--glass-text-muted)]" />
                                             )}
                                         </div>
                                         <form onSubmit={handleCommentSubmit} className="flex-1 group">
@@ -587,13 +586,13 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                     onChange={e => setCommentText(e.target.value)}
                                                     placeholder={!session ? (dict.projects?.login_to_comment || "Login to share your thoughts") : ((session as any).user?.status === "LIMITED" ? (dict.projects?.commenting_restricted || "Commenting restricted") : (dict.projects?.write_thoughts || "Write your thoughts..."))}
                                                     disabled={!session || (session as any).user?.status === "LIMITED"}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-[1.5rem] p-5 lg:p-6 text-white focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-black/40 focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all min-h-[90px] resize-y shadow-inner font-medium placeholder:text-gray-500 pr-16 disabled:opacity-50"
+                                                    className="w-full bg-[var(--site-sidebar-bg)] border border-[var(--site-sidebar-border)] rounded-[1.5rem] p-5 lg:p-6 text-[var(--glass-text)] focus:outline-none focus:border-[var(--site-secondary)]/60 focus:bg-[var(--glass-bg)] focus:ring-4 focus:ring-[var(--site-secondary)]/10 transition-all min-h-[90px] resize-y shadow-inner font-bold placeholder:text-[var(--glass-text-muted)] pr-16 disabled:opacity-50"
                                                     rows={1}
                                                 />
                                                 <button
                                                     type="submit"
                                                     disabled={!commentText.trim() || isSubmittingComment || (session as any)?.user?.status === "LIMITED"}
-                                                    className="absolute right-4 bottom-4 p-3.5 rounded-xl bg-white/10 text-[var(--site-secondary)] border border-white/5 hover:bg-white/20 shadow-lg disabled:opacity-30 disabled:translate-y-2 disabled:hover:bg-white/10 transition-all hover:scale-105 active:scale-95 backdrop-blur-md disabled:grayscale"
+                                                    className="absolute right-4 bottom-4 p-3.5 rounded-xl bg-[var(--site-sidebar-active)] text-[var(--site-secondary)] border border-[var(--site-sidebar-border)] hover:bg-[var(--site-secondary)] hover:text-white shadow-lg disabled:opacity-30 disabled:translate-y-2 disabled:hover:bg-[var(--site-sidebar-active)] transition-all hover:scale-105 active:scale-95 backdrop-blur-md disabled:grayscale"
                                                 >
                                                     <Send size={18} />
                                                 </button>
@@ -609,27 +608,27 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                     key={comment._id}
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
-                                                    className="flex gap-4 group p-5 rounded-2xl bg-black/20 border border-white/5 hover:border-white/10 hover:bg-black/30 transition-all shadow-sm backdrop-blur-sm"
+                                                    className="flex gap-4 group p-5 rounded-2xl bg-[var(--site-sidebar-active)]/40 border border-[var(--site-sidebar-border)] hover:border-[var(--site-secondary)]/20 hover:bg-[var(--site-sidebar-active)]/60 transition-all shadow-sm backdrop-blur-sm"
                                                 >
-                                                    <div className="w-11 h-11 rounded-full bg-white/5 border border-white/5 shrink-0 overflow-hidden">
+                                                    <div className="w-11 h-11 rounded-full bg-[var(--site-sidebar-bg)] border border-[var(--site-sidebar-border)] shrink-0 overflow-hidden shadow-sm">
                                                         {comment.user.image ? (
-                                                            <Image src={comment.user.image} alt={comment.user.username} width={40} height={40} />
+                                                            <img src={comment.user.image} alt={comment.user.username} onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold font-mono">
+                                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold font-mono text-[var(--glass-text-muted)]">
                                                                 {comment.user.username[0]}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="space-y-1.5 flex-1">
                                                         <div className="flex items-baseline gap-2">
-                                                            <span className="font-bold text-[15px] text-white tracking-wide">{comment.user.username}</span>
-                                                            <span className="text-[11px] font-medium text-gray-500">{formatDate(comment.createdAt)}</span>
+                                                            <span className="font-black text-[15px] text-[var(--glass-text)] tracking-wide">{comment.user.username}</span>
+                                                            <span className="text-[11px] font-bold text-[var(--glass-text-muted)]">{formatDate(comment.createdAt)}</span>
                                                         </div>
-                                                        <p className="text-gray-300 leading-relaxed text-sm group-hover:text-white transition-colors font-medium">{comment.text}</p>
+                                                        <p className="text-[var(--glass-text-muted)] leading-relaxed text-sm group-hover:text-[var(--glass-text)] transition-colors font-bold">{comment.text}</p>
                                                     </div>
                                                 </motion.div>
                                             )) : (
-                                                <p className="text-sm font-medium text-gray-500 bg-white/5 border border-white/5 p-6 rounded-2xl text-center border-dashed">No comments yet. Be the first to share your thoughts!</p>
+                                                <p className="text-sm font-bold text-[var(--glass-text-muted)] bg-[var(--site-sidebar-active)]/20 border border-[var(--site-sidebar-border)] p-8 rounded-2xl text-center border-dashed">No comments yet. Be the first to share your thoughts!</p>
                                             )}
                                         </AnimatePresence>
                                     </div>

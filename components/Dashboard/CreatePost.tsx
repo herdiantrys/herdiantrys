@@ -3,7 +3,6 @@ import { Image as ImageIcon, Video, Send, X, Loader2, CheckCircle2, AlertCircle 
 import { createPost } from "@/lib/actions/post.actions";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
 import AvatarWithEffect from "../AvatarWithEffect";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -155,13 +154,11 @@ export default function CreatePost({ user, dict, dbUserId }: { user: any; dict?:
                 <div className="hidden sm:block">
                     <AvatarWithEffect
                         src={(() => {
-                            if (!user.profileImage) return user.imageURL;
-                            if (typeof user.profileImage === 'string') return user.profileImage;
-                            try {
-                                return urlFor(user.profileImage).width(100).url();
-                            } catch (e) {
-                                return user.imageURL;
-                            }
+                            const img = user.profileImage;
+                            if (!img) return user.imageURL || null;
+                            if (typeof img === 'string') return img;
+                            if (img?.asset?.url) return img.asset.url;
+                            return user.imageURL || null;
                         })()}
                         alt={user.fullName || "User"}
                         size={48}

@@ -1,5 +1,4 @@
 import AppLayoutAdapter from "@/components/AppLayoutAdapter";
-import { SanityLive } from "@/sanity/lib/live";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import Footer from "@/components/Footer";
 import { getDictionary } from "@/get-dictionary";
@@ -24,7 +23,6 @@ export default async function Layout({
           <Footer dict={dict} />
         </FooterWrapper>
       </AppLayoutAdapter>
-      <SanityLive />
     </SessionProviderWrapper>
   );
 }

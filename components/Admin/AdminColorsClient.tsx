@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AppColor } from "@prisma/client";
 import { createAppColor, updateAppColor, deleteAppColor, bulkDeleteAppColors } from "@/lib/actions/color.actions";
 import { useRouter } from "next/navigation";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 interface AdminColorsClientProps {
     initialColors: AppColor[];
@@ -228,8 +229,8 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
             {/* Header */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
-                        <Palette className="text-teal-500" /> Color Database
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                        <Palette className="text-[var(--site-accent)]" /> Color Database
                     </h1>
                     <div className="flex gap-3">
                         <button
@@ -242,7 +243,7 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
                 </div>
 
                 {/* Filters Box */}
-                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
+                <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
@@ -254,7 +255,7 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
                                 placeholder="Search by name or HEX..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/40 dark:focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -267,7 +268,7 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
                                 <select
                                     value={filterFamily}
                                     onChange={(e) => setFilterFamily(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                                 >
                                     <option value="ALL">All Families</option>
                                     {families.map(fam => (
@@ -290,7 +291,7 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-teal-500/50 appearance-none hover:bg-white dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
                         </div>
@@ -299,7 +300,7 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
             </div>
 
             {/* Table Area */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
+            <div className="bg-white/90 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 rounded-2xl overflow-hidden shadow-md dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[900px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -397,26 +398,18 @@ export default function AdminColorsClient({ initialColors }: AdminColorsClientPr
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let p = i + 1;
-                                if (totalPages > 5 && currentPage > 3) {
-                                    p = currentPage - 2 + i;
-                                    if (p > totalPages) p = totalPages - (4 - i);
-                                }
-
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setCurrentPage(p)}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(currentPage, totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setCurrentPage(p)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

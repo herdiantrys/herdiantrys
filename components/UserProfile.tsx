@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit2, MapPin, Link as LinkIcon, X, Save, Settings, User, Bell, Shield, Moon, Monitor, Camera, Trash2, MessageCircle } from "lucide-react";
 import { updateUserProfile, uploadProfileImage, removeProfileImage, uploadBannerImage, removeBannerImage } from "@/lib/actions/user.actions";
-import { urlFor } from "@/sanity/lib/image";
 import { useRouter } from "next/navigation";
 
 const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dict: any }) => {
@@ -147,7 +146,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                     >
                         {user.bannerImage && (
                             <Image
-                                src={urlFor(user.bannerImage).width(1200).url()}
+                                src={user.bannerImage}
                                 alt="Banner"
                                 fill
                                 className="object-cover"
@@ -194,7 +193,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                         <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-end -mt-12 md:-mt-16">
                             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[var(--glass-bg)] overflow-hidden bg-gray-800 shadow-xl flex-shrink-0">
                                 <Image
-                                    src={user.profileImage ? urlFor(user.profileImage).width(400).url() : (user.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`)}
+                                    src={user.profileImage ? user.profileImage : (user.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`)}
                                     alt={user.fullName}
                                     fill
                                     className="object-cover"
@@ -401,7 +400,7 @@ const UserProfile = ({ user, isOwner, dict }: { user: any; isOwner: boolean; dic
                             <div className="mb-6 flex flex-col items-center gap-4">
                                 <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-white/20">
                                     <Image
-                                        src={user.profileImage ? urlFor(user.profileImage).width(400).url() : (user.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`)}
+                                        src={user.profileImage ? user.profileImage : (user.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`)}
                                         alt="Profile Preview"
                                         fill
                                         className="object-cover"

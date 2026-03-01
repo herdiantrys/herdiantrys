@@ -69,7 +69,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                     card.style.setProperty("--mouse-x", `${x}px`);
                     card.style.setProperty("--mouse-y", `${y}px`);
                 }}
-                className="bg-white/5 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden group/card transition-shadow duration-500 hover:shadow-[0_0_40px_rgba(var(--site-secondary-rgb),0.15)]"
+                className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden group/card transition-shadow duration-500 hover:shadow-[0_0_40px_rgba(var(--site-secondary-rgb),0.15)]"
             >
                 {/* Dynamic Spotlight Effect */}
                 <div
@@ -90,17 +90,17 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                             <Trophy className="text-[var(--site-secondary)] drop-shadow-[0_0_8px_rgba(var(--site-secondary-rgb),0.5)]" size={20} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white text-lg tracking-tight leading-none mb-1">
+                            <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight leading-none mb-1">
                                 {t.tab_achievements || "Achievements"}
                             </h3>
-                            <p className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-widest font-bold">{t.progress_journey || "Progress Journey"}</p>
+                            <p className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-widest font-bold font-mono">{t.progress_journey || "Progress Journey"}</p>
                         </div>
                     </div>
                     <div className="flex flex-col items-end">
-                        <span className="text-sm font-black text-white">
+                        <span className="text-sm font-black text-slate-900 dark:text-white">
                             {unlockedBadges.length}<span className="text-[var(--glass-text-muted)] font-bold text-xs">/{totalBadges}</span>
                         </span>
-                        <div className="w-12 h-1 bg-white/5 rounded-full mt-1 overflow-hidden">
+                        <div className="w-12 h-1 bg-black/5 dark:bg-white/5 rounded-full mt-1 overflow-hidden">
                             <div
                                 className="h-full bg-[var(--site-secondary)] shadow-[0_0_10px_var(--site-secondary)]"
                                 style={{ width: `${completionPercent}%` }}
@@ -122,7 +122,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                             stroke="currentColor"
                             strokeWidth="6"
                             fill="none"
-                            className="text-white/5"
+                            className="text-black/5 dark:text-white/5"
                         />
                         {/* Glow Layer */}
                         <circle
@@ -159,7 +159,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
 
                     <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
                         <div className="relative">
-                            <span className="text-4xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{completionPercent}</span>
+                            <span className="text-4xl font-black text-slate-900 dark:text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{completionPercent}</span>
                             <span className="text-xs font-bold text-[var(--site-secondary)] absolute -top-1 -right-4">%</span>
                         </div>
                         <span className="text-[10px] text-[var(--glass-text-muted)] uppercase tracking-[0.2em] font-black mt-1">{t.mastery || "Mastery"}</span>
@@ -192,7 +192,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.1 }}
-                                            className="group/badge p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-[var(--site-secondary)]/30 transition-all cursor-pointer relative overflow-hidden"
+                                            className="group/badge p-2.5 rounded-xl bg-black/[0.03] border border-black/5 dark:bg-white/[0.03] dark:border-white/5 hover:bg-black/[0.08] dark:hover:bg-white/[0.08] hover:border-[var(--site-secondary)]/30 transition-all cursor-pointer relative overflow-hidden"
                                             onClick={handleViewAll}
                                         >
                                             <div className="flex items-center gap-3 relative z-10">
@@ -201,14 +201,14 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                                     <PixelBadge badge={badge} size="sm" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h5 className="text-xs font-bold text-white truncate group-hover/badge:text-[var(--site-secondary)] transition-colors">
+                                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover/badge:text-[var(--site-secondary)] transition-colors">
                                                         {badge.name}
                                                     </h5>
-                                                    <p className="text-[10px] text-[var(--glass-text-muted)] font-medium">
+                                                    <p className="text-[10px] text-[var(--glass-text-muted)] font-bold uppercase tracking-tighter">
                                                         {t.unlocked || "Unlocked"} {formatDate(userBadge.awardedAt)}
                                                     </p>
                                                 </div>
-                                                <div className="p-1.5 rounded-lg bg-black/20 opacity-0 group-hover/badge:opacity-100 transition-opacity">
+                                                <div className="p-1.5 rounded-lg bg-black/5 dark:bg-black/20 opacity-0 group-hover/badge:opacity-100 transition-opacity">
                                                     <ChevronRight size={12} className="text-[var(--site-secondary)]" />
                                                 </div>
                                             </div>
@@ -221,7 +221,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
 
                     {/* Almost There Section */}
                     {closeToUnlock.length > 0 && (
-                        <div className="space-y-3 pt-4 border-t border-white/5">
+                        <div className="space-y-3 pt-4 border-t border-black/5 dark:border-white/5">
                             <h4 className="text-[10px] font-black text-[var(--glass-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Lock size={12} className="text-amber-500/70" />
                                 {t.within_reach || "Within Reach"}
@@ -244,7 +244,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                     return (
                                         <div
                                             key={badge.id}
-                                            className="group/lock p-2.5 rounded-xl bg-black/20 border border-white/5 hover:border-amber-500/20 transition-all cursor-pointer"
+                                            className="group/lock p-2.5 rounded-xl bg-slate-50 dark:bg-black/20 border border-black/5 dark:border-white/5 hover:border-amber-500/20 transition-all cursor-pointer"
                                             onClick={handleViewAll}
                                         >
                                             <div className="flex items-center gap-3 mb-2">
@@ -252,7 +252,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                                     <PixelBadge badge={badge} size="sm" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h5 className="text-[11px] font-bold text-slate-300 truncate">
+                                                    <h5 className="text-[11px] font-bold text-slate-800 dark:text-slate-300 truncate">
                                                         {badge.name}
                                                     </h5>
                                                     <div className="flex items-center justify-between mt-1">
@@ -261,7 +261,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-1 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-gradient-to-r from-amber-600 to-amber-400 group-hover/lock:shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all duration-700"
                                                     style={{ width: `${progress}%` }}
@@ -276,7 +276,7 @@ export default function BadgesSidebar({ user, isOwner = false, dict, maxDisplay 
                 </div>
 
                 {/* Action Footer */}
-                <div className="mt-8 pt-6 border-t border-white/5 relative z-10">
+                <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 relative z-10">
                     <button
                         onClick={handleViewAll}
                         className="w-full group/btn relative py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[var(--site-secondary)]/10 to-transparent border border-[var(--site-secondary)]/20 hover:border-[var(--site-secondary)]/40 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden shadow-xl"

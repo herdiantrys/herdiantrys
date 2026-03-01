@@ -11,6 +11,7 @@ import ProjectForm from "./ProjectForm";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 interface Project {
     id: string;
@@ -212,7 +213,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
 
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Projects</h1>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Projects</h1>
                     <div className="flex gap-3">
                         {/* Bulk actions removed from here */}
                         <button
@@ -226,7 +227,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                 </div>
 
                 {/* Filters Box */}
-                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
+                <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-md group">
@@ -337,7 +338,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         <div className="flex items-center gap-2">
                                             {project.author?.image && (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <Image src={project.author.image} alt={project.author.name} fill className="object-cover" />
+                                                    <img src={project.author.image} alt={project.author.name} onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                 </div>
                                             )}
                                             <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -403,26 +404,18 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let p = i + 1;
-                                if (totalPages > 5 && currentPage > 3) {
-                                    p = currentPage - 2 + i;
-                                    if (p > totalPages) p = totalPages - (4 - i);
-                                }
-
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setCurrentPage(p)}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(currentPage, totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setCurrentPage(p)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

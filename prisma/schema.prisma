@@ -48,33 +48,33 @@ enum ShopItemType {
 // Models
 
 model User {
-  id             String  @id @default(cuid())
-  name           String? @map("fullName")
-  email          String  @unique
-  username       String? @unique
-  password       String?
-  image          String? @map("profileImage")
-  imageURL       String?
-  bannerImage    String?
-  headline       String?
-  bio            String?
-  location       String?
-  website        String?
-  role           Role    @default(USER)
-  points         Float   @default(0)
+  id               String  @id @default(cuid())
+  name             String? @map("fullName")
+  email            String  @unique
+  username         String? @unique
+  password         String?
+  image            String? @map("profileImage")
+  imageURL         String?
+  bannerImage      String?
+  headline         String?
+  bio              String?
+  location         String?
+  website          String?
+  role             Role    @default(USER)
+  points           Float   @default(0)
   stripeCustomerId String?
 
   portfolioConfig PortfolioConfig?
 
-  equippedEffect String? // Deprecated
-  equippedFrame  String?
+  equippedEffect     String? // Deprecated
+  equippedFrame      String?
   equippedBackground String?
-  equippedBanner String? // Tracks 'custom-video' or other future banners
-  bannerVideo    String? // The actual URL of the uploaded video
-  profileColor   String?
-  frameColor     String?
-  phoneNumber    String?
-  resumeURL      String?
+  equippedBanner     String? // Tracks 'custom-video' or other future banners
+  bannerVideo        String? // The actual URL of the uploaded video
+  profileColor       String?
+  frameColor         String?
+  phoneNumber        String?
+  resumeURL          String?
 
   // JSON fields for complex/nested Sanity objects
   socialLinks Json? // Array of { platform, url, icon }
@@ -83,22 +83,22 @@ model User {
   experience  Json? // Array of { jobTitle, company, startDate, endDate, isCurrent, description }
   education   Json? // Array of { degree, institution, startDate, endDate, description }
 
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  status             UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  status    UserStatus @default(ACTIVE)
 
   // Bonus Tracking
-  lastActiveAt DateTime?
-  lastLoginBonusDate DateTime? // Deprecated/Legacy
+  lastActiveAt               DateTime?
+  lastLoginBonusDate         DateTime? // Deprecated/Legacy
   lastSessionRewardClaimedAt DateTime? // New session-based tracking
-  lastUsernameChange DateTime? // Track last username change for 30-day cooldown
+  lastUsernameChange         DateTime? // Track last username change for 30-day cooldown
 
   // Gamification
-  level             Int      @default(1)
-  xp                Int      @default(0)
-  badges            Json?    // Array of { id, name, icon, awardedAt }
-  gamificationState Json?    // Internal counters: { viewedProjects: [], messageCount: 0, etc }
-  explorationProgress Int    @default(0) // 0-100 percentage
+  level               Int   @default(1)
+  xp                  Int   @default(0)
+  badges              Json? // Array of { id, name, icon, awardedAt }
+  gamificationState   Json? // Internal counters: { viewedProjects: [], messageCount: 0, etc }
+  explorationProgress Int   @default(0) // 0-100 percentage
 
   // Relations
   posts    Post[]    @relation("AuthorPosts")
@@ -114,7 +114,9 @@ model User {
   bookmarkedProjects Project[] @relation("UserBookmarksProjects")
 
   // Inventory
-  inventory UserInventory[]
+  inventory       UserInventory[]
+  digitalProducts DigitalProductOwnership[]
+  orders          Order[]
 
   // Notifications
   receivedNotifications Notification[] @relation("ReceivedNotifications")
@@ -128,7 +130,7 @@ model User {
   profileVisits   ProfileVisit[] @relation("TargetUser")
 
   // Activities (Public Feed)
-  activities    Activity[] @relation("UserActivities")
+  activities      Activity[] @relation("UserActivities")
   likedActivities Activity[] @relation("ActivityLikes")
 
   // Social (Followers/Following)
@@ -136,44 +138,44 @@ model User {
   following  User[] @relation("UserFollows")
 
   // Messaging
-  sentMessages  Message[] @relation("SentMessages")
+  sentMessages  Message[]      @relation("SentMessages")
   conversations Conversation[] @relation("ConversationParticipants")
 }
 
 model Notification {
   id        String   @id @default(cuid())
-  type      String   // like_post, comment_post, follow, system
+  type      String // like_post, comment_post, follow, system
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   recipientId String
   recipient   User   @relation("ReceivedNotifications", fields: [recipientId], references: [id])
 
-  senderId    String
-  sender      User   @relation("SentNotifications", fields: [senderId], references: [id])
+  senderId String
+  sender   User   @relation("SentNotifications", fields: [senderId], references: [id])
 
-  postId      String?
-  post        Post?   @relation(fields: [postId], references: [id])
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
 
-  projectId   String?
-  project     Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
 
-  commentId   String?
-  comment     Comment? @relation(fields: [commentId], references: [id])
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id])
 
-  details     Json?    // Context for XP/Coins: { amount: 10, reason: "Like" }
+  details Json? // Context for XP/Coins: { amount: 10, reason: "Like" }
 }
 
 model Activity {
   id        String   @id @default(cuid())
-  type      String   // badge_awarded, achievement, profile_update
-  details   Json?    // { badgeName: "Tycoon", icon: "👑" }
+  type      String // badge_awarded, achievement, profile_update
+  details   Json? // { badgeName: "Tycoon", icon: "👑" }
   createdAt DateTime @default(now())
 
-  userId    String
-  user      User     @relation("UserActivities", fields: [userId], references: [id])
+  userId String
+  user   User   @relation("UserActivities", fields: [userId], references: [id])
 
-  likedBy   User[]   @relation("ActivityLikes")
+  likedBy User[] @relation("ActivityLikes")
 }
 
 model Category {
@@ -203,9 +205,9 @@ model Project {
 
   views    Int     @default(0)
   favorite Boolean @default(false)
-  
-  status ProjectStatus @default(PUBLISHED)
-  isArchived Boolean @default(false) // Deprecated
+
+  status     ProjectStatus @default(PUBLISHED)
+  isArchived Boolean       @default(false) // Deprecated
 
   uploadDate      DateTime @default(now())
   customUpdatedAt DateTime @default(now())
@@ -271,7 +273,7 @@ model Comment {
 
   postId String?
   post   Post?   @relation(fields: [postId], references: [id])
-  
+
   notifications Notification[]
 }
 
@@ -302,8 +304,8 @@ model AppColor {
 model AppPalette {
   id        String   @id @default(cuid())
   name      String
-  colors    Json     // Array of HEX strings
-  tags      Json     // Array of tag strings
+  colors    Json // Array of HEX strings
+  tags      Json // Array of tag strings
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -323,14 +325,65 @@ model UserInventory {
 
 // Additional CMS Models
 
+model DigitalProduct {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  price       Int      @default(0)
+  currency    String   @default("IDR")
+  category    String // EBOOK, COURSE, COMPONENT, etc.
+  coverImage  String?
+  thumbnail   String?
+  fileUrl     String? // The URL to download or access the digital product
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owners DigitalProductOwnership[]
+  orders Order[]
+}
+
+model DigitalProductOwnership {
+  id         String   @id @default(cuid())
+  acquiredAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productId String
+  product   DigitalProduct @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  amount          Int
+  currency        String   @default("IDR")
+  status          String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  paymentMethod   String? // QRIS, BANK_TRANSFER, STRIPE, etc.
+  paymentProvider String? // midtrans, stripe
+  paymentId       String?  @unique // external ID from payment gateway
+  checkoutUrl     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productId String
+  product   DigitalProduct @relation(fields: [productId], references: [id])
+}
+
 model Service {
   id          String   @id @default(cuid())
   title       String
   description String?
   price       Int?
   imageUrl    String?
-  gallery     Json?    // Array of { type: 'image'|'video', url }
-  features    Json?    // Array of strings
+  gallery     Json? // Array of { type: 'image'|'video', url }
+  features    Json? // Array of strings
   buttonText  String?
   orderLink   String?
   createdAt   DateTime @default(now())
@@ -364,47 +417,45 @@ model Contact {
 }
 
 model SiteContent {
-  id             String  @id @default("main")
-  displayEmail   String?
-  phoneNumber    String?
-  resumeURL      String?
-  
-  // Hero / Profile Display
-  fullName       String?
-  headline       String?
-  bio            String?
-  aboutTitle     String?
-  location       String?
-  website        String?
-  profileImage   String?
-  bannerImage    String?
-  
-  // Collections
-  socialLinks    Json? // Array of { platform, url, icon }
-  skills         Json? // Array of { name, icon, proficiency }
-  experience     Json? // Array of { jobTitle, company, startDate, endDate, isCurrent, description }
-  education      Json? // Array of { degree, institution, startDate, endDate, description }
+  id           String  @id @default("main")
+  displayEmail String?
+  phoneNumber  String?
+  resumeURL    String?
 
-  updatedAt      DateTime @updatedAt
+  // Hero / Profile Display
+  fullName     String?
+  headline     String?
+  bio          String?
+  aboutTitle   String?
+  location     String?
+  website      String?
+  profileImage String?
+  bannerImage  String?
+
+  // Collections
+  socialLinks Json? // Array of { platform, url, icon }
+  skills      Json? // Array of { name, icon, proficiency }
+  experience  Json? // Array of { jobTitle, company, startDate, endDate, isCurrent, description }
+  education   Json? // Array of { degree, institution, startDate, endDate, description }
+
+  updatedAt DateTime @updatedAt
 }
 
 model GlobalSetting {
   id        String   @id @default("main")
-  theme     Json?    // Stores { primary, secondary, accent, darkPrimary, darkSecondary, darkAccent }
+  theme     Json? // Stores { primary, secondary, accent, darkPrimary, darkSecondary, darkAccent }
   updatedAt DateTime @updatedAt
 }
-
-
 
 model ProjectView {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
 
   @@unique([userId, projectId]) // Ensure unique view per user per project
 }
@@ -414,10 +465,10 @@ model ProfileVisit {
   createdAt DateTime @default(now())
 
   visitorId String
-  visitor   User     @relation("Visitor", fields: [visitorId], references: [id])
+  visitor   User   @relation("Visitor", fields: [visitorId], references: [id])
 
   targetUserId String
-  targetUser   User    @relation("TargetUser", fields: [targetUserId], references: [id])
+  targetUser   User   @relation("TargetUser", fields: [targetUserId], references: [id])
 
   @@unique([visitorId, targetUserId])
 }
@@ -434,26 +485,26 @@ model Rank {
 }
 
 model PortfolioConfig {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  isEnabled   Boolean  @default(false)
-  domain      String?  // custom domain if supported later
-  
+  isEnabled Boolean @default(false)
+  domain    String? // custom domain if supported later
+
   // Theme & Style
   layoutType   String  @default("minimal") // minimal, magazine, grid
   primaryColor String? // Hex code
-  fontFamily   String  @default("sans")    // sans, serif, mono, display
-  
+  fontFamily   String  @default("sans") // sans, serif, mono, display
+
   // Advanced Customization
   heroAlign      String @default("center") // left, center, right
-  gridCols       Int    @default(3)        // 2, 3, 4
-  borderRadius   String @default("xl")     // none, sm, md, lg, xl, full
+  gridCols       Int    @default(3) // 2, 3, 4
+  borderRadius   String @default("xl") // none, sm, md, lg, xl, full
   glassIntensity String @default("medium") // none, low, medium, high
   animationStyle String @default("dynamic") // none, fade, slide, dynamic
-  bgPattern      String @default("mesh")    // none, mesh, dots, grid, noise
-  
+  bgPattern      String @default("mesh") // none, mesh, dots, grid, noise
+
   // Branding
   displayName String?
   logo        String? // URL
@@ -462,7 +513,7 @@ model PortfolioConfig {
   secondaryColor String? // Secondary background or element color
   accentColor    String? // Buttons, links, highlights
   textColor      String? // Main text color
-  
+
   // Content Sections
   // Hero
   showHero        Boolean @default(true)
@@ -475,57 +526,57 @@ model PortfolioConfig {
   aboutTitle       String?
   aboutDescription String?
   aboutImage       String?
-  
+
   // Works
   showWorks        Boolean @default(true)
   worksTitle       String?
   worksDescription String?
-  
+
   // Testimony
   showTestimony    Boolean @default(true)
   testimonyTitle   String?
-  testimonyContent Json?   // Array of { name, role, content, image }
+  testimonyContent Json? // Array of { name, role, content, image }
 
   // Contact
-  showResume      Boolean @default(true)
-  showContact     Boolean @default(true)
-  contactTitle    String?
-  contactEmail    String?
-  location        String?
-  googleMapsUrl   String?
-  socials         Json?    // Array of { platform: string, url: string }
-  
+  showResume    Boolean @default(true)
+  showContact   Boolean @default(true)
+  contactTitle  String?
+  contactEmail  String?
+  location      String?
+  googleMapsUrl String?
+  socials       Json? // Array of { platform: string, url: string }
+
   // Featured Projects (IDs)
   featuredProjectIds Json? // Array of strings
-  
+
   // Custom Gallery
-  gallery            Json? // Array of { url, title, description, width, height }
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  gallery Json? // Array of { url, title, description, width, height }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Messaging Models
 
 model Conversation {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   participants User[]    @relation("ConversationParticipants")
   messages     Message[]
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  attachment String?
+  id             String   @id @default(cuid())
+  content        String
+  attachment     String?
   attachmentType String? // image, file
-  createdAt DateTime @default(now())
-  isRead    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  isRead         Boolean  @default(false)
 
-  senderId  String
-  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
 
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id])
@@ -550,6 +601,6 @@ model PasswordResetToken {
 
 model SiteVisit {
   id        String   @id @default(cuid())
-  path      String   // e.g. "/", "/works", "/about"
+  path      String // e.g. "/", "/works", "/about"
   createdAt DateTime @default(now())
 }

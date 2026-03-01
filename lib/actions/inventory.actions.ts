@@ -172,3 +172,48 @@ export async function updateFrameColor(userId: string, color: string) {
         return { success: false, error: "Failed to update frame color" };
     }
 }
+/**
+ * Fetches all digital products owned by the currently authenticated user.
+ */
+export async function getUserDigitalInventory() {
+    try {
+        const session = await auth();
+
+        if (!session?.user?.id) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const ownedProducts = await prisma.digitalProductOwnership.findMany({
+            where: {
+                userId: session.user.id
+            },
+            include: {
+                product: true
+            },
+            orderBy: {
+                acquiredAt: "desc"
+            }
+        });
+
+        // Ensure serialization of dates
+        const serialized = ownedProducts.map(op => ({
+            ...op,
+            acquiredAt: op.acquiredAt.toISOString(),
+            product: {
+                ...op.product,
+                createdAt: op.product.createdAt.toISOString(),
+                updatedAt: op.product.updatedAt.toISOString(),
+            }
+        }));
+
+        return {
+            success: true,
+            inventory: serialized
+        };
+
+    } catch (error: any) {
+        console.error("Failed to fetch user digital inventory:", error);
+        return { success: false, error: "Failed to fetch digital inventory data." };
+    }
+}
+

@@ -18,6 +18,11 @@ export type ThemeConfig = {
     glassOpacity: number; // 0 to 1
     glassSaturation: number; // %
 
+    // Typography
+    fontHeading?: string; // Google Fonts family name for headings
+    fontBody?: string;    // Google Fonts family name for body text
+    fontMono?: string;    // Google Fonts family name for monospace
+
     // Sidebar Specific
     sidebarBg: string;
     sidebarFg: string;
@@ -65,6 +70,11 @@ export const DEFAULT_THEME: ThemeConfig = {
     glassOpacity: 0.25,
     glassSaturation: 150,
 
+    // Default fonts — keep existing Geist feel
+    fontHeading: "Inter",
+    fontBody: "Inter",
+    fontMono: "JetBrains Mono",
+
     sidebarBg: "#ffffff",
     sidebarFg: "#1f2937",
     sidebarBorder: "#e5e7eb",
@@ -86,3 +96,4 @@ export const DEFAULT_THEME: ThemeConfig = {
     darkSidebarAccent: "#2dd4bf",
     darkSidebarActive: "#2d2d2d",
 };
+

@@ -36,7 +36,7 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
                         <div className="p-2 bg-[var(--site-primary)]/20 rounded-lg text-[var(--site-secondary)]">
                             <Layout size={18} />
                         </div>
-                        <h3 className="font-bold text-white text-base">{t.my_portfolio || "My Portfolio"}</h3>
+                        <h3 className="font-bold text-slate-900 dark:text-white text-base">{t.my_portfolio || "My Portfolio"}</h3>
                     </div>
                     {isEnabled ? (
                         <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
@@ -49,7 +49,7 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
                     )}
                 </div>
 
-                <p className="text-sm text-slate-300 mb-4 line-clamp-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 line-clamp-2">
                     {isEnabled
                         ? (t.portfolio_active_desc || "Your professional landing page is live. Share it with the world!")
                         : (t.portfolio_inactive_desc || "Your portfolio is currently hidden from the public. Enable it in the editor.")}
@@ -58,9 +58,9 @@ export default function PortfolioWidget({ user, dict }: PortfolioWidgetProps) {
                 <div className="grid grid-cols-2 gap-3">
                     <Link
                         href={`/profile/${user.username}/portfolio`}
-                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white text-xs font-bold transition-all border ${isEnabled
-                            ? "bg-white/10 hover:bg-white/20 border-white/5"
-                            : "bg-white/5 hover:bg-white/10 border-white/10 opacity-50"
+                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-slate-800 dark:text-white text-xs font-bold transition-all border ${isEnabled
+                            ? "bg-white/50 hover:bg-white/80 dark:bg-white/10 dark:hover:bg-white/20 border-black/5 dark:border-white/5"
+                            : "bg-white/20 hover:bg-white/50 dark:bg-white/5 dark:hover:bg-white/10 border-black/10 dark:border-white/10 opacity-50"
                             }`}
                     >
                         <ExternalLink size={14} />

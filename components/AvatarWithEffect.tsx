@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 
 interface AvatarWithEffectProps {
     src?: string | null;
@@ -27,7 +27,13 @@ export default function AvatarWithEffect({
     frameColor
 }: AvatarWithEffectProps) {
     const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || "User")}&background=random`;
-    const imageSrc = src || defaultImage;
+    const [imageSrc, setImageSrc] = useState(src || defaultImage);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        setImageSrc(src || defaultImage);
+        setHasError(false);
+    }, [src, defaultImage]);
 
     // Resolve what to show
     const activeBackground = background || effect;
@@ -90,12 +96,16 @@ export default function AvatarWithEffect({
                 )}
 
                 <div className="w-full h-full rounded-full overflow-hidden bg-black/20 relative z-10">
-                    <Image
+                    <img
                         src={imageSrc}
                         alt={alt || "Avatar"}
-                        fill
-                        className="object-cover"
-                        sizes={`${size}px`}
+                        className="w-full h-full object-cover"
+                        onError={() => {
+                            if (!hasError) {
+                                setImageSrc(defaultImage);
+                                setHasError(true);
+                            }
+                        }}
                     />
                 </div>
             </div>

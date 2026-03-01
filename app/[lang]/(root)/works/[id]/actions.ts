@@ -1,15 +1,15 @@
 "use server";
 
-import { writeClient } from "@/sanity/lib/write-client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
 export async function incrementViews(projectId: string) {
     try {
-        await writeClient
-            .patch(projectId)
-            .inc({ views: 1 })
-            .commit();
+        await prisma.project.update({
+            where: { id: projectId },
+            data: { views: { increment: 1 } },
+        });
     } catch (error) {
         console.error("Error incrementing views:", error);
     }
@@ -24,26 +24,31 @@ export async function toggleLike(projectId: string) {
     const userId = session.user.id;
 
     try {
-        const project = await writeClient.getDocument(projectId);
-        const likes = project?.likes || [];
-        const hasLiked = likes.some((ref: any) => ref._ref === userId);
+        const project = await prisma.project.findUnique({
+            where: { id: projectId },
+            include: { likedBy: { where: { id: userId } } },
+        });
+
+        if (!project) return { error: "Project not found" };
+
+        const hasLiked = project.likedBy.length > 0;
 
         if (hasLiked) {
             // Remove like
-            await writeClient
-                .patch(projectId)
-                .unset([`likes[_ref=="${userId}"]`])
-                .commit();
+            await prisma.project.update({
+                where: { id: projectId },
+                data: { likedBy: { disconnect: { id: userId } } },
+            });
         } else {
             // Add like
-            await writeClient
-                .patch(projectId)
-                .setIfMissing({ likes: [] })
-                .append("likes", [{ _type: "reference", _ref: userId }])
-                .commit();
+            await prisma.project.update({
+                where: { id: projectId },
+                data: { likedBy: { connect: { id: userId } } },
+            });
         }
 
         revalidatePath(`/works/${projectId}`);
+        // Can optionally trigger gamification routines here or rely on the primary like action.
         return { success: true, hasLiked: !hasLiked };
     } catch (error) {
         console.error("Error toggling like:", error);
@@ -62,12 +67,12 @@ export async function postComment(projectId: string, text: string) {
     }
 
     try {
-        await writeClient.create({
-            _type: "comment",
-            text,
-            project: { _type: "reference", _ref: projectId },
-            user: { _type: "reference", _ref: session.user.id },
-            createdAt: new Date().toISOString(),
+        await prisma.comment.create({
+            data: {
+                text,
+                projectId,
+                userId: session.user.id,
+            },
         });
 
         revalidatePath(`/works/${projectId}`);

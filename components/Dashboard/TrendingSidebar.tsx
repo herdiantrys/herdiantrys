@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { TrendingPost } from "@/lib/actions/trending.actions";
 import { Flame, Heart, MessageSquare } from "lucide-react";
-import { urlFor } from "@/sanity/lib/image";
 
 export default function TrendingSidebar({ posts, dict }: { posts: TrendingPost[], dict?: any }) {
     const t = dict?.dashboard || {};
@@ -28,7 +27,7 @@ export default function TrendingSidebar({ posts, dict }: { posts: TrendingPost[]
                             <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden border border-white/10 bg-white/5">
                                 {post.image ? (
                                     <img
-                                        src={urlFor(post.image).width(100).url()}
+                                        src={post.image}
                                         alt="Post content"
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />

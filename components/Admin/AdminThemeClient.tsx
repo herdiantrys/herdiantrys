@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Save, RefreshCcw, Palette, Sun, Moon, Info } from "lucide-react";
+import { Save, RefreshCcw, Palette, Sun, Moon, Info, Type } from "lucide-react";
 import { updateGlobalTheme } from "@/lib/actions/settings.actions";
 import { ThemeConfig, DEFAULT_THEME } from "@/lib/types/theme";
 
@@ -82,7 +82,7 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
         }
     };
 
-    const [activeTab, setActiveTab] = useState<"light" | "dark" | "interface">("light");
+    const [activeTab, setActiveTab] = useState<"light" | "dark" | "interface" | "typography">("light");
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -141,6 +141,12 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
                             onClick={() => setActiveTab("interface")}
                             icon={<Palette size={16} className={activeTab === "interface" ? "text-pink-400" : ""} />}
                             label="Interface"
+                        />
+                        <TabButton
+                            active={activeTab === "typography"}
+                            onClick={() => setActiveTab("typography")}
+                            icon={<Type size={16} className={activeTab === "typography" ? "text-blue-400" : ""} />}
+                            label="Typografi"
                         />
                     </div>
 
@@ -317,6 +323,65 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
                                                 Interactive
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "typography" && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <div className="bg-white/5 dark:bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10 space-y-6">
+                                    <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+                                        <Type className="text-blue-400" />
+                                        <div>
+                                            <h2 className="text-xl font-bold">Typografi</h2>
+                                            <p className="text-[11px] text-[var(--glass-text-muted)] mt-0.5">Font dimuat dari Google Fonts dan berlaku di seluruh website secara instan.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <FontPicker
+                                            label="Heading Font"
+                                            value={theme.fontHeading ?? "Inter"}
+                                            onChange={(v) => handleChange('fontHeading', v)}
+                                            description="Digunakan untuk h1–h6 di seluruh website"
+                                        />
+                                        <FontPicker
+                                            label="Body Font"
+                                            value={theme.fontBody ?? "Inter"}
+                                            onChange={(v) => handleChange('fontBody', v)}
+                                            description="Digunakan untuk paragraf dan teks umum"
+                                        />
+                                        <FontPicker
+                                            label="Monospace Font"
+                                            value={theme.fontMono ?? "JetBrains Mono"}
+                                            onChange={(v) => handleChange('fontMono', v)}
+                                            description="Digunakan untuk code, pre, dan elemen keyboard"
+                                            isMono
+                                        />
+                                    </div>
+
+                                    {/* Live Font Preview */}
+                                    <div className="mt-2 p-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 space-y-3">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--glass-text-muted)] mb-4">Live Preview</p>
+                                        <h3
+                                            className="text-3xl font-bold text-[var(--glass-text)] leading-tight"
+                                            style={{ fontFamily: `'${theme.fontHeading ?? "Inter"}', sans-serif` }}
+                                        >
+                                            The quick brown fox
+                                        </h3>
+                                        <p
+                                            className="text-sm text-[var(--glass-text-muted)] leading-relaxed"
+                                            style={{ fontFamily: `'${theme.fontBody ?? "Inter"}', sans-serif` }}
+                                        >
+                                            Jumps over the lazy dog. 1234567890
+                                        </p>
+                                        <code
+                                            className="text-xs text-[var(--glass-text-muted)] mt-2 block"
+                                            style={{ fontFamily: `'${theme.fontMono ?? "JetBrains Mono"}', monospace` }}
+                                        >
+                                            {`const greet = () => "Hello, World!";`}
+                                        </code>
                                     </div>
                                 </div>
                             </div>
@@ -518,3 +583,88 @@ function RangePicker({ label, value, min, max, step, onChange, suffix = "", desc
         </div>
     );
 }
+
+// ── Curated font list ─────────────────────────────────────────────────────────
+const SANS_FONTS = [
+    "Inter", "Plus Jakarta Sans", "Outfit", "DM Sans", "Space Grotesk",
+    "Geist", "Poppins", "Nunito", "Raleway", "Figtree",
+    "Sora", "Manrope", "Be Vietnam Pro", "Urbanist", "Lexend",
+];
+const SERIF_FONTS = [
+    "Playfair Display", "Merriweather", "Lora", "DM Serif Display",
+    "Cormorant Garamond", "Libre Baskerville", "Crimson Pro",
+];
+const MONO_FONTS = [
+    "JetBrains Mono", "Fira Code", "Source Code Pro", "IBM Plex Mono",
+    "Cascadia Code", "Space Mono", "Roboto Mono",
+];
+const ALL_FONTS = [...SANS_FONTS, ...SERIF_FONTS, ...MONO_FONTS];
+
+function FontPicker({
+    label, value, onChange, description, isMono = false
+}: {
+    label: string; value: string; onChange: (v: string) => void;
+    description: string; isMono?: boolean;
+}) {
+    const fontList = isMono ? MONO_FONTS : [...SANS_FONTS, ...SERIF_FONTS];
+
+    // Pre-load preview fonts on mount
+    if (typeof window !== "undefined") {
+        fontList.forEach(family => {
+            const id = `gfont-admin-${family.replace(/\s+/g, "-").toLowerCase()}`;
+            if (!document.getElementById(id)) {
+                const link = document.createElement("link");
+                link.id = id;
+                link.rel = "stylesheet";
+                link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s/g, "+")}:wght@400;700&display=swap`;
+                document.head.appendChild(link);
+            }
+        });
+    }
+
+    return (
+        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all">
+            <div className="flex justify-between items-start">
+                <div>
+                    <span className="text-sm font-bold block">{label}</span>
+                    <span className="text-[10px] text-[var(--glass-text-muted)]">{description}</span>
+                </div>
+                <span
+                    className="text-sm font-semibold text-[var(--glass-text-muted)] shrink-0 ml-4"
+                    style={{ fontFamily: `'${value}', sans-serif` }}
+                >
+                    {value}
+                </span>
+            </div>
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full mt-1 px-3 py-2.5 rounded-xl text-sm font-medium bg-white/10 dark:bg-black/30 border border-white/10 text-[var(--glass-text)] focus:outline-none focus:ring-2 focus:ring-teal-500/40 cursor-pointer"
+                style={{ fontFamily: `'${value}', sans-serif` }}
+            >
+                {!isMono && (
+                    <optgroup label="Sans-Serif">
+                        {SANS_FONTS.map(f => (
+                            <option key={f} value={f} style={{ fontFamily: `'${f}', sans-serif` }}>{f}</option>
+                        ))}
+                    </optgroup>
+                )}
+                {!isMono && (
+                    <optgroup label="Serif">
+                        {SERIF_FONTS.map(f => (
+                            <option key={f} value={f} style={{ fontFamily: `'${f}', serif` }}>{f}</option>
+                        ))}
+                    </optgroup>
+                )}
+                {isMono && (
+                    <optgroup label="Monospace">
+                        {MONO_FONTS.map(f => (
+                            <option key={f} value={f} style={{ fontFamily: `'${f}', monospace` }}>{f}</option>
+                        ))}
+                    </optgroup>
+                )}
+            </select>
+        </div>
+    );
+}
+

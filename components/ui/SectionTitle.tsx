@@ -51,27 +51,37 @@ export const SectionTitle = ({
                 className="w-24 h-1 bg-[var(--site-secondary)] mb-6 rounded-full"
             />
 
-            {/* Main Title with Parallax */}
-            <motion.div style={{ y: yTitle, opacity }}>
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 leading-tight">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-gray-200 dark:to-gray-400 drop-shadow-2xl">
+            {/* Main Title with Coordinated Reveal */}
+            <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-10%" }}
+                variants={{
+                    hidden: { opacity: 0, y: 20, filter: "blur(12px)" },
+                    visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } }
+                }}
+            >
+                <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 leading-tight">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-gray-200 dark:to-gray-400 drop-shadow-sm">
                         {title}
                     </span>
                 </h2>
             </motion.div>
 
-            {/* Subtitle with Reveal */}
+            {/* Subtitle with Coordinated Reveal */}
             {subtitle && (
-                <motion.div style={{ y: ySubtitle, opacity }}>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2, duration: 0.8 }}
-                        className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light tracking-wide"
-                    >
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-10%" }}
+                    variants={{
+                        hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
+                        visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] } }
+                    }}
+                >
+                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light tracking-wide">
                         {subtitle}
-                    </motion.p>
+                    </p>
                 </motion.div>
             )}
         </div>

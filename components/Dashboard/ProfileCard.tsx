@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Camera, Edit, MapPin, Link as LinkIcon, Coins, MessageSquare } from "lucide-react";
-import { urlFor } from "@/sanity/lib/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import EditProfileModal from "./EditProfileModal";
@@ -102,7 +101,7 @@ export default function ProfileCard({
         if (typeof image === 'string') return image;
         if (image?.asset?.url) return image.asset.url;
         try {
-            return urlFor(image).width(width).url();
+            return image;
         } catch (e) {
             return null;
         }
@@ -121,7 +120,7 @@ export default function ProfileCard({
                 card.style.setProperty("--mouse-x", `${x}px`);
                 card.style.setProperty("--mouse-y", `${y}px`);
             }}
-            className={`bg-white/5 dark:bg-black/40 backdrop-blur-3xl border border-white/10 flex flex-col items-center text-center relative overflow-hidden transition-all duration-500 rounded-2xl group/profile-card ${isUploading ? 'animate-pulse' : ''} ${isCollapsed ? 'p-2' : ''}`}
+            className={`bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/10 flex flex-col items-center text-center relative overflow-hidden transition-all duration-500 rounded-2xl group/profile-card ${isUploading ? 'animate-pulse' : ''} ${isCollapsed ? 'p-2' : ''}`}
         >
             {/* Dynamic Spotlight Effect */}
             <div
@@ -152,7 +151,7 @@ export default function ProfileCard({
                             className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
                         />
                     ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/20 dark:from-black/60 dark:via-black/20 to-transparent" />
 
                     {/* Decorative Arcane Orb */}
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--site-secondary)]/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
@@ -207,14 +206,14 @@ export default function ProfileCard({
                     <div className={`relative w-full h-full rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden
                          ${(user.equippedFrame) && !(user.equippedFrame?.startsWith('/') || user.equippedFrame?.startsWith('http')) && user.equippedFrame !== 'custom-color'
                             ? `p-1.5 bg-gradient-to-br ${user.equippedFrame}`
-                            : 'border-[6px] border-[#121212] bg-[#121212]'} 
-                         ${user.equippedFrame === 'custom-color' ? 'p-1.5' : ''}
-                         ${!isPublic ? 'hover:scale-105 transition-transform' : ''}
+                            : 'border-[6px] border-white dark:border-[#121212] bg-white dark:bg-[#121212]'}
+                        ${user.equippedFrame === 'custom-color' ? 'p-1.5' : ''}
+                        ${!isPublic ? 'hover:scale-105 transition-transform' : ''}
                     `}
                         style={user.equippedFrame === 'custom-color' && user.frameColor ? { background: `linear-gradient(135deg, ${user.frameColor}, ${user.frameColor})` } : {}}
                     >
 
-                        <div className="w-full h-full rounded-full overflow-hidden relative bg-[#1a1a1a] p-1">
+                        <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-100 dark:bg-[#1a1a1a] p-1">
 
                             {user.equippedFrame && (user.equippedFrame.startsWith('http') || user.equippedFrame.startsWith('/')) && (
                                 <div className="absolute inset-0 z-20 pointer-events-none">
@@ -257,7 +256,7 @@ export default function ProfileCard({
                         className="w-full"
                     >
                         <div className="mb-4">
-                            <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-sm mb-0.5">{user.fullName}</h2>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight drop-shadow-sm mb-0.5">{user.fullName}</h2>
                             <p className="text-xs font-bold text-[var(--site-secondary)] uppercase tracking-widest opacity-80">@{user.username}</p>
                         </div>
 
@@ -270,7 +269,7 @@ export default function ProfileCard({
                             </div>
                             <div className="flex flex-col items-start leading-none">
                                 <span className="text-[10px] text-[var(--site-accent)]/60 font-black uppercase tracking-tighter mb-1">{dict?.profile_card?.soul_fortune || "Soul Fortune"}</span>
-                                <span className="font-black text-lg text-white font-mono tracking-tight underline decoration-[var(--site-accent)]/30 decoration-2 underline-offset-4">
+                                <span className="font-black text-lg text-slate-800 dark:text-white font-mono tracking-tight underline decoration-[var(--site-accent)]/30 decoration-2 underline-offset-4">
                                     {formatNumber(points)} <span className="text-sm font-bold text-[var(--site-accent)]/80">R</span>
                                 </span>
                             </div>
@@ -278,7 +277,7 @@ export default function ProfileCard({
 
                         {user.headline && (
                             <div className="mb-6 relative">
-                                <p className="text-sm text-slate-300 italic px-6 leading-relaxed">
+                                <p className="text-sm text-slate-600 dark:text-slate-300 italic px-6 leading-relaxed">
                                     <span className="text-2xl text-[var(--site-secondary)] opacity-20 absolute -top-2 left-2 font-serif">"</span>
                                     {user.headline}
                                     <span className="text-2xl text-[var(--site-secondary)] opacity-20 absolute -bottom-6 right-2 font-serif">"</span>
@@ -288,10 +287,10 @@ export default function ProfileCard({
 
                         {/* Location and Links - Card within Card style */}
                         {(user.location || (user.socialLinks && user.socialLinks.length > 0)) && (
-                            <div className="bg-black/20 rounded-2xl p-4 border border-white/5 mb-6 backdrop-blur-sm">
+                            <div className="bg-slate-100/50 dark:bg-black/20 rounded-2xl p-4 border border-black/5 dark:border-white/5 mb-6 backdrop-blur-sm">
                                 <div className="flex flex-col gap-3 text-xs">
                                     {user.location && (
-                                        <div className="flex items-center justify-center gap-2 text-slate-400">
+                                        <div className="flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400">
                                             <MapPin size={12} className="text-[var(--site-secondary)]" />
                                             <span className="font-bold tracking-tight">{user.location}</span>
                                         </div>
@@ -306,7 +305,7 @@ export default function ProfileCard({
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1.5 text-slate-500 hover:text-[var(--site-secondary)] transition-all font-bold group/link"
                                                 >
-                                                    <div className="p-1 rounded bg-white/5 group-hover/link:bg-[var(--site-secondary)]/10">
+                                                    <div className="p-1 rounded bg-black/5 dark:bg-white/5 group-hover/link:bg-[var(--site-secondary)]/10">
                                                         <LinkIcon size={10} />
                                                     </div>
                                                     <span>{link.platform || "Link"}</span>
@@ -326,8 +325,8 @@ export default function ProfileCard({
                                 { label: dict?.profile_card?.stats?.likes || 'Likes', value: user.stats?.likes || 0 },
                                 { label: dict?.profile_card?.stats?.talks || 'Talks', value: user.stats?.comments || 0 },
                             ].map((stat, i) => (
-                                <div key={i} className="flex flex-col items-center p-2 rounded-xl bg-white/[0.02] border border-white/5 group/stat hover:bg-white/[0.05] transition-all">
-                                    <span className="font-black text-lg text-white group-hover/stat:text-[var(--site-secondary)] transition-colors leading-none mb-1">
+                                <div key={i} className="flex flex-col items-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group/stat hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-all">
+                                    <span className="font-black text-lg text-slate-800 dark:text-white group-hover/stat:text-[var(--site-secondary)] transition-colors leading-none mb-1">
                                         {stat.value}
                                     </span>
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{stat.label}</span>
@@ -357,28 +356,30 @@ export default function ProfileCard({
                                     ) : (
                                         <button
                                             onClick={() => setIsEditOpen(true)}
-                                            className="w-full py-3.5 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-xs"
+                                            className="w-full py-3.5 px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white font-black uppercase tracking-[0.2em] text-xs hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                                         >
                                             {dict?.profile_card?.actions?.edit_essence || "Edit Essence"}
                                         </button>
                                     )}
-                                    <button
-                                        onClick={() => {
-                                            window.dispatchEvent(new CustomEvent('open-direct-message', {
-                                                detail: { recipientId: user.id || user._id }
-                                            }));
-                                        }}
-                                        className="w-full py-3 px-6 rounded-2xl bg-white/10 border border-white/10 hover:border-[var(--site-secondary)]/50 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-2 group/msg"
-                                    >
-                                        <MessageSquare size={14} className="group-hover/msg:scale-110 transition-transform" />
-                                        <span>{dict?.profile_card?.actions?.send_message || "Send Message"}</span>
-                                    </button>
+                                    {currentUserId !== (user._id || user.id) && (
+                                        <button
+                                            onClick={() => {
+                                                window.dispatchEvent(new CustomEvent('open-direct-message', {
+                                                    detail: { recipientId: user.id || user._id }
+                                                }));
+                                            }}
+                                            className="w-full py-3 px-6 rounded-2xl bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:border-[var(--site-secondary)]/50 text-slate-700 dark:text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-2 group/msg"
+                                        >
+                                            <MessageSquare size={14} className="group-hover/msg:scale-110 transition-transform" />
+                                            <span>{dict?.profile_card?.actions?.send_message || "Send Message"}</span>
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
                                 isProfilePage ? (
                                     <button
                                         onClick={() => setIsEditOpen(true)}
-                                        className="w-full group/btn relative py-3.5 px-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--site-secondary)]/40 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden shadow-xl"
+                                        className="w-full group/btn relative py-3.5 px-6 rounded-2xl bg-slate-100 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:border-[var(--site-secondary)]/40 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden shadow-xl"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--site-secondary)]/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                                         <Edit size={16} className="text-[var(--site-secondary)] relative z-10" />

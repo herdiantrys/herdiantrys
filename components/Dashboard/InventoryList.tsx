@@ -186,8 +186,8 @@ export default function InventoryList({
 
     if (!inventory || inventory.length === 0) {
         return (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center flex flex-col items-center">
-                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-500">
+            <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-12 text-center flex flex-col items-center">
+                <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-500">
                     <Sparkles size={32} />
                 </div>
                 <p className="text-[var(--glass-text)] text-lg mb-2">Inventory is empty</p>
@@ -199,7 +199,7 @@ export default function InventoryList({
     return (
         <div className="space-y-6">
             {/* Filter Tabs */}
-            <div className="flex p-1 bg-black/20 rounded-xl w-fit">
+            <div className="flex p-1 bg-black/5 dark:bg-black/20 rounded-xl w-fit">
                 {(['ALL', 'FRAME', 'BACKGROUND'] as const).map((type) => (
                     <button
                         key={type}
@@ -208,7 +208,7 @@ export default function InventoryList({
                             px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300
                             ${filter === type
                                 ? "bg-[var(--site-secondary)] text-white shadow-md"
-                                : "text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-white/5"
+                                : "text-[var(--glass-text-muted)] hover:text-[var(--glass-text)] hover:bg-black/5 hover:dark:bg-white/5"
                             }
                         `}
                     >

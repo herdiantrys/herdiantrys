@@ -42,10 +42,9 @@ export const InventoryCard = ({
             whileHover={{ scale: 1.02 }}
             className={`
                 group relative p-4 font-mono select-none flex flex-col h-full
-                ${isEquipped ? "opacity-100" : "opacity-80 hover:opacity-100"}
+                ${isEquipped ? "opacity-100 bg-white dark:bg-[#1e293b]" : "opacity-80 hover:opacity-100 bg-slate-100 dark:bg-[#0f172a]"}
             `}
             style={{
-                backgroundColor: isEquipped ? '#1e293b' : '#0f172a',
                 // 8-bit border effect
                 boxShadow: `
                     -2px 0 0 0 black,
@@ -78,7 +77,7 @@ export const InventoryCard = ({
 
             <div className="relative z-10 flex flex-col h-full gap-4">
                 {/* 1. Top: Image/Icon Area */}
-                <div className="w-full aspect-square bg-black/40 relative flex items-center justify-center overflow-hidden border-2 border-dashed border-white/10 group-hover:border-white/20 transition-colors">
+                <div className="w-full aspect-square bg-black/5 dark:bg-black/40 relative flex items-center justify-center overflow-hidden border-2 border-dashed border-black/10 dark:border-white/10 group-hover:border-black/20 dark:group-hover:border-white/20 transition-colors">
                     {item.type === "FRAME" ? (
                         <div className="relative w-1/2 h-1/2">
                             {/* Frame Preview Container */}
@@ -102,7 +101,7 @@ export const InventoryCard = ({
 
                 {/* 2. Middle: Info */}
                 <div className="flex-1 flex flex-col gap-1 text-center">
-                    <h3 className={`text-sm font-bold uppercase tracking-wide break-words ${isEquipped ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-400"}`}>
+                    <h3 className={`text-sm font-bold uppercase tracking-wide break-words ${isEquipped ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)] dark:drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-600 dark:text-slate-400"}`}>
                         {item.name}
                     </h3>
                     <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2">
@@ -112,14 +111,14 @@ export const InventoryCard = ({
 
                 {/* 3. Configuration Area (Collapsible) */}
                 {(isEquipped && isOwner) && (
-                    <div className="w-full bg-black/20 p-2 border border-white/5">
+                    <div className="w-full bg-black/5 dark:bg-black/20 p-2 border border-black/5 dark:border-white/5">
                         {isCustomColorItem && (
                             <div className="relative flex items-center gap-2">
                                 <div
-                                    className="w-4 h-4 border border-white/20 shadow-sm shrink-0"
+                                    className="w-4 h-4 border border-black/10 dark:border-white/20 shadow-sm shrink-0"
                                     style={{ backgroundColor: color || '#000000' }}
                                 />
-                                <span className="text-[10px] text-slate-400 truncate flex-1">{color || 'No Color'}</span>
+                                <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate flex-1">{color || 'No Color'}</span>
                                 <input
                                     type="color"
                                     value={color || "#000000"}
@@ -163,7 +162,7 @@ export const InventoryCard = ({
                         className={`
                             w-full py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:translate-y-0.5 active:shadow-none
                             ${isEquipped
-                                ? "bg-red-900 text-red-200 border-b-2 border-red-950 hover:bg-red-800"
+                                ? "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200 border-b-2 border-red-200 dark:border-red-950 hover:bg-red-200 dark:hover:bg-red-800"
                                 : "bg-[var(--site-secondary)] text-white border-b-2 border-[var(--site-secondary)] hover:opacity-90"
                             }
                             disabled:opacity-50 disabled:cursor-not-allowed

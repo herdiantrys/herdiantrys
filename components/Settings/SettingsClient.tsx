@@ -153,20 +153,20 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
     };
 
     const renderTabs = () => (
-        <div className="flex p-1.5 bg-black/20 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 mb-8 overflow-x-auto no-scrollbar">
+        <div className="flex p-1.5 bg-slate-100/50 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-slate-200/50 dark:border-white/10 mb-8 overflow-x-auto shadow-sm no-scrollbar">
             {(["profile", "account", "interface", "notifications"] as const).map((tab) => (
                 <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all relative font-bold text-sm whitespace-nowrap ${activeTab === tab
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all relative z-10 font-bold text-sm whitespace-nowrap ${activeTab === tab
+                        ? "text-slate-900 dark:text-white text-shadow-sm"
+                        : "text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:text-white text-shadow-sm"
                         }`}
                 >
                     {activeTab === tab && (
                         <motion.div
                             layoutId="activeTabSettings"
-                            className="absolute inset-0 bg-white/10 dark:bg-white/10 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-white/10"
+                            className="absolute inset-0 bg-white dark:bg-white/10 rounded-xl shadow-sm dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-slate-200/50 dark:border-white/10 -z-10"
                             transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                         />
                     )}
@@ -174,7 +174,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                     {tab === "account" && <Shield size={16} />}
                     {tab === "interface" && <Palette size={16} />}
                     {tab === "notifications" && <Bell size={16} />}
-                    <span className="relative z-10 uppercase tracking-widest text-[10px]">
+                    <span className="relative uppercase tracking-widest text-[10px]">
                         {tabs[tab] || tab}
                     </span>
                 </button>
@@ -185,10 +185,10 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
     return (
         <div className="max-w-4xl mx-auto px-4">
             <header className="mb-10 text-center sm:text-left">
-                <h1 className="text-4xl font-black tracking-tighter text-foreground mb-2 drop-shadow-sm">
+                <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2 drop-shadow-sm">
                     {ds.title || "Settings"}
                 </h1>
-                <p className="text-muted-foreground font-medium">
+                <p className="text-slate-500 dark:text-gray-400 font-medium">
                     {ds.description || "Manage your account and preferences."}
                 </p>
             </header>
@@ -205,86 +205,86 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                 >
                     {activeTab === "profile" && (
                         <div className="space-y-6">
-                            <div className="glass-liquid p-8 rounded-[2.5rem] border border-white/20 dark:border-white/10 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 blur-[100px] -z-10" />
+                            <div className="bg-white/80 dark:bg-[#1A1A1A]/40 backdrop-blur-2xl border border-slate-200/70 dark:border-white/10 p-8 rounded-[2.5rem] shadow-xl dark:shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/20 dark:bg-teal-500/5 blur-[100px] -z-10" />
 
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="p-3 bg-teal-500/10 rounded-2xl text-teal-400">
+                                    <div className="p-3 bg-teal-100 dark:bg-teal-500/10 rounded-2xl text-teal-600 dark:text-teal-400">
                                         <User size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black tracking-tight">{ds.profile?.title || "Public Profile"}</h3>
-                                        <p className="text-sm text-muted-foreground">{ds.profile?.subtitle || "How you appear to the world."}</p>
+                                        <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">{ds.profile?.title || "Public Profile"}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-gray-400">{ds.profile?.subtitle || "How you appear to the world."}</p>
                                     </div>
                                 </div>
 
                                 <form onSubmit={handleProfileSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.profile?.display_name || "Display Name"}
                                         </label>
                                         <input
                                             type="text"
                                             value={profileData.fullName}
                                             onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                                            className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-muted-foreground/30"
+                                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-slate-400 dark:placeholder-gray-500"
                                             placeholder="Enter your full name"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.profile?.headline || "Headline"}
                                         </label>
                                         <input
                                             type="text"
                                             value={profileData.headline}
                                             onChange={(e) => setProfileData({ ...profileData, headline: e.target.value })}
-                                            className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-muted-foreground/30"
+                                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-slate-400 dark:placeholder-gray-500"
                                             placeholder="e.g. Creative Developer"
                                         />
                                     </div>
 
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.profile?.bio || "Bio"}
                                         </label>
                                         <textarea
                                             value={profileData.bio}
                                             onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                                             rows={4}
-                                            className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all resize-none placeholder:text-muted-foreground/30"
+                                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all resize-none placeholder:text-slate-400 dark:placeholder-gray-500"
                                             placeholder="Tell us a bit about yourself..."
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.profile?.location || "Location"}
                                         </label>
                                         <div className="relative">
-                                            <MapPin size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                            <MapPin size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400" />
                                             <input
                                                 type="text"
                                                 value={profileData.location}
                                                 onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                                                className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-muted-foreground/30"
+                                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-slate-400 dark:placeholder-gray-500"
                                                 placeholder="City, Country"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.profile?.website || "Website"}
                                         </label>
                                         <div className="relative">
-                                            <Globe size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                            <Globe size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400" />
                                             <input
                                                 type="url"
                                                 value={profileData.website}
                                                 onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
-                                                className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-muted-foreground/30"
+                                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all placeholder:text-slate-400 dark:placeholder-gray-500"
                                                 placeholder="https://example.com"
                                             />
                                         </div>
@@ -294,7 +294,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                         <button
                                             type="submit"
                                             disabled={isSaving}
-                                            className="w-full sm:w-auto px-8 py-4 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                                            className="w-full sm:w-auto px-8 py-4 bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                                         >
                                             {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} className="group-hover:rotate-12 transition-transform" />}
                                             {isSaving ? "Updating..." : ds.profile?.save_btn || "Save Profile"}
@@ -307,31 +307,31 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
 
                     {activeTab === "account" && (
                         <div className="space-y-6">
-                            <div className="glass-liquid p-8 rounded-[2.5rem] border border-white/20 dark:border-white/10 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] -z-10" />
+                            <div className="bg-white/80 dark:bg-[#1A1A1A]/40 backdrop-blur-2xl border border-slate-200/70 dark:border-white/10 p-8 rounded-[2.5rem] shadow-xl dark:shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 dark:bg-blue-500/5 blur-[100px] -z-10" />
 
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400">
+                                    <div className="p-3 bg-blue-100 dark:bg-blue-500/10 rounded-2xl text-blue-600 dark:text-blue-400">
                                         <Shield size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black tracking-tight">{ds.account?.title || "Account Security"}</h3>
-                                        <p className="text-sm text-muted-foreground">{ds.account?.subtitle || "Manage access and security credentials."}</p>
+                                        <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">{ds.account?.title || "Account Security"}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-gray-400">{ds.account?.subtitle || "Manage access and security credentials."}</p>
                                     </div>
                                 </div>
 
                                 <form onSubmit={handleUsernameSubmit} className="space-y-6 max-w-lg">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.account?.username || "Username"}
                                         </label>
                                         <div className="relative">
-                                            <AtSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                            <AtSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400" />
                                             <input
                                                 type="text"
                                                 value={accountData.username}
                                                 onChange={(e) => setAccountData({ ...accountData, username: e.target.value })}
-                                                className={`w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all ${cooldown?.active ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--site-secondary)]/50 transition-all ${cooldown?.active ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 placeholder="username"
                                                 disabled={cooldown?.active}
                                             />
@@ -346,20 +346,20 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.account?.email || "Email Address"}
                                         </label>
                                         <div className="relative">
-                                            <Mail size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                            <Mail size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400" />
                                             <input
                                                 type="email"
                                                 value={accountData.email}
                                                 disabled
-                                                className="w-full bg-black/10 dark:bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold opacity-50 cursor-not-allowed"
+                                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-slate-900 dark:text-white opacity-50 cursor-not-allowed"
                                                 placeholder="email@example.com"
                                             />
                                         </div>
-                                        <p className="text-[10px] text-muted-foreground/60 font-bold mt-1 ml-1">
+                                        <p className="text-[10px] text-slate-400 dark:text-gray-500 font-bold mt-1 ml-1">
                                             Contact support to change your verified email address.
                                         </p>
                                     </div>
@@ -368,7 +368,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                         <button
                                             type="submit"
                                             disabled={isSaving || accountData.username === user.username || cooldown?.active}
-                                            className="w-full sm:w-auto px-8 py-4 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:hover:scale-100"
+                                            className="w-full sm:w-auto px-8 py-4 bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:hover:scale-100"
                                         >
                                             {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                                             {isSaving ? "Updating..." : ds.account?.change_username || "Update Username"}
@@ -381,22 +381,22 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
 
                     {activeTab === "interface" && (
                         <div className="space-y-6">
-                            <div className="glass-liquid p-8 rounded-[2.5rem] border border-white/20 dark:border-white/10 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] -z-10" />
+                            <div className="bg-white/80 dark:bg-[#1A1A1A]/40 backdrop-blur-2xl border border-slate-200/70 dark:border-white/10 p-8 rounded-[2.5rem] shadow-xl dark:shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 dark:bg-purple-500/5 blur-[100px] -z-10" />
 
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
+                                    <div className="p-3 bg-purple-100 dark:bg-purple-500/10 rounded-2xl text-purple-600 dark:text-purple-400">
                                         <Palette size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black tracking-tight">{ds.interface?.title || "Interface Preferences"}</h3>
-                                        <p className="text-sm text-muted-foreground">{ds.interface?.subtitle || "Customize how the platform looks and feels."}</p>
+                                        <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">{ds.interface?.title || "Interface Preferences"}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-gray-400">{ds.interface?.subtitle || "Customize how the platform looks and feels."}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-8 max-w-lg">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">
                                             {ds.interface?.language || "Language"}
                                         </label>
                                         <div className="grid grid-cols-2 gap-4">
@@ -406,10 +406,10 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                                     onClick={() => setPreferences({ ...preferences, language: lang })}
                                                     className={`p-4 rounded-2xl border flex items-center gap-3 transition-all ${preferences.language === lang
                                                         ? "bg-[var(--site-secondary)]/10 border-[var(--site-secondary)]/40 text-[var(--site-secondary)]"
-                                                        : "bg-black/10 dark:bg-white/5 border-white/10 hover:border-white/20 text-muted-foreground"
+                                                        : "bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-500 dark:text-gray-400"
                                                         }`}
                                                 >
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${preferences.language === lang ? "bg-[var(--site-secondary)]/20" : "bg-white/10"
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${preferences.language === lang ? "bg-[var(--site-secondary)]/20" : "bg-slate-200 dark:bg-white/10"
                                                         }`}>
                                                         {lang.toUpperCase()}
                                                     </div>
@@ -430,7 +430,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                         <button
                                             onClick={handlePrefSubmit}
                                             disabled={isSaving}
-                                            className="w-full sm:w-auto px-8 py-4 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                                            className="w-full sm:w-auto px-8 py-4 bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                                         >
                                             {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                                             {isSaving ? "Saving..." : ds.interface?.save_btn || "Save Preferences"}
@@ -443,16 +443,16 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
 
                     {activeTab === "notifications" && (
                         <div className="space-y-6">
-                            <div className="glass-liquid p-8 rounded-[2.5rem] border border-white/20 dark:border-white/10 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[100px] -z-10" />
+                            <div className="bg-white/80 dark:bg-[#1A1A1A]/40 backdrop-blur-2xl border border-slate-200/70 dark:border-white/10 p-8 rounded-[2.5rem] shadow-xl dark:shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/20 dark:bg-amber-500/5 blur-[100px] -z-10" />
 
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-400">
+                                    <div className="p-3 bg-amber-100 dark:bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400">
                                         <Bell size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black tracking-tight">{ds.notifications?.title || "Update Channels"}</h3>
-                                        <p className="text-sm text-muted-foreground">{ds.notifications?.subtitle || "Choose how we should keep you in the loop."}</p>
+                                        <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">{ds.notifications?.title || "Update Channels"}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-gray-400">{ds.notifications?.subtitle || "Choose how we should keep you in the loop."}</p>
                                     </div>
                                 </div>
 
@@ -471,15 +471,15 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                                     [channel.id]: !preferences.notifications?.[channel.id as keyof typeof preferences.notifications]
                                                 }
                                             })}
-                                            className="flex items-center justify-between p-5 bg-black/5 dark:bg-white/5 rounded-[2rem] border border-white/5 cursor-pointer hover:border-white/20 transition-all group"
+                                            className="flex items-center justify-between p-5 bg-slate-50 dark:bg-black/20 rounded-[2rem] border border-slate-200 dark:border-white/10 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-amber-400/10 group-hover:text-amber-400 transition-colors">
+                                                <div className="p-3 bg-slate-200 dark:bg-white/5 rounded-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-400/10 group-hover:text-amber-600 group-hover:text-amber-400 transition-colors">
                                                     {channel.icon}
                                                 </div>
                                                 <span className="font-bold text-sm tracking-tight">{channel.label}</span>
                                             </div>
-                                            <div className={`w-12 h-6 rounded-full p-1 transition-all duration-300 ${preferences.notifications?.[channel.id as keyof typeof preferences.notifications] ? "bg-amber-400" : "bg-zinc-700"
+                                            <div className={`w-12 h-6 rounded-full p-1 transition-all duration-300 ${preferences.notifications?.[channel.id as keyof typeof preferences.notifications] ? "bg-amber-400" : "bg-slate-300 dark:bg-zinc-700"
                                                 }`}>
                                                 <div className={`w-4 h-4 bg-white rounded-full transition-all duration-300 ${preferences.notifications?.[channel.id as keyof typeof preferences.notifications] ? "translate-x-6" : "translate-x-0"
                                                     }`} />
@@ -491,7 +491,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                                         <button
                                             onClick={handlePrefSubmit}
                                             disabled={isSaving}
-                                            className="w-full sm:w-auto px-8 py-4 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                                            className="w-full sm:w-auto px-8 py-4 bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                                         >
                                             {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                                             {isSaving ? "Update Preferences" : "Save Changes"}

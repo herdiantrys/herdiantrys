@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Image as ImageIcon, Music, Video, User as UserIcon } from "lucide-react";
 import { useEffect } from "react";
 import { formatDate } from "@/lib/utils";
+import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 
 export default function AdminPostsClient({ posts, currentUserId }: { posts: any[], currentUserId?: string }) {
     const router = useRouter();
@@ -200,7 +201,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
             {/* Header Section */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Posts</h1>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Posts</h1>
                     <div className="flex gap-3">
                         <button
                             onClick={() => {
@@ -220,7 +221,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                 </div>
 
                 {/* Filters Box */}
-                <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
+                <div className="bg-white/80 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 p-5 rounded-2xl shadow-sm dark:shadow-xl transition-colors">
                     <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
 
                         {/* Search */}
@@ -233,7 +234,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                 placeholder="Search posts or authors..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-secondary)]/50 transition-all duration-300"
+                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-black/40 focus:border-[var(--site-accent)]/40 dark:focus:border-[var(--site-secondary)]/50 transition-all duration-300"
                             />
                         </div>
 
@@ -247,7 +248,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-purple-500/50 appearance-none cursor-pointer hover:bg-white dark:hover:bg-black/30 transition-all"
                                 >
                                     <option value="ALL">All Status</option>
                                     <option value="ACTIVE">Active</option>
@@ -269,7 +270,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     max="100"
                                     value={rowsPerPage}
                                     onChange={(e) => setRowsPerPage(Math.max(1, parseInt(e.target.value) || 10))}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-secondary)]/50 appearance-none hover:bg-gray-100 dark:hover:bg-black/30 transition-all"
+                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-xl text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-[var(--site-accent)]/40 dark:focus:border-[var(--site-secondary)]/50 appearance-none hover:bg-white dark:hover:bg-black/30 transition-all"
                                 />
                             </div>
                         </div>
@@ -278,7 +279,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors overflow-x-auto">
+            <div className="bg-white/90 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-slate-200/70 dark:border-white/5 rounded-2xl overflow-hidden shadow-md dark:shadow-xl transition-colors overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-xs">
                         <tr>
@@ -338,7 +339,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         <div className="flex items-center gap-2">
                                             {post.author.imageURL && (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <Image src={post.author.imageURL} alt="" fill className="object-cover" />
+                                                    <img src={post.author.imageURL} alt="" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
                                                 </div>
                                             )}
                                             {post.author.name}
@@ -414,25 +415,18 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let p = i + 1;
-                                if (totalPages > 5 && currentPage > 3) {
-                                    p = currentPage - 2 + i;
-                                    if (p > totalPages) p = totalPages - (4 - i);
-                                }
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setCurrentPage(p)}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
-                                            ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
+                            {getPageNumbers(currentPage, totalPages).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setCurrentPage(p)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                        ? "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                                        }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
                         </div>
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

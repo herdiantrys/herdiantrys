@@ -32,6 +32,10 @@ export async function registerUser(formData: FormData) {
         // Generate unique username
         const username = `${email.split('@')[0]}_${Math.floor(Date.now() / 1000)}`;
 
+        // Check if this is the first user
+        const userCount = await prisma.user.count();
+        const role = userCount === 0 ? 'SUPER_ADMIN' : 'USER';
+
         // Create user in Prisma
         await prisma.user.create({
             data: {
@@ -40,7 +44,7 @@ export async function registerUser(formData: FormData) {
                 username: username,
                 password: hashedPassword,
                 image: defaultImage,
-                role: 'USER',
+                role: role,
             }
         });
 

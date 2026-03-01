@@ -75,10 +75,9 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
                         className={`relative p-4 font-mono select-none flex flex-col h-full
-                            ${isUnlocked ? "opacity-100" : "opacity-60 grayscale"}
+                            ${isUnlocked ? "opacity-100 bg-white dark:bg-[#1e293b]" : "opacity-60 grayscale bg-slate-100 dark:bg-[#0f172a]"}
                         `}
                         style={{
-                            backgroundColor: isUnlocked ? '#1e293b' : '#0f172a',
                             // 8-bit border effect
                             boxShadow: `
                                 -2px 0 0 0 black,
@@ -111,12 +110,12 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
 
                         <div className="flex flex-col h-full relative z-10 gap-3">
                             {/* Header: Icon + Name */}
-                            <div className="flex items-center gap-3 border-b border-black/40 pb-3">
+                            <div className="flex items-center gap-3 border-b border-black/10 dark:border-black/40 pb-3">
                                 <div className="shrink-0">
                                     <PixelBadge badge={badge} size="sm" />
                                 </div>
                                 <div className="leading-tight">
-                                    <h3 className={`font-bold text-sm tracking-wide uppercase ${isUnlocked ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-500"}`}>
+                                    <h3 className={`font-bold text-sm tracking-wide uppercase ${isUnlocked ? "text-[var(--site-secondary)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)] dark:drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" : "text-slate-500"}`}>
                                         {badge.name}
                                     </h3>
                                     <div className="text-[10px] uppercase mt-1 inline-block px-1.5 py-0.5 bg-black text-white">
@@ -127,7 +126,7 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
 
                             {/* Body: Description */}
                             <div className="flex-1 mt-1">
-                                <p className="text-xs text-slate-300 leading-relaxed min-h-[40px]">
+                                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed min-h-[40px]">
                                     "{badge.description}"
                                 </p>
 
@@ -151,11 +150,11 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                             {/* Progress Bar (Only if Locked/Progressable) */}
                             {showProgress && (
                                 <div className="mt-2">
-                                    <div className="flex justify-between text-[10px] text-slate-400 mb-1 uppercase">
+                                    <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase">
                                         <span>Progress</span>
                                         <span>{current} / {target}</span>
                                     </div>
-                                    <div className="h-3 w-full bg-black relative border border-slate-700">
+                                    <div className="h-3 w-full bg-slate-200 dark:bg-black relative border border-slate-300 dark:border-slate-700">
                                         <div
                                             className="h-full bg-[var(--site-secondary)] relative transition-all duration-500"
                                             style={{ width: `${percent}%` }}
@@ -168,13 +167,13 @@ export default function AchievementsList({ user, isOwner }: AchievementsListProp
                             )}
 
                             {/* Footer: Date */}
-                            <div className="pt-2 border-t border-black/40 text-[10px] text-right mt-auto">
+                            <div className="pt-2 border-t border-black/10 dark:border-black/40 text-[10px] text-right mt-auto">
                                 {isUnlocked ? (
-                                    <span className="text-[var(--site-secondary)]">
+                                    <span className="text-[var(--site-secondary)] font-bold">
                                         ACQUIRED: {formatDate(unlockedData.awardedAt)}
                                     </span>
                                 ) : (
-                                    <span className="text-slate-600">
+                                    <span className="text-slate-400 dark:text-slate-600">
                                         KEEP GOING...
                                     </span>
                                 )}

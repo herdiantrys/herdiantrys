@@ -147,19 +147,31 @@ export default function ScrollBackground() {
 
                 <motion.div
                     style={{ y: y1, rotate: rotate1, opacity }}
-                    className="absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] to-[color-mix(in_srgb,var(--site-secondary),transparent_95%)] blur-[120px] z-10"
+                    className={`absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full blur-[120px] z-10 
+                        ${resolvedTheme === 'dark'
+                            ? "bg-gradient-to-br from-[color-mix(in_srgb,var(--site-accent),transparent_85%)] to-[color-mix(in_srgb,var(--site-accent-next),transparent_95%)]"
+                            : "bg-gradient-to-br from-[color-mix(in_srgb,var(--site-secondary),transparent_80%)] to-white/20"
+                        }`}
                 />
 
                 {/* Bottom Left Orb */}
                 <motion.div
                     style={{ y: y2, rotate: rotate2, opacity }}
-                    className="absolute top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full bg-gradient-to-tr from-[color-mix(in_srgb,var(--site-secondary),transparent_95%)] to-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] blur-[150px] z-10"
+                    className={`absolute top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full blur-[150px] z-10
+                        ${resolvedTheme === 'dark'
+                            ? "bg-gradient-to-tr from-[color-mix(in_srgb,var(--site-accent-prev),transparent_90%)] to-[color-mix(in_srgb,var(--site-accent),transparent_85%)]"
+                            : "bg-gradient-to-tr from-white/30 to-[color-mix(in_srgb,var(--site-secondary),transparent_85%)]"
+                        }`}
                 />
 
                 {/* Floating Circle (Bottom Right) - NEW */}
                 <motion.div
                     style={{ y: y4 }}
-                    className="absolute bottom-[10%] right-[5%] w-[150px] h-[150px] rounded-full bg-gradient-to-t from-[color-mix(in_srgb,var(--site-secondary),transparent_90%)] to-transparent blur-[60px] z-10"
+                    className={`absolute bottom-[10%] right-[5%] w-[150px] h-[150px] rounded-full blur-[60px] z-10
+                        ${resolvedTheme === 'dark'
+                            ? "bg-gradient-to-t from-[color-mix(in_srgb,var(--site-accent),transparent_80%)] to-transparent"
+                            : "bg-gradient-to-t from-[color-mix(in_srgb,var(--site-secondary),transparent_85%)] to-transparent"
+                        }`}
                 />
             </div>
 

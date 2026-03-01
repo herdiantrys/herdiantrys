@@ -4,7 +4,6 @@ import { useState, useEffect, useTransition } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Send, Loader2 } from "lucide-react";
 import { createComment, getComments, Comment } from "@/lib/actions/comment.actions";
-import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AvatarWithEffect from "@/components/AvatarWithEffect";
@@ -89,7 +88,7 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                             if (!currentUserImage) return undefined;
                             if (typeof currentUserImage === 'string') return currentUserImage;
                             try {
-                                return urlFor(currentUserImage).width(100).url();
+                                return currentUserImage;
                             } catch (e) {
                                 return undefined;
                             }
@@ -140,7 +139,7 @@ export default function CommentSection({ targetId, targetType, userId, currentUs
                                             if (typeof comment.user.profileImage === 'string') return comment.user.profileImage;
                                             try {
                                                 if (comment.user.profileImage && typeof comment.user.profileImage === 'object') {
-                                                    return urlFor(comment.user.profileImage).width(100).url();
+                                                    return comment.user.profileImage;
                                                 }
                                                 return comment.user.imageURL;
                                             } catch (e) {

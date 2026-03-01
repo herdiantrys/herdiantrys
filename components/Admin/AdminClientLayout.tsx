@@ -35,6 +35,7 @@ export default function AdminClientLayout({
                 id="admin-main-content"
                 className={`
                     flex-1 p-4 md:p-8 overflow-y-auto h-screen transition-all duration-300 pt-28 md:pt-32
+                    bg-slate-50/60 dark:bg-transparent
                     ${isSidebarOpen ? "lg:ml-64" : "ml-0 lg:ml-20"}
                 `}
             >
