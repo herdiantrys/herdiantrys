@@ -114,7 +114,6 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
         {
             title: dict.nav?.system || "System",
             items: [
-                { name: dict.nav?.shop || "Shop", href: "/admin/shop", icon: ShoppingBag },
                 { name: "Digital Products", href: "/admin/digitalproducts", icon: Package },
                 { name: dict.nav?.ranks || "Ranks", href: "/admin/ranks", icon: Trophy },
             ]
@@ -270,7 +269,6 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                     {[
                                         { name: dict.nav?.home || "Home", href: "/dashboard", icon: Home },
                                         { name: dict.nav?.works || "Works", href: "/projects", icon: Briefcase },
-                                        { name: dict.nav?.shop || "Shop", href: "/shop", icon: ShoppingBag },
                                         { name: "Digital Products", href: "/digitalproducts", icon: Layers },
                                         { name: dict.nav?.app_store || "Apps", href: "/apps", icon: Layout },
                                     ].map((item) => (
@@ -288,7 +286,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                 <SidebarSection label={dict.nav?.user || "Account"} isExpanded={isExpanded} show={!!user}>
                                     {[
                                         { name: dict.nav?.profile || "Profile", href: `/profile/${user?.username || user?.id || 'me'}`, icon: User },
-                                        { name: "My Inventory", href: "/dashboard/inventory", icon: Package },
+                                        { name: "My Inventory", href: "/inventory", icon: Package },
                                         { name: dict.nav?.messages || "Messages", href: "#", icon: MessageSquare, onClick: () => setIsMessageOpen(true), unread: unreadMessages },
                                         { name: dict.nav?.notifications || "Notifications", href: "/notifications", icon: Bell },
                                         { name: dict.nav?.settings || "Settings", href: "/settings", icon: Settings },
@@ -980,8 +978,8 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages }: G
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Link href="/shop" onClick={() => setIsProfileOpen(false)} className="text-xs font-bold text-[var(--site-secondary)] hover:underline">
-                                                Go to Shop →
+                                            <Link href="/digitalproducts" onClick={() => setIsProfileOpen(false)} className="text-xs font-bold text-[var(--site-secondary)] hover:underline">
+                                                Digital Products →
                                             </Link>
                                         </div>
                                     </div>

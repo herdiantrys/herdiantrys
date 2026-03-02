@@ -1,14 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Download, PlayCircle, FileText, Package, ExternalLink, CalendarDays } from "lucide-react";
+import { Download, PlayCircle, FileText, Package, ExternalLink, CalendarDays, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { toggleEquipItem } from "@/lib/actions/inventory.actions";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
-export default function DigitalInventoryClient({ initialInventory }: { initialInventory: any[] }) {
+export default function DigitalInventoryClient({
+    initialInventory,
+    equippedFrame,
+    equippedBackground,
+    profileColor,
+    frameColor
+}: {
+    initialInventory: any[],
+    equippedFrame?: string | null,
+    equippedBackground?: string | null,
+    profileColor?: string | null,
+    frameColor?: string | null
+}) {
     const [searchQuery, setSearchQuery] = useState("");
+    const { data: session } = useSession();
+    const [isPending, startTransition] = useTransition();
+
+    // Optimistic UI state for equipment
+    const [localEquippedFrame, setLocalEquippedFrame] = useState(equippedFrame);
+    const [localEquippedBg, setLocalEquippedBg] = useState(equippedBackground);
 
     const filteredInventory = initialInventory.filter(item => {
         const product = item.product;
@@ -21,8 +42,41 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
             case "EBOOK": return <FileText size={16} />;
             case "COURSE": return <PlayCircle size={16} />;
             case "ASSET": return <Download size={16} />;
+            case "FRAME":
+            case "BACKGROUND":
+                return <CheckCircle size={16} />;
             default: return <Package size={16} />;
         }
+    };
+
+    const handleToggleEquip = (shopItem: any) => {
+        if (!session?.user?.id) return;
+
+        const type = shopItem.type;
+        const itemValue = shopItem.value;
+
+        // Determine if it's currently equipped based on local state
+        let isEquipped = false;
+        if (type === "FRAME") isEquipped = localEquippedFrame === itemValue;
+        if (type === "BACKGROUND") isEquipped = localEquippedBg === itemValue;
+
+        // Optimistic update
+        if (type === "FRAME") setLocalEquippedFrame(isEquipped ? null : itemValue);
+        if (type === "BACKGROUND") setLocalEquippedBg(isEquipped ? null : itemValue);
+
+        const userId = session.user.id || "";
+
+        startTransition(async () => {
+            const res = await toggleEquipItem(userId, itemValue, type as any, isEquipped);
+            if (res.success) {
+                toast.success(isEquipped ? "Item unequipped" : "Item equipped");
+            } else {
+                toast.error("Failed to equip item");
+                // Revert optimistic update
+                if (type === "FRAME") setLocalEquippedFrame(isEquipped ? itemValue : null);
+                if (type === "BACKGROUND") setLocalEquippedBg(isEquipped ? itemValue : null);
+            }
+        });
     };
 
     return (
@@ -31,10 +85,10 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                        My Digital Inventory
+                        My Inventory
                     </h1>
                     <p className="mt-2 text-slate-500 dark:text-gray-400 font-medium text-sm">
-                        Access and download all your purchased premium digital goods.
+                        Access your purchased profile effects and digital goods.
                     </p>
                 </div>
 
@@ -54,9 +108,18 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
 
             {/* Inventory Grid */}
             {filteredInventory.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filteredInventory.map((item, index) => {
                         const product = item.product;
+                        const isShopItem = item.isShopItem;
+                        const originalShopItem = item.originalShopItem;
+
+                        let isEquipped = false;
+                        if (isShopItem && originalShopItem) {
+                            if (originalShopItem.type === "FRAME") isEquipped = localEquippedFrame === originalShopItem.value;
+                            if (originalShopItem.type === "BACKGROUND") isEquipped = localEquippedBg === originalShopItem.value;
+                        }
+
                         return (
                             <motion.div
                                 key={item.id}
@@ -68,18 +131,38 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
                                 {/* Decorative Gradient Overlay on Hover */}
                                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-accent)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border-b border-slate-200/50 dark:border-white/5">
-                                    {product.coverImage ? (
-                                        <Image
-                                            src={product.coverImage}
-                                            alt={product.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center text-slate-300 dark:text-zinc-600">
-                                            <Package size={32} />
+                                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border-b border-slate-200/50 dark:border-white/5 flex items-center justify-center">
+                                    {isShopItem ? (
+                                        <div className="w-full h-full flex items-center justify-center p-4">
+                                            {originalShopItem.icon ? (
+                                                <Image
+                                                    src={originalShopItem.icon}
+                                                    alt={product.title}
+                                                    width={100}
+                                                    height={100}
+                                                    className="object-contain group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className={`w-16 h-16 rounded-full border-4 border-white dark:border-[#0a0a0a] shadow-xl ${originalShopItem.value}`}
+                                                />
+                                            )}
                                         </div>
+                                    ) : (
+                                        <>
+                                            {product.coverImage ? (
+                                                <Image
+                                                    src={product.coverImage}
+                                                    alt={product.title}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="absolute inset-0 flex items-center justify-center text-slate-300 dark:text-zinc-600">
+                                                    <Package size={32} />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                     <div className="absolute top-3 left-3">
                                         <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-white">
@@ -100,24 +183,36 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
                                     </div>
 
                                     <div className="mt-auto pt-5">
-                                        {product.fileUrl ? (
-                                            <a
-                                                href={product.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full py-3 rounded-xl bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] hover:bg-[var(--site-secondary)] hover:text-white font-bold text-sm flex justify-center items-center gap-2 transition-all duration-200"
-                                            >
-                                                <Download size={16} />
-                                                Access / Download
-                                            </a>
-                                        ) : (
+                                        {isShopItem ? (
                                             <button
-                                                disabled
-                                                className="w-full py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 font-bold text-sm flex justify-center items-center gap-2 cursor-not-allowed opacity-70"
+                                                onClick={() => handleToggleEquip(originalShopItem)}
+                                                disabled={isPending}
+                                                className={`w-full py-3 rounded-xl font-bold text-sm flex justify-center items-center gap-2 transition-all duration-200 ${isEquipped ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-[var(--site-button)] text-[var(--site-button-text)] hover:opacity-90'}`}
                                             >
-                                                <ExternalLink size={16} />
-                                                Link Unavailable
+                                                {isEquipped ? 'Unequip' : 'Equip Theme'}
                                             </button>
+                                        ) : (
+                                            <>
+                                                {product.fileUrl ? (
+                                                    <a
+                                                        href={product.fileUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full py-3 rounded-xl bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] hover:bg-[var(--site-secondary)] hover:text-white font-bold text-sm flex justify-center items-center gap-2 transition-all duration-200"
+                                                    >
+                                                        <Download size={16} />
+                                                        Access / Download
+                                                    </a>
+                                                ) : (
+                                                    <button
+                                                        disabled
+                                                        className="w-full py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 font-bold text-sm flex justify-center items-center gap-2 cursor-not-allowed opacity-70"
+                                                    >
+                                                        <ExternalLink size={16} />
+                                                        Link Unavailable
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -132,13 +227,13 @@ export default function DigitalInventoryClient({ initialInventory }: { initialIn
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Your inventory is empty</h3>
                     <p className="text-slate-500 dark:text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
-                        You haven't purchased any digital items yet. Explore the catalog to level up your workflow.
+                        You haven't purchased any items yet. Explore the digital products catalog to level up your workflow.
                     </p>
                     <Link
                         href="/digitalproducts"
                         className="px-6 py-3 rounded-xl bg-[var(--site-button)] text-[var(--site-button-text)] font-bold text-sm shadow-lg shadow-[var(--site-accent)]/20 hover:-translate-y-0.5 transition-all"
                     >
-                        Browse Digital Catalog
+                        Browse Digital Products
                     </Link>
                 </div>
             )}

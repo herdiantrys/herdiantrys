@@ -5,11 +5,17 @@ import { auth } from "@/auth";
 
 export async function getDigitalProducts(adminOnly = false) {
     try {
-        const whereClause = adminOnly ? {} : { isPublished: true };
+        const whereClause: any = adminOnly ? {} : { isPublished: true };
+
+        // Return mostly digital stuff here
+        whereClause.type = { in: ['EBOOK', 'COURSE', 'TEMPLATE', 'COMPONENT', 'OTHER'] };
+        whereClause.category = { not: "cosmetics" };
+
         const products = await prisma.digitalProduct.findMany({
             where: whereClause,
             orderBy: { createdAt: "desc" }
         });
+
         return products;
     } catch (error) {
         console.error("Failed to fetch digital products:", error);
@@ -22,6 +28,7 @@ export async function getDigitalProductById(id: string) {
         const product = await prisma.digitalProduct.findUnique({
             where: { id }
         });
+        return product;
         return product;
     } catch (error) {
         console.error("Failed to fetch digital product:", error);
@@ -83,7 +90,7 @@ export async function updateDigitalProduct(id: string, data: any) {
                 title: data.title,
                 slug: data.slug,
                 description: data.description,
-                price: parseInt(data.price),
+                price: parseInt(data.price) || 0,
                 currency: data.currency,
                 category: data.category,
                 coverImage: data.coverImage,
@@ -115,5 +122,27 @@ export async function deleteDigitalProduct(id: string) {
     } catch (error: any) {
         console.error("Failed to delete digital product:", error);
         return { success: false, error: error.message || "Failed to delete product" };
+    }
+}
+
+export async function uploadDigitalProductThumbnail(formData: FormData) {
+    try {
+        const session = await auth();
+        if (!session?.user || session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const file = formData.get("file") as File;
+        if (!file) return { success: false, error: "No file provided" };
+
+        const { uploadLocalFile } = await import("@/lib/upload");
+
+        // Use the existing local upload utility to save in /public/uploads/digitalproducts
+        const publicUrl = await uploadLocalFile(file, "digitalproducts");
+
+        return { success: true, url: publicUrl };
+    } catch (error: any) {
+        console.error("Thumbnail upload error:", error);
+        return { success: false, error: error.message || "Failed to upload thumbnail" };
     }
 }

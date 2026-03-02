@@ -1,0 +1,7 @@
+﻿app/[lang]/(root)/digitalproducts/[slug]/page.tsx(8,34): error TS2339: Property 'digitalProduct' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/(root)/digitalproducts/page.tsx(5,35): error TS2339: Property 'digitalProduct' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/digitalproducts/[id]/page.tsx(8,34): error TS2339: Property 'digitalProduct' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/digitalproducts/page.tsx(5,35): error TS2339: Property 'digitalProduct' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/shop/[itemId]/page.tsx(22,31): error TS2339: Property 'shopItem' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/shop/page.tsx(13,32): error TS2339: Property 'shopItem' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/shop/page.tsx(17,33): error TS7006: Parameter 'item' implicitly has an 'any' type.

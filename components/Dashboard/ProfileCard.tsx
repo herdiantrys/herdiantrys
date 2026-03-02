@@ -261,7 +261,7 @@ export default function ProfileCard({
                         </div>
 
                         <Link
-                            href={user.username ? `/${pathname?.split('/')[1] || 'en'}/profile/${user.username}?tab=inventory` : "/inventory"}
+                            href={user.username ? `/${pathname?.split('/')[1] || 'en'}/profile/${user.username}?tab=inventory` : `/${pathname?.split('/')[1] || 'en'}/inventory`}
                             className="inline-flex items-center gap-2.5 px-5 py-2 rounded-2xl bg-gradient-to-br from-[var(--site-accent)]/20 via-[var(--site-accent)]/5 to-transparent border border-[var(--site-accent)]/20 mb-6 shadow-xl backdrop-blur-md cursor-pointer hover:border-[var(--site-accent)]/40 hover:scale-105 transition-all group/runes"
                         >
                             <div className="p-1.5 rounded-lg bg-[var(--site-accent)]/20">

@@ -48,8 +48,8 @@ export async function createCheckoutSession(productId: string, gateway: "MIDTRAN
             data: {
                 userId: session.user.id as string,
                 productId: product.id,
-                amount: product.price,
-                currency: product.currency,
+                amount: product.price || 0,
+                currency: product.currency || "IDR",
                 status: "PENDING",
                 paymentProvider: gateway.toLowerCase(),
             }
@@ -70,7 +70,7 @@ export async function createCheckoutSession(productId: string, gateway: "MIDTRAN
                                 description: product.description || undefined,
                                 images: product.coverImage ? [product.coverImage] : undefined,
                             },
-                            unit_amount: product.currency === "IDR" ? product.price * 100 : product.price, // Adjust based on currency minimums
+                            unit_amount: (product.currency || "IDR") === "IDR" ? (product.price || 0) * 100 : (product.price || 0), // Adjust based on currency minimums
                         },
                         quantity: 1,
                     },
@@ -101,7 +101,7 @@ export async function createCheckoutSession(productId: string, gateway: "MIDTRAN
             const parameter = {
                 transaction_details: {
                     order_id: order.id,
-                    gross_amount: product.price
+                    gross_amount: product.price || 0
                 },
                 credit_card: {
                     secure: true
@@ -112,7 +112,7 @@ export async function createCheckoutSession(productId: string, gateway: "MIDTRAN
                 },
                 item_details: [{
                     id: product.id,
-                    price: product.price,
+                    price: product.price || 0,
                     quantity: 1,
                     name: product.title
                 }]
@@ -160,7 +160,6 @@ export async function verifyAndFulfillOrder(orderId: string) {
                 data: { status: "SUCCESS" }
             });
 
-            // Grant Ownership
             await tx.digitalProductOwnership.create({
                 data: {
                     userId: order.userId,
@@ -172,5 +171,37 @@ export async function verifyAndFulfillOrder(orderId: string) {
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };
+    }
+}
+
+export async function purchaseDigitalProductWithRunes(userId: string, productId: string, pointsCost: number) {
+    try {
+        const product = await prisma.digitalProduct.findUnique({ where: { id: productId } });
+        if (!product) return { success: false, error: "Product not found" };
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || user.points < pointsCost) return { success: false, error: "Insufficient runes" };
+
+        const existing = await prisma.digitalProductOwnership.findFirst({
+            where: { userId, productId }
+        });
+
+        if (existing) return { success: false, error: "You already own this item" };
+
+        await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+                where: { id: userId },
+                data: { points: { decrement: pointsCost } }
+            });
+
+            await tx.digitalProductOwnership.create({
+                data: { userId, productId }
+            });
+        });
+
+        return { success: true };
+    } catch (error: any) {
+        console.error("Purchase error:", error);
+        return { success: false, error: "Transaction failed" };
     }
 }

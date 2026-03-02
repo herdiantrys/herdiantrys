@@ -33,7 +33,7 @@ export async function awardRunes(userId: string, amount: number, reason: string,
 
         revalidatePath("/");
         revalidatePath("/dashboard");
-        revalidatePath("/shop");
+        revalidatePath("/digitalproducts");
 
         return { success: true };
     } catch (error) {
@@ -192,7 +192,7 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
         if (badgeId === "tycoon") {
             createActivity(userId, "achievement", {
                 achievementTitle: "Tycoon",
-                description: "Unlocked every item in the shop! 👑",
+                description: "Unlocked every item in the store! 👑",
                 badgeIcon: "👑"
             }).catch(e => console.error("Tycoon Activity Error:", e));
 
@@ -203,7 +203,7 @@ export async function checkAndAwardBadge(userId: string, badgeId: string, tx?: P
                 type: "achievement",
                 details: {
                     achievementTitle: "Tycoon",
-                    description: "Unlocked every item in the shop! 👑",
+                    description: "Unlocked every item in the store! 👑",
                     icon: "👑"
                 }
             }).catch(e => console.error("Achievement Notification Error:", e));

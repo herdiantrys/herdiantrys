@@ -56,7 +56,6 @@ const buildMenuGroups = (unreadCount: number): NavGroup[] => [
         items: [
             { name: "Users", href: "/admin/users", icon: Users },
             { name: "Ranks", href: "/admin/ranks", icon: Trophy },
-            { name: "Shop", href: "/admin/shop", icon: ShoppingBag },
             { name: "Digital Products", href: "/admin/digitalproducts", icon: FolderOpen },
         ]
     },

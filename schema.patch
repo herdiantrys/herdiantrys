@@ -1,0 +1,131 @@
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index a9e74b4..40c1b06 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -37,12 +37,16 @@ enum ProjectStatus {
+   ARCHIVED
+ }
+ 
+-enum ShopItemType {
++enum ProductType {
+   FRAME
+   BACKGROUND
+   COURSE
+   SAAS_TEMPLATE
+   BANNER_VIDEO
++  EBOOK
++  TEMPLATE
++  COMPONENT
++  OTHER
+ }
+ 
+ // Models
+@@ -115,7 +119,6 @@ model User {
+ 
+   // Inventory
+   inventory       UserInventory[]
+-  digitalProducts DigitalProductOwnership[]
+   orders          Order[]
+ 
+   // Notifications
+@@ -277,17 +280,32 @@ model Comment {
+   notifications Notification[]
+ }
+ 
+-model ShopItem {
+-  id          String       @id @default(cuid())
+-  name        String
++model Product {
++  id          String      @id @default(cuid())
++  title       String      @map("name") // Maps legacy 'name' to 'title'
++  slug        String?     @unique
+   description String?
+-  price       Int
+-  type        ShopItemType @default(FRAME)
+-  category    String?      @default("cosmetics") // cosmetics, designs, courses, apps
+-  value       String? // CSS class or value
+-  icon        String? // Image URL
++  
++  priceIdr    Int?        @default(0)
++  priceRunes  Int?        @default(0)
++  currency    String      @default("IDR") // Legacy fallback for now
++  
++  type        ProductType @default(OTHER)
++  category    String?     @default("digital") // E.g., cosmetics, EBOOK, COURSE, etc.
++  
++  coverImage  String?
++  thumbnail   String?
++  icon        String?     // Specifically for cosmetics
++  
++  fileUrl     String?     // URL to download/access digital products
++  value       String?     // CSS class or value for cosmetics
++  
++  isPublished Boolean     @default(false)
++  createdAt   DateTime    @default(now())
++  updatedAt   DateTime    @updatedAt
+ 
+-  owners UserInventory[]
++  owners      UserInventory[]
++  orders      Order[]
+ }
+ 
+ model AppColor {
+@@ -317,46 +335,14 @@ model UserInventory {
+   userId String
+   user   User   @relation(fields: [userId], references: [id])
+ 
+-  shopItemId String
+-  shopItem   ShopItem @relation(fields: [shopItemId], references: [id])
+-
+-  @@unique([userId, shopItemId])
+-}
+-
+-// Additional CMS Models
+-
+-model DigitalProduct {
+-  id          String   @id @default(cuid())
+-  title       String
+-  slug        String   @unique
+-  description String?
+-  price       Int      @default(0)
+-  currency    String   @default("IDR")
+-  category    String // EBOOK, COURSE, COMPONENT, etc.
+-  coverImage  String?
+-  thumbnail   String?
+-  fileUrl     String? // The URL to download or access the digital product
+-  isPublished Boolean  @default(false)
+-  createdAt   DateTime @default(now())
+-  updatedAt   DateTime @updatedAt
+-
+-  owners DigitalProductOwnership[]
+-  orders Order[]
+-}
+-
+-model DigitalProductOwnership {
+-  id         String   @id @default(cuid())
+-  acquiredAt DateTime @default(now())
+-
+-  userId String
+-  user   User   @relation(fields: [userId], references: [id])
+-
+   productId String
+-  product   DigitalProduct @relation(fields: [productId], references: [id])
++  product   Product @relation(fields: [productId], references: [id])
+ 
+   @@unique([userId, productId])
+ }
+ 
++// Additional CMS Models
++
+ model Order {
+   id              String   @id @default(cuid())
+   amount          Int
+@@ -373,7 +359,7 @@ model Order {
+   user   User   @relation(fields: [userId], references: [id])
+ 
+   productId String
+-  product   DigitalProduct @relation(fields: [productId], references: [id])
++  product   Product @relation(fields: [productId], references: [id])
+ }
+ 
+ model Service {

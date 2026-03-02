@@ -1,0 +1,3 @@
+﻿app/[lang]/admin/digitalproducts/[id]/page.tsx(8,34): error TS2339: Property 'product' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/shop/[itemId]/page.tsx(22,31): error TS2339: Property 'product' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/[lang]/admin/shop/page.tsx(13,32): error TS2339: Property 'product' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.

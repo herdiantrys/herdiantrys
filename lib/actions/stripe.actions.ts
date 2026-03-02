@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 
 export const createCheckoutSession = async (itemId: string, userId: string, returnUrl: string) => {
     try {
-        const item = await prisma.shopItem.findUnique({
+        const item = await prisma.digitalProduct.findUnique({
             where: { id: itemId }
         });
 
@@ -51,25 +51,25 @@ export const createCheckoutSession = async (itemId: string, userId: string, retu
                     price_data: {
                         currency: 'idr',
                         product_data: {
-                            name: item.name,
+                            name: item.title,
                             description: item.description || "Premium Item",
-                            images: item.icon ? [item.icon] : [],
+                            images: item.coverImage ? [item.coverImage] : [],
                         },
                         // IDR is treated as a decimal currency by Stripe (1 IDR = 100 units/cents), 
                         // unlike JPY which is zero-decimal.
                         // So for Rp 50,000, we need to send 5,000,000.
-                        unit_amount: item.price * 100,
+                        unit_amount: (item.price || 0) * 100,
                     },
                     quantity: 1,
                 },
             ],
             mode: 'payment',
             success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${returnUrl}?session_id={CHECKOUT_SESSION_ID}&item_id=${itemId}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/shop`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/digitalproducts`,
             metadata: {
                 userId: userId,
                 itemId: itemId,
-                type: item.type
+                type: item.category
             }
         });
 
@@ -92,11 +92,10 @@ export const verifyStripeSession = async (sessionId: string) => {
             const itemId = session.metadata?.itemId;
 
             if (userId && itemId) {
-                // Add item to inventory
-                await prisma.userInventory.create({
+                await prisma.digitalProductOwnership.create({
                     data: {
                         userId: userId,
-                        shopItemId: itemId
+                        productId: itemId
                     }
                 }).catch((err) => {
                     // Ignore if already verified/exists

@@ -69,30 +69,21 @@ export async function toggleEquipItem(userId: string, itemValue: string, type: "
 
         if (type === "FRAME") {
             updateData.equippedFrame = isEquipped ? null : itemValue;
-            if (isEquipped && itemValue === "custom-color") {
-                // When removing custom-color frame, reset the frame color too? 
-                // Actually maybe keep it so they don't have to re-pick.
-                // updateData.frameColor = null; 
-            }
         } else if (type === "BACKGROUND") {
             if (itemValue === "custom-image" && !isEquipped) {
-                // Fetch user preferences to see if they have a saved custom URL
                 const user = await prisma.user.findUnique({
                     where: { id: userId },
                     select: { preferences: true }
                 });
                 const prefs = (user?.preferences as Record<string, any>) || {};
-
-                // Use saved URL if exists, otherwise fallback to itemValue (which renders as empty/placeholder in UI)
                 updateData.equippedBackground = prefs.customBackgroundUrl || itemValue;
             } else {
                 updateData.equippedBackground = isEquipped ? null : itemValue;
             }
 
             if (!isEquipped && itemValue !== "custom-color") {
-                updateData.profileColor = null; // Background overrides color (except for custom-color type)
+                updateData.profileColor = null;
             } else if (isEquipped && itemValue === "custom-color") {
-                // When removing custom-color background, reset the color too
                 updateData.profileColor = null;
             }
         }
@@ -103,12 +94,10 @@ export async function toggleEquipItem(userId: string, itemValue: string, type: "
         });
 
         revalidatePath("/dashboard");
-        revalidatePath("/shop");
+        revalidatePath("/digitalproducts");
 
-        // Revalidate user profile
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
         if (user?.username) {
-            revalidatePath(`/profile/${user.username}`);
             revalidatePath(`/profile/${user.username}`);
         }
 
@@ -130,18 +119,13 @@ export async function updateProfileColor(userId: string, color: string) {
             data: { profileColor: color }
         });
 
-        // Revalidate paths to update UI
         revalidatePath("/dashboard");
-
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
         if (user?.username) {
             revalidatePath(`/profile/${user.username}`);
-            revalidatePath(`/profile/${user.username}`);
         }
-
         return { success: true };
     } catch (error) {
-        console.error("Error updating profile color:", error);
         return { success: false, error: "Failed to update color" };
     }
 }
@@ -153,56 +137,41 @@ export async function updateFrameColor(userId: string, color: string) {
             return { success: false, error: "Unauthorized" };
         }
 
-        // Use raw query to bypass prisma client sync issues
         await prisma.$executeRawUnsafe(`UPDATE User SET frameColor = ? WHERE id = ?`, color, userId);
 
-
-        // Revalidate paths to update UI
         revalidatePath("/dashboard");
-
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
         if (user?.username) {
-            revalidatePath(`/user/${user.username}`);
             revalidatePath(`/profile/${user.username}`);
         }
-
         return { success: true };
     } catch (error) {
-        console.error("Error updating frame color:", error);
         return { success: false, error: "Failed to update frame color" };
     }
 }
+
 /**
- * Fetches all digital products owned by the currently authenticated user.
+ * Legacy digital inventory fetcher - now just calls getUserInventory and filters for digital products.
  */
 export async function getUserDigitalInventory() {
     try {
         const session = await auth();
-
         if (!session?.user?.id) {
             return { success: false, error: "Unauthorized" };
         }
 
-        const ownedProducts = await prisma.digitalProductOwnership.findMany({
-            where: {
-                userId: session.user.id
-            },
-            include: {
-                product: true
-            },
-            orderBy: {
-                acquiredAt: "desc"
-            }
-        });
+        const data = await getUserInventory(session.user.id);
+        const digitalItems = data.inventory.filter(item =>
+            !["FRAME", "BACKGROUND", "BANNER_VIDEO"].includes(item.type)
+        );
 
-        // Ensure serialization of dates
-        const serialized = ownedProducts.map(op => ({
-            ...op,
-            acquiredAt: op.acquiredAt.toISOString(),
+        const serialized = digitalItems.map(item => ({
+            ...item,
+            acquiredAt: item.acquiredAt ? new Date(item.acquiredAt).toISOString() : new Date().toISOString(),
             product: {
-                ...op.product,
-                createdAt: op.product.createdAt.toISOString(),
-                updatedAt: op.product.updatedAt.toISOString(),
+                ...item,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             }
         }));
 
@@ -210,7 +179,6 @@ export async function getUserDigitalInventory() {
             success: true,
             inventory: serialized
         };
-
     } catch (error: any) {
         console.error("Failed to fetch user digital inventory:", error);
         return { success: false, error: "Failed to fetch digital inventory data." };

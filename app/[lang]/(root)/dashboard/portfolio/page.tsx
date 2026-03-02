@@ -30,8 +30,8 @@ export default async function PortfolioEditorPage() {
                     <p className="text-gray-400">
                         You need to purchase the <span className="text-teal-400 font-semibold">Professional Portfolio Template</span> to access this feature.
                     </p>
-                    <a href="/shop" className="inline-block px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-colors">
-                        Go to Shop
+                    <a href="/digitalproducts" className="inline-block px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-colors">
+                        Browse Digital Products
                     </a>
                 </div>
             </div>
