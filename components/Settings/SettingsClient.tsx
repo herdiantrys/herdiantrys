@@ -24,6 +24,7 @@ import { updateUserProfile, updateUsername } from "@/lib/actions/user.actions";
 import { updatePreferences } from "@/lib/actions/settings.actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { GlassTabs, tabContentVariants } from "@/components/ui/GlassTabs";
 
 interface SettingsClientProps {
     user: any;
@@ -152,36 +153,7 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
         }
     };
 
-    const renderTabs = () => (
-        <div className="flex p-1.5 bg-slate-100/50 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-slate-200/50 dark:border-white/10 mb-8 overflow-x-auto shadow-sm no-scrollbar">
-            {(["profile", "account", "interface", "notifications"] as const).map((tab) => (
-                <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all relative z-10 font-bold text-sm whitespace-nowrap ${activeTab === tab
-                        ? "text-slate-900 dark:text-white text-shadow-sm"
-                        : "text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:text-white text-shadow-sm"
-                        }`}
-                >
-                    {activeTab === tab && (
-                        <motion.div
-                            layoutId="activeTabSettings"
-                            className="absolute inset-0 bg-white dark:bg-white/10 rounded-xl shadow-sm dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-slate-200/50 dark:border-white/10 -z-10"
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                        />
-                    )}
-                    {tab === "profile" && <User size={16} />}
-                    {tab === "account" && <Shield size={16} />}
-                    {tab === "interface" && <Palette size={16} />}
-                    {tab === "notifications" && <Bell size={16} />}
-                    <span className="relative uppercase tracking-widest text-[10px]">
-                        {tabs[tab] || tab}
-                    </span>
-                </button>
-            ))}
-        </div>
-    );
-
+    // ... inside component ...
     return (
         <div className="max-w-4xl mx-auto px-4">
             <header className="mb-10 text-center sm:text-left">
@@ -193,15 +165,26 @@ export default function SettingsClient({ user, dict, currentLocale }: SettingsCl
                 </p>
             </header>
 
-            {renderTabs()}
+            <div className="mb-8 overflow-x-auto no-scrollbar pb-2">
+                <GlassTabs
+                    activeTab={activeTab}
+                    setActiveTab={(id) => setActiveTab(id as typeof activeTab)}
+                    tabs={[
+                        { id: "profile", label: tabs.profile || "Profile", icon: User, color: "from-teal-400 to-emerald-500" },
+                        { id: "account", label: tabs.account || "Account", icon: Shield, color: "from-blue-400 to-cyan-500" },
+                        { id: "interface", label: tabs.interface || "Interface", icon: Palette, color: "from-purple-400 to-pink-500" },
+                        { id: "notifications", label: tabs.notifications || "Notifications", icon: Bell, color: "from-amber-400 to-orange-500" },
+                    ]}
+                />
+            </div>
 
             <AnimatePresence mode="wait">
                 <motion.div
                     key={activeTab}
-                    initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-                    transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
                 >
                     {activeTab === "profile" && (
                         <div className="space-y-6">

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Sparkles, Zap, Trophy, Star, Crown } from "lucide-react";
 
 interface XPToastProps {
@@ -12,48 +11,24 @@ interface XPToastProps {
 
 export const XPToast = ({ amount, reason, type = "default", icon }: XPToastProps) => {
     return (
-        <motion.div
-            initial={{ y: -20, opacity: 0, scale: 0.95 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: -10, opacity: 0, scale: 0.95 }}
-            className="group relative flex items-center gap-4 bg-[var(--site-primary)]/40 backdrop-blur-3xl border border-[var(--site-accent)]/20 rounded-2xl p-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.3)] min-w-[320px] max-w-sm overflow-hidden"
-        >
-            {/* Liquid Background Accents */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[var(--site-accent)]/10 via-transparent to-[var(--site-secondary)]/5 opacity-50 -z-10" />
-
-            {/* Standard Glass Icon Container */}
-            <div className="relative shrink-0 flex items-center justify-center w-11 h-11">
-                <div className="absolute inset-0 bg-[var(--site-accent)] blur-xl opacity-20" />
-                <div className="relative w-full h-full rounded-xl bg-gradient-to-br from-[var(--site-accent)]/90 to-[var(--site-secondary)]/90 shadow-md flex items-center justify-center text-[var(--site-button-text)] border border-white/20">
-                    {icon || (
-                        type === "levelup" ? <Crown size={22} className="drop-shadow-sm" /> :
-                            type === "milestone" ? <Trophy size={20} className="drop-shadow-sm" /> :
-                                <Sparkles size={20} className="drop-shadow-sm" />
-                    )}
-                </div>
+        <div className="flex items-center gap-4 bg-white/90 dark:bg-[#1A1A1A]/80 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl p-4 shadow-2xl w-[320px] max-w-sm">
+            <div className={`flex items-center justify-center shrink-0 w-10 h-10 rounded-full ${type === 'levelup' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'}`}>
+                {icon || (
+                    type === "levelup" ? <Crown size={20} /> :
+                        type === "milestone" ? <Trophy size={20} /> :
+                            <Sparkles size={20} />
+                )}
             </div>
-
-            {/* Content Section */}
-            <div className="flex-1 flex flex-col justify-center min-w-0">
-                <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-black text-[var(--glass-text)] font-pixel leading-tight">
-                        +{amount} XP
-                    </span>
-                    {type === "levelup" && (
-                        <span className="text-[10px] font-black text-[var(--site-accent)] animate-pulse uppercase tracking-tighter">
-                            Tier Up!
-                        </span>
-                    )}
-                </div>
+            <div className="flex flex-col justify-center">
+                <span className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                    +{amount} XP {type === "levelup" && <span className="text-xs text-yellow-600 dark:text-yellow-400 ml-1">(Tier Up!)</span>}
+                </span>
                 {reason && (
-                    <span className="text-[11px] font-bold text-[var(--glass-text-muted)] uppercase tracking-widest truncate leading-tight mt-0.5">
+                    <span className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-0.5">
                         {reason}
                     </span>
                 )}
             </div>
-
-            {/* Subtle Interactive Shimmer */}
-            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--site-accent)]/30 to-transparent" />
-        </motion.div>
+        </div>
     );
 };

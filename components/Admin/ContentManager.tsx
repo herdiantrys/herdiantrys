@@ -13,11 +13,7 @@ import {
 import { updateSiteContent, uploadSiteImage } from "@/lib/actions/content.actions";
 import { useRouter } from "next/navigation";
 
-const tabVariants: Variants = {
-    hidden: { opacity: 0, y: 12, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0.22, 0.61, 0.36, 1] } },
-    exit: { opacity: 0, y: -8, scale: 0.98, transition: { duration: 0.15 } }
-};
+import { GlassTabs, tabContentVariants } from "@/components/ui/GlassTabs";
 
 const itemVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
@@ -201,38 +197,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
         <div className="flex flex-col gap-6">
 
             {/* ── Tab Navigation ─────────────────────────────────────────── */}
-            <div className="bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.07] rounded-2xl p-1.5 shadow-sm dark:shadow-none">
-                <div className="flex flex-wrap gap-1">
-                    {tabs.map(tab => {
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250 ${isActive
-                                    ? "text-white shadow-md"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
-                                    }`}
-                            >
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeTabBg"
-                                        className={`absolute inset-0 rounded-xl bg-gradient-to-r ${tab.color} opacity-90`}
-                                        transition={{ type: "spring", stiffness: 380, damping: 36 }}
-                                    />
-                                )}
-                                <span className="relative flex items-center gap-2">
-                                    <tab.icon size={15} />
-                                    {tab.label}
-                                </span>
-                                {isActive && (
-                                    <span className="relative ml-1 w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
+            <GlassTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* ── Tab Content Card ───────────────────────────────────────── */}
             <div className="bg-white/75 dark:bg-[#1A1A1A]/70 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.07] rounded-3xl shadow-xl dark:shadow-2xl overflow-hidden">
@@ -262,7 +227,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
 
                         {/* ── GENERAL TAB ─────────────────────── */}
                         {activeTab === "general" && (
-                            <motion.div key="general" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                            <motion.div key="general" variants={tabContentVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
 
                                 {/* Banner */}
                                 <div>
@@ -340,7 +305,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
 
                         {/* ── ABOUT TAB ───────────────────────── */}
                         {activeTab === "about" && (
-                            <motion.div key="about" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                            <motion.div key="about" variants={tabContentVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
 
                                 {/* Profile Picture */}
                                 <SectionCard>
@@ -408,7 +373,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
 
                         {/* ── SKILLS TAB ──────────────────────── */}
                         {activeTab === "skills" && (
-                            <motion.div key="skills" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
+                            <motion.div key="skills" variants={tabContentVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Technical Skills</h3>
@@ -485,7 +450,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
 
                         {/* ── EXPERIENCE TAB ──────────────────── */}
                         {activeTab === "experience" && (
-                            <motion.div key="experience" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
+                            <motion.div key="experience" variants={tabContentVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Work Experience</h3>
@@ -602,7 +567,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
 
                         {/* ── EDUCATION TAB ───────────────────── */}
                         {activeTab === "education" && (
-                            <motion.div key="education" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
+                            <motion.div key="education" variants={tabContentVariants} initial="hidden" animate="visible" exit="exit" className="space-y-5">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Education</h3>

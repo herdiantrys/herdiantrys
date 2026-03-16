@@ -47,8 +47,8 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
   };
 
   return (
-    <section ref={containerRef} className="relative min-h-screen flex flex-col-reverse lg:block dark:text-white overflow-hidden mt-[-64px] pt-40 lg:pt-48">
-      <div className="relative z-10 container mx-auto px-6 lg:px-10 flex flex-col justify-center lg:grid lg:grid-cols-2 gap-12 items-center text-center lg:text-left min-h-[50vh] lg:min-h-[calc(100vh-300px)]">
+    <section ref={containerRef} className="relative min-h-screen flex flex-col-reverse lg:block dark:text-white overflow-hidden mt-[-64px]">
+      <div className="relative z-10 container mx-auto px-6 lg:px-10 flex flex-col justify-center lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center text-center lg:text-left min-h-screen pt-28 lg:pt-16 pb-16 lg:pb-0">
         {/* Left content */}
         <motion.div
           style={{ y: yText, opacity: opacityText }}
@@ -68,7 +68,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
-            className="text-5xl lg:text-7xl font-bold leading-tight mb-6"
+            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4 md:mb-6"
           >
             {dict.hero.greeting} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] via-[var(--site-secondary)] to-[var(--site-secondary)] animate-gradient-x">
@@ -76,7 +76,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             </span>
           </motion.h1>
 
-          <div className="h-14 mb-8 flex items-center justify-center lg:justify-start">
+          <div className="h-12 md:h-14 mb-6 md:mb-8 flex items-center justify-center lg:justify-start">
             <AnimatePresence mode="wait">
               <motion.h3
                 key={roles[index]}
@@ -84,7 +84,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -15, filter: "blur(12px)" }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="text-2xl lg:text-3xl text-[var(--glass-text-muted)] font-light py-2"
+                className="text-xl md:text-2xl lg:text-3xl text-[var(--glass-text-muted)] font-light py-2"
               >
                 {roles[index]}
               </motion.h3>
@@ -95,7 +95,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="text-lg text-[var(--glass-text-muted)] max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed"
+            className="text-base md:text-lg text-[var(--glass-text-muted)] max-w-lg mx-auto lg:mx-0 mb-8 md:mb-10 leading-relaxed"
           >
             {dict.hero.description}
           </motion.p>
@@ -108,14 +108,14 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
           >
             <button
               onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] text-[var(--site-button-text)] font-bold shadow-lg shadow-[var(--site-accent)]/30 hover:shadow-[var(--site-accent)]/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[var(--site-accent-prev)] to-[var(--site-accent-next)] text-[var(--site-button-text)] font-bold shadow-lg shadow-[var(--site-accent)]/30 hover:shadow-[var(--site-accent)]/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
               {dict.hero.view_portfolio}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 glass-liquid text-[var(--glass-text)] font-semibold hover:scale-105 hover:bg-white/60 dark:hover:bg-black/50 transition-all duration-300 shadow-sm hover:shadow-md"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl glass-liquid text-[var(--glass-text)] font-semibold hover:scale-105 hover:bg-white/60 dark:hover:bg-black/50 transition-all duration-300 shadow-sm hover:shadow-md"
             >
               {dict.hero.contact_me}
             </button>
@@ -127,13 +127,13 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
       {/* Right content - image */}
       <motion.div
         style={{ y: yImage, scale: scaleImage }}
-        className="relative w-full h-[50vh] lg:absolute lg:flex lg:justify-end lg:top-0 lg:left-[60%] lg:-translate-x-1/2 lg:h-screen lg:w-auto lg:aspect-[1080/1275] pointer-events-none z-0 lg:z-10 flex items-end justify-center"
+        className="relative w-full h-[45vh] lg:absolute lg:flex lg:justify-end lg:top-0 lg:left-[60%] lg:-translate-x-1/2 lg:h-screen lg:w-auto lg:aspect-[1080/1275] pointer-events-none z-0 lg:z-10 flex items-end justify-center"
       >
-        <div className="relative w-[90vw] h-[50vh] lg:w-full lg:h-full [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+        <div className="relative w-[100vw] sm:w-[80vw] h-full lg:w-full lg:h-full [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)] lg:[mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
           {/* Animated outline box behind image */}
           <motion.div
             style={{ rotate: rotateOutline }}
-            className="absolute inset-0 w-[300px] h-[300px] left-1/2 -translate-x-1/2 top-[20%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-[var(--site-secondary)]/50 bg-white/10 dark:bg-white/5 backdrop-blur-sm shadow-xl shadow-[var(--site-secondary)]/20 dark:shadow-none"
+            className="absolute inset-0 w-[70vw] h-[70vw] max-w-[280px] max-h-[280px] left-1/2 -translate-x-1/2 top-[15%] lg:w-[46%] lg:h-[39%] lg:left-[30%] lg:translate-x-0 lg:top-[35%] rounded-3xl border-4 border-[var(--site-secondary)]/50 bg-white/10 dark:bg-white/5 backdrop-blur-sm shadow-xl shadow-[var(--site-secondary)]/20 dark:shadow-none"
           ></motion.div>
 
           {profile?.bannerImage ? (
@@ -143,7 +143,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
-              className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              className="relative object-cover object-top w-full h-full lg:rounded-3xl top-[10px] lg:top-[64px]"
               priority
             />
           ) : getImageUrl(profile?.profileImage) ? (
@@ -152,7 +152,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
               alt={profile.fullName || "Hero Model"}
               width={1080}
               height={1275}
-              className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              className="relative object-cover object-top w-full h-full lg:rounded-3xl top-[10px] lg:top-[64px]"
               priority
             />
           ) : (
@@ -161,7 +161,7 @@ export default function HeroSection({ profile, dict }: { profile: any, dict: any
               alt="Hero Model"
               width={1080}
               height={1275}
-              className="relative object-cover object-top w-full h-full rounded-3xl top-[20px] lg:top-[64px]"
+              className="relative object-cover object-top w-full h-full lg:rounded-3xl top-[10px] lg:top-[64px]"
               priority
             />
           )}

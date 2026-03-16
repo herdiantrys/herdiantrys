@@ -8,6 +8,8 @@ import { ThemeConfig, DEFAULT_THEME } from "@/lib/types/theme";
 
 import { useRouter } from "next/navigation";
 import FrontPagePreview from "./FrontPagePreview";
+import { GlassTabs, tabContentVariants } from "@/components/ui/GlassTabs";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminThemeClient({ initialTheme }: { initialTheme: ThemeConfig }) {
     const router = useRouter();
@@ -123,32 +125,16 @@ export default function AdminThemeClient({ initialTheme }: { initialTheme: Theme
                 <div className="xl:col-span-7 flex flex-col gap-6">
 
                     {/* Tab Navigation */}
-                    <div className="flex bg-white/5 dark:bg-black/20 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md w-full max-w-lg">
-                        <TabButton
-                            active={activeTab === "light"}
-                            onClick={() => setActiveTab("light")}
-                            icon={<Sun size={16} className={activeTab === "light" ? "text-orange-400" : ""} />}
-                            label="Light Theme"
-                        />
-                        <TabButton
-                            active={activeTab === "dark"}
-                            onClick={() => setActiveTab("dark")}
-                            icon={<Moon size={16} className={activeTab === "dark" ? "text-purple-400" : ""} />}
-                            label="Dark Theme"
-                        />
-                        <TabButton
-                            active={activeTab === "interface"}
-                            onClick={() => setActiveTab("interface")}
-                            icon={<Palette size={16} className={activeTab === "interface" ? "text-pink-400" : ""} />}
-                            label="Interface"
-                        />
-                        <TabButton
-                            active={activeTab === "typography"}
-                            onClick={() => setActiveTab("typography")}
-                            icon={<Type size={16} className={activeTab === "typography" ? "text-blue-400" : ""} />}
-                            label="Typografi"
-                        />
-                    </div>
+                    <GlassTabs
+                        activeTab={activeTab}
+                        setActiveTab={(id) => setActiveTab(id as typeof activeTab)}
+                        tabs={[
+                            { id: "light", label: "Light Theme", icon: Sun, color: "from-orange-400 to-amber-500" },
+                            { id: "dark", label: "Dark Theme", icon: Moon, color: "from-purple-500 to-indigo-500" },
+                            { id: "interface", label: "Interface", icon: Palette, color: "from-pink-500 to-rose-500" },
+                            { id: "typography", label: "Typografi", icon: Type, color: "from-blue-500 to-cyan-500" },
+                        ]}
+                    />
 
                     {/* Tab Content */}
                     <div className="flex-1 relative">

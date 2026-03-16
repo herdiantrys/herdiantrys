@@ -7,9 +7,13 @@ export async function getDigitalProducts(adminOnly = false) {
     try {
         const whereClause: any = adminOnly ? {} : { isPublished: true };
 
-        // Return mostly digital stuff here
-        whereClause.type = { in: ['EBOOK', 'COURSE', 'TEMPLATE', 'COMPONENT', 'OTHER'] };
-        whereClause.category = { not: "cosmetics" };
+        // If there's specific logic for admin vs public, we can keep `isPublished` check.
+        // We previously filtered out "cosmetics" or non-standard types for the main inventory.
+        // Let's ensure admin can see EVERYTHING, and public sees only what's published.
+        if (!adminOnly) {
+            // If you still want to hide cosmetics from the main public store view, keep this here:
+            // whereClause.category = { not: "cosmetics" };
+        }
 
         const products = await prisma.digitalProduct.findMany({
             where: whereClause,
@@ -60,12 +64,17 @@ export async function createDigitalProduct(data: any) {
                 title: data.title,
                 slug: data.slug,
                 description: data.description || "",
-                price: parseInt(data.price) || 0,
+                price: parseInt(data.priceIdr) || parseInt(data.price) || 0, // Fallback to old price if priceIdr missing
+                priceIdr: parseInt(data.priceIdr) || 0,
+                priceRunes: parseInt(data.priceRunes) || 0,
                 currency: data.currency || "IDR",
                 category: data.category || "EBOOK",
+                type: data.type || "OTHER",
                 coverImage: data.coverImage || "",
                 thumbnail: data.thumbnail || "",
                 fileUrl: data.fileUrl || "",
+                icon: data.icon || "",
+                value: data.value || "",
                 isPublished: data.isPublished || false,
             }
         });
@@ -90,12 +99,17 @@ export async function updateDigitalProduct(id: string, data: any) {
                 title: data.title,
                 slug: data.slug,
                 description: data.description,
-                price: parseInt(data.price) || 0,
+                price: parseInt(data.priceIdr) || parseInt(data.price) || 0, // Fallback to old price if priceIdr missing
+                priceIdr: parseInt(data.priceIdr) || 0,
+                priceRunes: parseInt(data.priceRunes) || 0,
                 currency: data.currency,
                 category: data.category,
+                type: data.type,
                 coverImage: data.coverImage,
                 thumbnail: data.thumbnail,
                 fileUrl: data.fileUrl,
+                icon: data.icon,
+                value: data.value,
                 isPublished: data.isPublished,
             }
         });

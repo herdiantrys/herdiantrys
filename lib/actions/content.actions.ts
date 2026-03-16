@@ -6,39 +6,26 @@ import { serializeForClient } from "@/lib/utils";
 
 export const getSiteContent = async () => {
     try {
-        let content = await prisma.siteContent.findUnique({
-            where: { id: "main" }
+        const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+
+        const content = await prisma.siteContent.upsert({
+            where: { id: "main" },
+            update: {}, // If it exists, don't update anything
+            create: {
+                id: "main",
+                fullName: adminUser?.name || "Your Name",
+                headline: adminUser?.headline,
+                bio: adminUser?.bio,
+                location: adminUser?.location,
+                website: adminUser?.website,
+                profileImage: adminUser?.image,
+                bannerImage: adminUser?.bannerImage,
+                socialLinks: adminUser?.socialLinks || [],
+                skills: adminUser?.skills || [],
+                experience: adminUser?.experience || [],
+                education: adminUser?.education || []
+            }
         });
-
-        // Initialize if not exists
-        if (!content) {
-            // Migration logic: Attempt to fetch first admin to pre-populate?
-            // Or just create empty. Let's create empty but with reasonable defaults if possible,
-            // or leave it to the user to fill.
-            // For smoother transition, let's try to copy from the first ADMIN if desired, 
-            // but the user asked to SEPARATE. So starting fresh (or empty) might be cleaner,
-            // BUT that would break the homepage immediately.
-            // Better strategy: Try to find an admin user and copy their data once.
-
-            const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-
-            content = await prisma.siteContent.create({
-                data: {
-                    id: "main",
-                    fullName: adminUser?.name || "Your Name",
-                    headline: adminUser?.headline,
-                    bio: adminUser?.bio,
-                    location: adminUser?.location,
-                    website: adminUser?.website,
-                    profileImage: adminUser?.image,
-                    bannerImage: adminUser?.bannerImage,
-                    socialLinks: adminUser?.socialLinks || [],
-                    skills: adminUser?.skills || [],
-                    experience: adminUser?.experience || [],
-                    education: adminUser?.education || []
-                }
-            });
-        }
 
         return serializeForClient(content);
     } catch (error) {

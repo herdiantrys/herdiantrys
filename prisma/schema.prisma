@@ -330,12 +330,17 @@ model DigitalProduct {
   title       String
   slug        String   @unique
   description String?
-  price       Int      @default(0)
+  price       Int      @default(0) // Legacy
+  priceIdr    Int      @default(0)
+  priceRunes  Int      @default(0)
   currency    String   @default("IDR")
-  category    String // EBOOK, COURSE, COMPONENT, etc.
+  category    String // EBOOK, COURSE, COMPONENT, cosmetics, etc.
+  type        String   @default("OTHER") // DIGITAL_ASSET, FRAME, etc.
   coverImage  String?
   thumbnail   String?
   fileUrl     String? // The URL to download or access the digital product
+  icon        String? // For shop cosmetics
+  value       String? // CSS class or value
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
