@@ -112,8 +112,6 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
     // Background scales up and moves slightly
     const bgScale = useSpring(useTransform(scrollY, [0, 1000], [1.2, 1.38]), springConfig);
     const bgY = useSpring(useTransform(scrollY, [0, 1000], [0, 200]), springConfig);
-    const heroRailY = useSpring(useTransform(scrollY, [0, 400], [0, 96]), springConfig);
-    const stagePanelY = useSpring(useTransform(scrollY, [0, 450], [0, 120]), springConfig);
 
     const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
@@ -166,7 +164,6 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
         ? (projectPlainText.length > 220 ? `${projectPlainText.slice(0, 217).trimEnd()}...` : projectPlainText)
         : "A crafted project stage that blends concept, execution, and presentation into one polished showcase.";
     const readingTime = `${Math.max(1, Math.ceil(Math.max(projectPlainText.split(" ").filter(Boolean).length, 90) / 180))} min read`;
-    const mediaProgressLabel = `${String(activeHeroIndex + 1).padStart(2, "0")} / ${String(allMedia.length).padStart(2, "0")}`;
     const activeMediaLabel = activeMedia.type === "video" ? "Motion stage" : "Artwork stage";
     const sessionStatus = (session?.user as { status?: string } | undefined)?.status;
     const computedIsLiked = project.isLiked !== undefined
@@ -300,16 +297,6 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
         scrollToSection(sectionMap[key]);
     };
 
-    const goToPrevMedia = () => {
-        if (!hasMultipleMedia) return;
-        setActiveHeroIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
-    };
-
-    const goToNextMedia = () => {
-        if (!hasMultipleMedia) return;
-        setActiveHeroIndex((prev) => (prev + 1) % allMedia.length);
-    };
-
     const projectSections = [
         { key: "overview" as const, label: "Overview", detail: "Quick brief & project links" },
         { key: "story" as const, label: "Story", detail: "Read the full creative breakdown" },
@@ -354,254 +341,165 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
             />
 
             {/* --- MUSEUM STAGE HERO --- */}
+            {/* Parallax Container */}
             <header
                 ref={stageRef}
-                className="group/stage relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.2),transparent_32%),linear-gradient(180deg,#091224_0%,#07111f_42%,#050914_100%)]"
+                className="relative flex h-[100vh] w-full flex-col items-center justify-center overflow-hidden bg-black dark:bg-[#050505] group/stage"
             >
+                {/* 1. Ambient Background (Parallax + Scale) */}
                 <motion.div
                     key={`ambient-${activeHeroIndex}`}
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.42 }}
+                    animate={{ opacity: 0.4 }}
                     transition={{ duration: 1.5 }}
-                    className="pointer-events-none absolute inset-0 z-0 blur-[120px] saturate-150"
+                    className="absolute inset-0 z-0 blur-[120px] saturate-150 pointer-events-none"
                     style={{ opacity: heroOpacity, scale: bgScale, y: bgY }}
                 >
                     {activeMedia.type === "video" ? (
-                        <video src={activeMedia.url} className="h-full w-full object-cover" muted loop autoPlay />
+                        <video
+                            src={activeMedia.url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            autoPlay
+                        />
                     ) : (
-                        <Image src={activeMedia.url} alt="Ambient" fill className="object-cover" priority />
+                        <Image
+                            src={activeMedia.url}
+                            alt="Ambient"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
                     )}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(12,19,38,0.08),rgba(4,8,14,0.84)_72%)]" />
+                    <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
                 </motion.div>
 
-                <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(4,10,19,0.72)_0%,rgba(4,10,19,0.2)_24%,rgba(4,10,19,0.14)_65%,rgba(4,10,19,0.78)_100%)]" />
-                <div className="pointer-events-none absolute -left-20 top-[12%] z-[2] h-48 w-48 rounded-full bg-[var(--site-secondary)]/12 blur-[90px]" />
-                <div className="pointer-events-none absolute -right-10 bottom-[20%] z-[2] h-56 w-56 rounded-full bg-[var(--site-accent)]/10 blur-[110px]" />
-
-                <div className="absolute inset-x-0 top-4 z-40 px-4 sm:top-6 sm:px-6 lg:px-10">
-                    <div className="mx-auto flex max-w-[1360px] items-start justify-between gap-3">
-                        <Link
-                            href="/projects"
-                            className="group inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/30 px-3 py-3 pr-4 text-white/90 shadow-[0_20px_50px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:bg-black/45 hover:text-white"
+                {/* 2. Main Artwork Container (Parallax Y) */}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeHeroIndex}
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+                        transition={{ duration: 0.8, ease: "circOut" }}
+                        style={{ y: artworkY }}
+                        className="relative z-10 w-full h-full p-2 flex items-center justify-center"
+                    >
+                        <div
+                            className="relative flex items-center justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,0.8)] group cursor-zoom-in rounded-sm md:rounded-lg overflow-hidden ring-1 ring-white/10 dark:ring-white/5"
+                            onClick={() => openLightbox(activeHeroIndex)}
                         >
-                            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-transform duration-300 group-hover:-translate-x-1">
-                                <ArrowLeft size={18} />
-                            </span>
-                            <span className="hidden min-w-0 flex-col text-left sm:flex">
-                                <span className="text-[10px] uppercase tracking-[0.28em] text-white/45">Project Navigator</span>
-                                <span className="truncate text-sm font-semibold">Back to Projects</span>
-                            </span>
-                        </Link>
-
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/55 backdrop-blur-2xl">
-                                <span>{activeMediaLabel}</span>
-                                <span className="h-1.5 w-1.5 rounded-full bg-[var(--site-secondary)] shadow-[0_0_18px_rgba(195,245,255,0.65)]" />
-                                <span>{mediaProgressLabel}</span>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => openLightbox(activeHeroIndex)}
-                                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:bg-black/45 hover:text-white"
-                            >
-                                <Maximize2 size={16} />
-                                <span className="hidden sm:inline">Expand Stage</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => scrollToSection(overviewRef)}
-                                className="hidden items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur-2xl transition-all duration-300 hover:border-white/20 hover:bg-black/45 hover:text-white md:inline-flex"
-                            >
-                                Details
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative z-10 flex flex-1 items-center justify-center px-4 pb-52 pt-28 sm:px-6 sm:pb-56 sm:pt-32 lg:px-10 lg:pb-44 lg:pt-36">
-                    {hasMultipleMedia && (
-                        <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 hidden items-center justify-between px-4 lg:flex xl:px-8">
-                            <button
-                                type="button"
-                                onClick={goToPrevMedia}
-                                className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/80 shadow-[0_20px_45px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-all duration-300 hover:-translate-x-1 hover:border-white/20 hover:bg-black/45 hover:text-white"
-                                aria-label="Previous media"
-                            >
-                                <ChevronRight size={20} className="rotate-180" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={goToNextMedia}
-                                className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/80 shadow-[0_20px_45px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-all duration-300 hover:translate-x-1 hover:border-white/20 hover:bg-black/45 hover:text-white"
-                                aria-label="Next media"
-                            >
-                                <ChevronRight size={20} />
-                            </button>
-                        </div>
-                    )}
-
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeHeroIndex}
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
-                            transition={{ duration: 0.8, ease: "circOut" }}
-                            style={{ y: artworkY }}
-                            className="relative z-10 w-full max-w-[min(1380px,94vw)]"
-                        >
-                            <div
-                                className="group relative cursor-zoom-in overflow-hidden rounded-[2.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(10,18,34,0.9),rgba(7,13,24,0.78))] p-2 shadow-[0_32px_90px_rgba(0,0,0,0.5)] ring-1 ring-white/10"
-                                onClick={() => openLightbox(activeHeroIndex)}
-                            >
-                                <div className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/65 backdrop-blur-xl">
-                                    <span>{activeMedia.type === "video" ? "Motion" : "Still"}</span>
-                                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--site-secondary)]" />
-                                    <span>{mediaProgressLabel}</span>
+                            {activeMedia.type === "video" ? (
+                                <div className="relative bg-black flex items-center justify-center h-full w-full">
+                                    <video
+                                        src={activeMedia.url}
+                                        className="w-full h-full max-h-[90vh] object-contain"
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                    />
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        openLightbox(activeHeroIndex);
-                                    }}
-                                    className="absolute right-5 top-5 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2.5 text-sm font-semibold text-white/90 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-black/50 hover:text-white"
-                                >
-                                    <Maximize2 size={16} />
-                                    <span className="hidden sm:inline">Open Fullscreen</span>
-                                </button>
-                                <div className="relative overflow-hidden rounded-[1.8rem] bg-black/70">
-                                    {activeMedia.type === "video" ? (
-                                        <div className="relative flex items-center justify-center bg-black">
-                                            <video
-                                                src={activeMedia.url}
-                                                className="h-full max-h-[82vh] w-full object-contain"
-                                                autoPlay
-                                                loop
-                                                muted
-                                                playsInline
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="relative flex items-center justify-center bg-black/5 backdrop-blur-sm">
-                                            <Image
-                                                src={activeMedia.url}
-                                                alt={project.title}
-                                                width={1920}
-                                                height={1080}
-                                                className="h-full max-h-[82vh] w-full object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.015]"
-                                                priority
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(195,245,255,0.08),transparent_30%),linear-gradient(180deg,transparent_55%,rgba(3,7,14,0.6)_100%)]" />
-                                </div>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 36 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.85 }}
-                    style={{ y: stagePanelY }}
-                    className="absolute inset-x-0 bottom-0 z-30 px-4 pb-4 sm:px-6 sm:pb-6 lg:px-10"
-                >
-                    <div className="mx-auto grid max-w-[1360px] gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
-                        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-black/35 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.42)] backdrop-blur-[24px] sm:p-6 lg:p-7">
-                            <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.26em] text-white/50">
-                                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">{projectCategory}</span>
-                                {project.album && (
-                                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
-                                        {project.album}
-                                    </span>
-                                )}
-                                <span>{readingTime}</span>
-                            </div>
-                            <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                                <div className="max-w-3xl space-y-3">
-                                    <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-[3.4rem] lg:leading-[1.02]">
-                                        {project.title}
-                                    </h1>
-                                    <p className="max-w-2xl text-sm leading-7 text-white/68 sm:text-base">
-                                        {projectSynopsis}
-                                    </p>
-                                </div>
-                                <div className="flex flex-wrap gap-2.5">
-                                    {projectSections.map((section) => (
-                                        <button
-                                            key={section.label}
-                                            type="button"
-                                            onClick={() => scrollToSectionKey(section.key)}
-                                            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/85 transition-all duration-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                                        >
-                                            <span>{section.label}</span>
-                                            <ChevronRight size={16} />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-black/35 p-3 shadow-[0_22px_60px_rgba(0,0,0,0.42)] backdrop-blur-[24px]">
-                            <div className="mb-3 flex items-center justify-between gap-3 px-2 pt-1">
-                                <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/45">Stage Controls</p>
-                                    <p className="text-sm font-semibold text-white/90">Navigate and inspect details</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => openLightbox(activeHeroIndex)}
-                                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/75 transition-all duration-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                                >
-                                    <Maximize2 size={14} />
-                                    Expand
-                                </button>
-                            </div>
-
-                            {hasMultipleMedia ? (
-                                <motion.div style={{ y: heroRailY }} className="flex items-center gap-2 overflow-x-auto px-1 pb-1">
-                                    {allMedia.map((item, index) => (
-                                        <button
-                                            key={index}
-                                            type="button"
-                                            onClick={() => setActiveHeroIndex(index)}
-                                            className={`group relative h-20 w-20 shrink-0 overflow-hidden rounded-[1.25rem] border transition-all duration-300 sm:h-24 sm:w-24 ${activeHeroIndex === index
-                                                ? "border-[var(--site-secondary)] bg-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_18px_38px_rgba(0,0,0,0.34)]"
-                                                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-                                                }`}
-                                        >
-                                            {item.type === "video" ? (
-                                                <video src={item.url} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" muted />
-                                            ) : (
-                                                <Image
-                                                    src={item.url}
-                                                    alt={`Thumb ${index + 1}`}
-                                                    fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                />
-                                            )}
-                                            <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent transition-opacity ${activeHeroIndex === index ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`} />
-                                            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">
-                                                <span>{item.type === "video" ? "Motion" : "Still"}</span>
-                                                <span>{String(index + 1).padStart(2, "0")}</span>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </motion.div>
                             ) : (
-                                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-5 text-sm leading-7 text-white/65">
-                                    Inspect the artwork in fullscreen to study details, textures, and composition with a cleaner stage presentation.
+                                <div className="relative flex items-center justify-center w-full h-full bg-black/5 backdrop-blur-sm">
+                                    <Image
+                                        src={activeMedia.url}
+                                        alt={project.title}
+                                        width={1920}
+                                        height={1080}
+                                        className="w-full h-full max-h-[90vh] object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
+                                        priority
+                                    />
+
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* 3. Hero Thumbnail Navigation */}
+                {hasMultipleMedia && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8, duration: 0.8 }}
+                        className="absolute bottom-8 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-white/10 bg-black/50 p-2.5 shadow-2xl backdrop-blur-2xl"
+                    >
+                        {allMedia.map((item, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setActiveHeroIndex(index)}
+                                className={`relative w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 ${activeHeroIndex === index
+                                    ? "border-teal-500 scale-110 shadow-[0_0_20px_rgba(20,184,166,0.5)] z-10"
+                                    : "border-transparent opacity-50 hover:opacity-100 hover:scale-105 grayscale hover:grayscale-0"
+                                    }`}
+                            >
+                                {item.type === "video" ? (
+                                    <video src={item.url} className="w-full h-full object-cover" muted />
+                                ) : (
+                                    <Image
+                                        src={item.url}
+                                        alt={`Thumb ${index}`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                )}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+
+                {/* Navigation (Floating) */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                    className="absolute left-4 top-24 z-40 text-white sm:left-8"
+                >
+                    <Link
+                        href="/projects"
+                        className="group flex items-center gap-3 rounded-full border border-white/12 bg-black/45 px-3 py-3 pr-4 shadow-[0_20px_45px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:border-white/20 hover:bg-black/60"
+                    >
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 transition-all group-hover:bg-white/10">
+                            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        </div>
+                        <span className="hidden text-sm font-bold tracking-wide text-white/92 md:block">Back to Projects</span>
+                    </Link>
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                    className="absolute right-4 top-24 z-40 sm:right-8"
+                >
+                    <button
+                        type="button"
+                        onClick={() => openLightbox(activeHeroIndex)}
+                        className="group inline-flex items-center gap-3 rounded-full border border-white/12 bg-black/45 px-3 py-3 pr-4 text-white shadow-[0_20px_45px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:border-white/20 hover:bg-black/60"
+                    >
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 transition-all group-hover:bg-white/10">
+                            <Maximize2 size={18} />
+                        </div>
+                        <span className="hidden text-sm font-bold tracking-wide text-white/92 md:block">Expand Stage</span>
+                    </button>
+                </motion.div>
+
+                {/* Scroll Indicator */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.5 }}
+                    transition={{ delay: 1.5, duration: 1 }}
+                    style={{ opacity: heroOpacity }}
+                    className="absolute bottom-10 left-8 flex flex-col gap-2 items-center hidden lg:flex"
+                >
+                    <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/50 to-transparent" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/50 rotate-180" style={{ writingMode: "vertical-rl" }}>Scroll</span>
                 </motion.div>
             </header>
 
-            <main className="relative z-20 -mt-10 sm:-mt-12 lg:-mt-16">
+            <main className="relative z-20 mt-0">
                 <div className="container mx-auto px-4 lg:px-8 pb-32">
                     <div className="relative overflow-hidden rounded-[2.75rem] border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] ring-1 ring-[var(--glass-border)] backdrop-blur-3xl sm:p-8 lg:p-12 xl:p-16">
                         <div className="pointer-events-none absolute -right-16 top-0 h-72 w-72 rounded-full bg-[var(--site-secondary)]/10 blur-[140px]" />
