@@ -6,6 +6,17 @@ import { revalidatePath } from "next/cache";
 import { trackFirstBannerSetup } from "./gamification.actions";
 import { serializeForClient } from "@/lib/utils";
 import { auth } from "@/auth";
+import { DEFAULT_PROFILE_PICTURES } from "@/lib/default-profile-picture";
+
+const revalidateUserSurfacePaths = (username?: string | null) => {
+    revalidatePath("/dashboard");
+    revalidatePath("/");
+
+    if (username) {
+        revalidatePath(`/profile/${username}`);
+        revalidatePath(`/user/${username}`);
+    }
+};
 
 export const getUserByUsername = async (username: string, currentUserId?: string) => {
     try {
@@ -160,14 +171,33 @@ export const uploadProfileImage = async (userId: string, formData: FormData) => 
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
 
-        if (user) {
-            revalidatePath(`/profile/${user.username}`);
-        }
+        revalidateUserSurfacePaths(user?.username);
 
         return { success: true, imageUrl: imageUrl };
     } catch (error) {
         console.error("Error uploading profile image:", error);
         return { success: false, error: "Failed to upload image" };
+    }
+};
+
+export const setProfileImageFromPreset = async (userId: string, imagePath: string) => {
+    try {
+        if (!DEFAULT_PROFILE_PICTURES.includes(imagePath as (typeof DEFAULT_PROFILE_PICTURES)[number])) {
+            return { success: false, error: "Invalid preset avatar" };
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { image: imagePath }
+        });
+
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
+        revalidateUserSurfacePaths(user?.username);
+
+        return { success: true, imageUrl: imagePath };
+    } catch (error) {
+        console.error("Error setting preset profile image:", error);
+        return { success: false, error: "Failed to update avatar" };
     }
 };
 
@@ -179,9 +209,7 @@ export const removeProfileImage = async (userId: string) => {
         });
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user) {
-            revalidatePath(`/user/${user.username}`);
-        }
+        revalidateUserSurfacePaths(user?.username);
 
         return { success: true };
     } catch (error) {

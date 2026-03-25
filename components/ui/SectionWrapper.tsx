@@ -9,8 +9,6 @@ interface SectionWrapperProps {
     className?: string;
     parallaxSpeed?: number;
     parallax?: boolean;
-    stagger?: boolean;
-    delay?: number;
 }
 
 const sectionVariants: Variants = {
@@ -38,8 +36,6 @@ export default function SectionWrapper({
     className = "",
     parallaxSpeed = 0.15, // Slightly subtler default
     parallax = true,
-    stagger = true,
-    delay = 0,
 }: SectionWrapperProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +56,7 @@ export default function SectionWrapper({
         <section
             ref={containerRef}
             id={id}
-            className={`relative py-16 sm:py-24 flex flex-col items-center overflow-visible ${className}`}
+            className={`relative py-24 sm:py-28 lg:py-32 flex flex-col items-center overflow-visible ${className}`}
         >
             <motion.div
                 initial="hidden"

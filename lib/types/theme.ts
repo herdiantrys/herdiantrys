@@ -1,9 +1,12 @@
 export type ThemeConfig = {
+    useColorRule603010?: boolean;
     primary: string;
     secondary: string;
     accent: string;
     // Granular Controls
     button: string;
+    buttonGradientStart?: string;
+    buttonGradientEnd?: string;
     buttonText: string;
     link: string;
     card: string;
@@ -20,8 +23,8 @@ export type ThemeConfig = {
 
     // Typography
     fontHeading?: string; // Google Fonts family name for headings
-    fontBody?: string;    // Google Fonts family name for body text
-    fontMono?: string;    // Google Fonts family name for monospace
+    fontBody?: string; // Google Fonts family name for body text
+    fontMono?: string; // Google Fonts family name for monospace
 
     // Sidebar Specific
     sidebarBg: string;
@@ -35,6 +38,8 @@ export type ThemeConfig = {
     darkAccent: string;
     // Granular Controls Dark
     darkButton: string;
+    darkButtonGradientStart?: string;
+    darkButtonGradientEnd?: string;
     darkButtonText: string;
     darkLink: string;
     darkCard: string;
@@ -55,45 +60,54 @@ export type ThemeConfig = {
 };
 
 export const DEFAULT_THEME: ThemeConfig = {
-    primary: "#f5f7f8",
-    secondary: "#ffffff",
-    accent: "#14b8a6",
-    button: "#14b8a6",
-    buttonText: "#ffffff",
-    link: "#14b8a6",
-    card: "#ffffff",
-    cardText: "#1f2937",
+    useColorRule603010: true,
+    primary: "#eef4fb",
+    secondary: "#a7ebff",
+    accent: "#6d63ff",
+    button: "#a7ebff",
+    buttonGradientStart: "#d7f7ff",
+    buttonGradientEnd: "#6d63ff",
+    buttonText: "#081019",
+    link: "#5a5bf0",
+    card: "#f6f9fd",
+    cardText: "#10213d",
 
-    radius: 0.5,
+    radius: 1.25,
     scale: 1,
-    glassBlur: 8,
-    glassOpacity: 0.25,
-    glassSaturation: 150,
+    glassBlur: 20,
+    glassOpacity: 0.26,
+    glassSaturation: 180,
 
-    // Default fonts — keep existing Geist feel
-    fontHeading: "Inter",
+    // Default fonts for Ethereal Professional
+    fontHeading: "Space Grotesk",
     fontBody: "Inter",
     fontMono: "JetBrains Mono",
 
-    sidebarBg: "#ffffff",
-    sidebarFg: "#1f2937",
-    sidebarBorder: "#e5e7eb",
-    sidebarAccent: "#14b8a6",
-    sidebarActive: "#f0fdfa",
+    sidebarBg: "#f2f6fc",
+    sidebarFg: "#10213d",
+    sidebarBorder: "#d9e2ee",
+    sidebarAccent: "#8fe5ff",
+    sidebarActive: "#e8eff8",
 
-    darkPrimary: "#252525",
-    darkSecondary: "#333333",
-    darkAccent: "#2dd4bf",
-    darkButton: "#2dd4bf",
-    darkButtonText: "#1a1a1a",
-    darkLink: "#2dd4bf",
-    darkCard: "#333333",
-    darkCardText: "#ffffff",
+    darkPrimary: "#070d1b",
+    darkSecondary: "#c3f5ff",
+    darkAccent: "#9e8cff",
+    darkButton: "#9cefff",
+    darkButtonGradientStart: "#c3f5ff",
+    darkButtonGradientEnd: "#00e5ff",
+    darkButtonText: "#081019",
+    darkLink: "#8df3ff",
+    darkCard: "#11192c",
+    darkCardText: "#dae2fd",
 
-    darkSidebarBg: "#333333",
-    darkSidebarFg: "#ffffff",
-    darkSidebarBorder: "#404040",
-    darkSidebarAccent: "#2dd4bf",
-    darkSidebarActive: "#2d2d2d",
+    darkSidebarBg: "#091224",
+    darkSidebarFg: "#dae2fd",
+    darkSidebarBorder: "#2b3450",
+    darkSidebarAccent: "#c3f5ff",
+    darkSidebarActive: "#111a2f",
+
+    accentGradientStart: "#00e5ff",
+    accentGradientEnd: "#8f7dff",
+    darkAccentGradientStart: "#00e5ff",
+    darkAccentGradientEnd: "#9e8cff",
 };
-

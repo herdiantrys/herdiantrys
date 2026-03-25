@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { Camera, Edit, MapPin, Link as LinkIcon, Coins, MessageSquare } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import EditProfileModal from "./EditProfileModal";
-import { uploadProfileImage, followUser, unfollowUser } from "@/lib/actions/user.actions";
-import { getUserPoints } from "@/lib/actions/points.actions";
+import AvatarPickerModal from "./AvatarPickerModal";
+import { followUser, unfollowUser } from "@/lib/actions/user.actions";
+import { getDefaultProfilePicture } from "@/lib/default-profile-picture";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner"; // Assuming sonner is used for toasts, if not I'll adjust
@@ -28,12 +29,11 @@ export default function ProfileCard({
     const pathname = usePathname();
     const router = useRouter();
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [points, setPoints] = useState(user?.points || 0);
+    const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
     const [isFollowing, setIsFollowing] = useState(user.isFollowing || false);
     const [followersCount, setFollowersCount] = useState(user.stats?.followers || 0);
     const [isFollowLoading, setIsFollowLoading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const points = user?.points || 0;
 
     const handleFollowToggle = async () => {
         if (!currentUserId) {
@@ -66,7 +66,7 @@ export default function ProfileCard({
                 toast.success(originallyFollowing ? "Unfollowed user" : "Following user");
                 router.refresh();
             }
-        } catch (error) {
+        } catch {
             // Rollback
             setIsFollowing(originallyFollowing);
             setFollowersCount((prev: number) => originallyFollowing ? prev + 1 : prev - 1);
@@ -80,35 +80,20 @@ export default function ProfileCard({
 
     const handleImageClick = () => {
         if (!isPublic) {
-            fileInputRef.current?.click();
+            setIsAvatarPickerOpen(true);
         }
     };
 
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setIsUploading(true);
-            const formData = new FormData();
-            formData.append("image", file);
-            await uploadProfileImage(user._id, formData);
-            router.refresh();
-            setIsUploading(false);
-        }
-    };
-
-    const resolveImageUrl = (image: any, width = 600) => {
+    const resolveImageUrl = (image: any) => {
         if (!image) return null;
         if (typeof image === 'string') return image;
         if (image?.asset?.url) return image.asset.url;
-        try {
-            return image;
-        } catch (e) {
-            return null;
-        }
+        return image;
     };
 
-    const bannerUrl = resolveImageUrl(user.bannerImage, 600);
-    const profileUrl = resolveImageUrl(user.profileImage, 200) || user.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || "User")}&background=random`;
+    const bannerUrl = resolveImageUrl(user.bannerImage);
+    const fallbackProfileUrl = getDefaultProfilePicture(user.email || user.username || user.fullName || user._id || user.id);
+    const profileUrl = resolveImageUrl(user.profileImage) || user.imageURL || user.image || fallbackProfileUrl;
 
     return (
         <div
@@ -120,7 +105,7 @@ export default function ProfileCard({
                 card.style.setProperty("--mouse-x", `${x}px`);
                 card.style.setProperty("--mouse-y", `${y}px`);
             }}
-            className={`bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/10 flex flex-col items-center text-center relative overflow-hidden transition-all duration-500 rounded-2xl group/profile-card ${isUploading ? 'animate-pulse' : ''} ${isCollapsed ? 'p-2' : ''}`}
+            className={`bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/10 flex flex-col items-center text-center relative overflow-hidden transition-all duration-500 rounded-2xl group/profile-card ${isCollapsed ? 'p-2' : ''}`}
         >
             {/* Dynamic Spotlight Effect */}
             <div
@@ -131,6 +116,11 @@ export default function ProfileCard({
             />
 
             <EditProfileModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} user={user} />
+            <AvatarPickerModal
+                isOpen={isAvatarPickerOpen}
+                onClose={() => setIsAvatarPickerOpen(false)}
+                user={user}
+            />
 
             {/* Banner Section with Refined Overlay */}
             {!isCollapsed && (
@@ -225,22 +215,16 @@ export default function ProfileCard({
                                 </div>
                             )}
 
-                            {isUploading && (
-                                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                                    <div className="w-8 h-8 border-2 border-[var(--site-secondary)] border-t-transparent rounded-full animate-spin" />
-                                </div>
-                            )}
-
                             <img
                                 src={profileUrl}
                                 alt={user.fullName || "User"}
                                 className="w-full h-full rounded-full object-cover relative z-10 transition-transform duration-500 group-hover:scale-110"
                                 onError={(e) => {
-                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || "U")}&background=random`;
+                                    (e.target as HTMLImageElement).src = fallbackProfileUrl;
                                 }}
                             />
 
-                            {!isPublic && !isUploading && (
+                            {!isPublic && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-30 backdrop-blur-[2px]">
                                     <Camera size={18} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
                                 </div>
@@ -399,13 +383,6 @@ export default function ProfileCard({
                         </div>
                     </motion.div>
                 )}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    className="hidden"
-                    accept="image/*"
-                />
             </div>
 
             {/* Background Grain/Noise */}

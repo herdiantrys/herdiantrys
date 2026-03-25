@@ -4,6 +4,230 @@ import { auth } from "@/auth";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import {
+    DEFAULT_COSMETIC_SHOP_ITEMS,
+    getCosmeticShopSlug,
+} from "@/lib/default-cosmetic-shop-items";
+import {
+    trackFirstShopPurchase,
+    trackShopCompletion,
+} from "@/lib/actions/gamification.actions";
+
+const revalidateInventorySurfaces = (username?: string | null) => {
+    revalidatePath("/dashboard");
+    revalidatePath("/digitalproducts");
+    revalidatePath("/inventory");
+
+    if (username) {
+        revalidatePath(`/profile/${username}`);
+        revalidatePath(`/user/${username}`);
+    }
+};
+
+const isEquippedItem = (
+    type: "FRAME" | "BACKGROUND",
+    itemValue: string | null | undefined,
+    user: {
+        equippedFrame?: string | null;
+        equippedBackground?: string | null;
+    }
+) => {
+    if (!itemValue) return false;
+
+    if (type === "FRAME") {
+        return user.equippedFrame === itemValue;
+    }
+
+    if (itemValue === "custom-image") {
+        return Boolean(
+            user.equippedBackground === "custom-image" ||
+            user.equippedBackground?.startsWith("http") ||
+            user.equippedBackground?.startsWith("/")
+        );
+    }
+
+    return user.equippedBackground === itemValue;
+};
+
+async function ensureDefaultCosmeticShopItems() {
+    for (const item of DEFAULT_COSMETIC_SHOP_ITEMS) {
+        const existing = await prisma.shopItem.findFirst({
+            where: {
+                name: item.name,
+                type: item.type
+            }
+        });
+
+        if (!existing) {
+            await prisma.shopItem.create({
+                data: item
+            });
+            continue;
+        }
+
+        const shouldUpdate =
+            existing.description !== item.description ||
+            existing.price !== item.price ||
+            existing.category !== item.category ||
+            existing.value !== item.value ||
+            existing.icon !== item.icon;
+
+        if (shouldUpdate) {
+            await prisma.shopItem.update({
+                where: { id: existing.id },
+                data: item
+            });
+        }
+    }
+}
+
+export async function getCosmeticCatalog(userId?: string) {
+    try {
+        await ensureDefaultCosmeticShopItems();
+
+        const items = await prisma.shopItem.findMany({
+            where: { category: "cosmetics" },
+            orderBy: [
+                { type: "asc" },
+                { price: "asc" },
+                { name: "asc" }
+            ]
+        });
+
+        let ownedItemIds = new Set<string>();
+        let userEquipment = {
+            equippedFrame: null as string | null,
+            equippedBackground: null as string | null
+        };
+
+        if (userId) {
+            const [inventory, user] = await Promise.all([
+                prisma.userInventory.findMany({
+                    where: { userId },
+                    select: { shopItemId: true }
+                }),
+                prisma.user.findUnique({
+                    where: { id: userId },
+                    select: {
+                        equippedFrame: true,
+                        equippedBackground: true
+                    }
+                })
+            ]);
+
+            ownedItemIds = new Set(inventory.map((item) => item.shopItemId));
+            userEquipment = {
+                equippedFrame: user?.equippedFrame || null,
+                equippedBackground: user?.equippedBackground || null
+            };
+        }
+
+        return items.map((item) => ({
+            id: item.id,
+            kind: "cosmetic" as const,
+            slug: getCosmeticShopSlug(item.name),
+            title: item.name,
+            description: item.description || "",
+            category: item.type,
+            type: item.type,
+            collection: "COSMETIC",
+            coverImage: item.icon || null,
+            icon: item.icon || null,
+            value: item.value || "",
+            currency: "RUNES",
+            price: item.price,
+            priceRunes: item.price,
+            owned: ownedItemIds.has(item.id),
+            equipped: isEquippedItem(item.type as "FRAME" | "BACKGROUND", item.value, userEquipment),
+            customizable: item.value === "custom-color" || item.value === "custom-image",
+            customizationHint: item.value === "custom-color"
+                ? "Warna bisa di-custom dari tab Inventory setelah item di-equip."
+                : item.value === "custom-image"
+                    ? "Upload gambar sendiri dari tab Inventory setelah item dibeli."
+                    : null
+        }));
+    } catch (error) {
+        console.error("Error fetching cosmetic catalog:", error);
+        return [];
+    }
+}
+
+export async function purchaseShopItemWithRunes(userId: string, shopItemId: string) {
+    try {
+        const session = await auth();
+        if (!session?.user?.id || session.user.id !== userId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        await ensureDefaultCosmeticShopItems();
+
+        const [item, user, existingOwnership] = await Promise.all([
+            prisma.shopItem.findUnique({
+                where: { id: shopItemId }
+            }),
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    points: true,
+                    username: true
+                }
+            }),
+            prisma.userInventory.findFirst({
+                where: {
+                    userId,
+                    shopItemId
+                }
+            })
+        ]);
+
+        if (!item || item.category !== "cosmetics") {
+            return { success: false, error: "Item kosmetik tidak ditemukan" };
+        }
+
+        if (!user || user.points < item.price) {
+            return { success: false, error: "Rune tidak mencukupi" };
+        }
+
+        if (existingOwnership) {
+            return { success: false, error: "Item ini sudah kamu miliki" };
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+                where: { id: userId },
+                data: {
+                    points: { decrement: item.price }
+                }
+            });
+
+            await tx.userInventory.create({
+                data: {
+                    userId,
+                    shopItemId
+                }
+            });
+        });
+
+        revalidateInventorySurfaces(user.username);
+
+        trackFirstShopPurchase(userId).catch((trackingError) => {
+            console.error("Failed to track first shop purchase:", trackingError);
+        });
+        trackShopCompletion(userId).catch((trackingError) => {
+            console.error("Failed to track shop completion:", trackingError);
+        });
+
+        return {
+            success: true,
+            price: item.price,
+            type: item.type,
+            value: item.value
+        };
+    } catch (error) {
+        console.error("Failed to purchase shop item:", error);
+        return { success: false, error: "Transaksi gagal" };
+    }
+}
 
 export async function getUserInventory(userId: string) {
     try {
@@ -93,13 +317,8 @@ export async function toggleEquipItem(userId: string, itemValue: string, type: "
             data: updateData
         });
 
-        revalidatePath("/dashboard");
-        revalidatePath("/digitalproducts");
-
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user?.username) {
-            revalidatePath(`/profile/${user.username}`);
-        }
+        revalidateInventorySurfaces(user?.username);
 
         return { success: true };
     } catch (error) {
@@ -119,11 +338,8 @@ export async function updateProfileColor(userId: string, color: string) {
             data: { profileColor: color }
         });
 
-        revalidatePath("/dashboard");
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user?.username) {
-            revalidatePath(`/profile/${user.username}`);
-        }
+        revalidateInventorySurfaces(user?.username);
         return { success: true };
     } catch (error) {
         return { success: false, error: "Failed to update color" };
@@ -139,11 +355,8 @@ export async function updateFrameColor(userId: string, color: string) {
 
         await prisma.$executeRawUnsafe(`UPDATE User SET frameColor = ? WHERE id = ?`, color, userId);
 
-        revalidatePath("/dashboard");
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user?.username) {
-            revalidatePath(`/profile/${user.username}`);
-        }
+        revalidateInventorySurfaces(user?.username);
         return { success: true };
     } catch (error) {
         return { success: false, error: "Failed to update frame color" };

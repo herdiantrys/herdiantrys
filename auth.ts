@@ -4,6 +4,7 @@ import GitHub from "next-auth/providers/github"
 import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { getRandomDefaultProfilePicture } from "@/lib/default-profile-picture"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -63,6 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Check if this is the first user
             const userCount = await prisma.user.count();
             const role = userCount === 0 ? 'SUPER_ADMIN' : 'USER';
+            const profileImage = image || getRandomDefaultProfilePicture();
 
             // Only create if user doesn't exist
             await prisma.user.create({
@@ -70,8 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email,
                 name: name,
                 username: `${email.split('@')[0]}_${Math.floor(Date.now() / 1000)}`, // Ensure unique
-                // imageURL: image, // Disabled to prevent client mismatch
-                image: image,    // Map to profileImage
+                image: profileImage,
                 points: 0,
                 role: role,
               }
@@ -79,11 +80,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           } else {
             // Update existing user with latest data (Non-critical)
             try {
+              const nextImage = existingUser.image || image || getRandomDefaultProfilePicture();
+
               await prisma.user.update({
                 where: { email },
                 data: {
                   name: name,
-                  image: image
+                  ...(existingUser.image ? {} : { image: nextImage })
                 }
               });
             } catch (e) {

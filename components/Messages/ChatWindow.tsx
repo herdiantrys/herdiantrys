@@ -4,12 +4,37 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { FileDown, File as FileIcon, Check, CheckCheck } from "lucide-react";
+import AvatarWithEffect from "@/components/AvatarWithEffect";
+
+type MessageParticipant = {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    username?: string | null;
+    equippedFrame?: string | null;
+    equippedBackground?: string | null;
+    profileColor?: string | null;
+    frameColor?: string | null;
+    lastActiveAt?: string | Date | null;
+};
+
+type ChatMessage = {
+    id: string;
+    content?: string | null;
+    attachment?: string | null;
+    attachmentType?: string | null;
+    createdAt: string | Date;
+    isRead?: boolean;
+    senderId: string;
+    sender?: MessageParticipant | null;
+};
 
 interface ChatWindowProps {
-    messages: any[];
+    messages: ChatMessage[];
     currentUserId: string;
     loading?: boolean;
-    otherParticipant: any;
+    otherParticipant?: MessageParticipant | null;
 }
 
 export default function ChatWindow({
@@ -67,12 +92,15 @@ export default function ChatWindow({
             {/* Chat Header */}
             <div className="px-4 py-3 border-b border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)]/95 backdrop-blur-md flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] shadow-sm">
-                        <Image
-                            src={otherParticipant?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherParticipant?.name || "U")}&background=random`}
+                    <div className="relative shrink-0">
+                        <AvatarWithEffect
+                            src={otherParticipant?.image}
                             alt={otherParticipant?.name || "User"}
-                            fill
-                            className="object-cover"
+                            size={36}
+                            frame={otherParticipant?.equippedFrame}
+                            background={otherParticipant?.equippedBackground}
+                            profileColor={otherParticipant?.profileColor}
+                            frameColor={otherParticipant?.frameColor}
                         />
                         <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[var(--site-sidebar-bg)] ${isOnline ? 'bg-[var(--site-sidebar-accent)]' : 'bg-[var(--glass-text-muted)]/30'}`} />
                     </div>
@@ -132,14 +160,19 @@ export default function ChatWindow({
                                     >
                                         {/* Other user avatar */}
                                         {!isMe && (
-                                            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 relative bg-[var(--site-sidebar-active)] border border-[var(--site-sidebar-border)]">
-                                                {showAvatar && (
-                                                    <Image
-                                                        src={msg.sender?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.sender?.name || "U")}&background=random`}
-                                                        alt={msg.sender?.name || "U"}
-                                                        fill
-                                                        className="object-cover"
+                                            <div className="w-7 shrink-0">
+                                                {showAvatar ? (
+                                                    <AvatarWithEffect
+                                                        src={msg.sender?.image}
+                                                        alt={msg.sender?.name || "User"}
+                                                        size={28}
+                                                        frame={msg.sender?.equippedFrame}
+                                                        background={msg.sender?.equippedBackground}
+                                                        profileColor={msg.sender?.profileColor}
+                                                        frameColor={msg.sender?.frameColor}
                                                     />
+                                                ) : (
+                                                    <div className="w-7 h-7" />
                                                 )}
                                             </div>
                                         )}
@@ -151,8 +184,14 @@ export default function ChatWindow({
                                                     {msg.attachmentType === "image" ? (
                                                         <a href={msg.attachment} target="_blank" rel="noopener noreferrer"
                                                             className="block relative max-w-[320px] rounded-xl overflow-hidden border border-[var(--site-sidebar-border)] hover:opacity-90 transition-opacity bg-[var(--site-sidebar-active)] shadow-sm">
-                                                            <img src={msg.attachment} alt="Attachment"
-                                                                className="w-full h-auto max-h-[300px] object-contain block" loading="lazy" />
+                                                            <Image
+                                                                src={msg.attachment}
+                                                                alt="Attachment"
+                                                                width={320}
+                                                                height={240}
+                                                                unoptimized
+                                                                className="w-full h-auto max-h-[300px] object-contain block"
+                                                            />
                                                         </a>
                                                     ) : (
                                                         <a href={msg.attachment} target="_blank" rel="noopener noreferrer"

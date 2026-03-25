@@ -2,11 +2,34 @@
 
 import { motion } from "framer-motion";
 import { Search, MessageSquare } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
+import AvatarWithEffect from "@/components/AvatarWithEffect";
+
+type ConversationParticipant = {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    equippedFrame?: string | null;
+    equippedBackground?: string | null;
+    profileColor?: string | null;
+    frameColor?: string | null;
+    lastActiveAt?: string | Date | null;
+};
+
+type ConversationPreview = {
+    id: string;
+    participants: ConversationParticipant[];
+    messages: Array<{
+        createdAt: string | Date;
+        content?: string | null;
+        isRead?: boolean;
+        senderId?: string | null;
+    }>;
+};
 
 interface ConversationListProps {
-    conversations: any[];
+    conversations: ConversationPreview[];
     activeId?: string;
     onSelect: (id: string) => void;
     currentUserId: string;
@@ -21,8 +44,9 @@ export default function ConversationList({
     const [search, setSearch] = useState("");
 
     const filtered = conversations.filter(c => {
-        const other = c.participants.find((p: any) => p.id !== currentUserId);
-        return other?.name?.toLowerCase().includes(search.toLowerCase());
+        const other = c.participants.find((participant) => participant.id !== currentUserId);
+        const otherName = other?.name?.toLowerCase() || "";
+        return otherName.includes(search.toLowerCase());
     });
 
     return (
@@ -60,7 +84,7 @@ export default function ConversationList({
                     </div>
                 ) : (
                     filtered.map((conv) => {
-                        const other = conv.participants.find((p: any) => p.id !== currentUserId);
+                        const other = conv.participants.find((participant) => participant.id !== currentUserId);
                         const lastMessage = conv.messages[0];
                         const isActive = conv.id === activeId;
                         const isOnline = other?.lastActiveAt && (new Date().getTime() - new Date(other.lastActiveAt).getTime()) < 5 * 60 * 1000;
@@ -87,14 +111,16 @@ export default function ConversationList({
 
                                 {/* Avatar */}
                                 <div className="relative shrink-0 ml-1">
-                                    <div className={`w-10 h-10 rounded-full overflow-hidden border bg-[var(--site-sidebar-active)] relative shadow-sm transition-all ${isActive ? 'border-[var(--site-secondary)]/30 ring-2 ring-[var(--site-secondary)]/15' : 'border-[var(--site-sidebar-border)]'}`}>
-                                        <Image
-                                            src={other?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(other?.name || "U")}&background=random`}
-                                            alt={other?.name || "User"}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                    <AvatarWithEffect
+                                        src={other?.image}
+                                        alt={other?.name || "User"}
+                                        size={40}
+                                        frame={other?.equippedFrame}
+                                        background={other?.equippedBackground}
+                                        profileColor={other?.profileColor}
+                                        frameColor={other?.frameColor}
+                                        className={`transition-all ${isActive ? 'ring-2 ring-[var(--site-secondary)]/15' : ''}`}
+                                    />
                                     <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[var(--site-sidebar-bg)] shadow-sm ${isOnline ? 'bg-[var(--site-sidebar-accent)]' : 'bg-[var(--glass-text-muted)]/30'}`} />
                                 </div>
 

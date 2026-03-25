@@ -24,8 +24,13 @@ export async function getConversations() {
                     select: {
                         id: true,
                         name: true,
+                        email: true,
                         username: true,
                         image: true,
+                        equippedFrame: true,
+                        equippedBackground: true,
+                        profileColor: true,
+                        frameColor: true,
                         lastActiveAt: true,
                     }
                 },
@@ -70,8 +75,13 @@ export async function getMessages(conversationId: string) {
                     select: {
                         id: true,
                         name: true,
+                        email: true,
                         image: true,
                         username: true,
+                        equippedFrame: true,
+                        equippedBackground: true,
+                        profileColor: true,
+                        frameColor: true,
                         lastActiveAt: true
                     }
                 }

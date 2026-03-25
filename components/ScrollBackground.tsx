@@ -2,20 +2,29 @@
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 
 const getSectionColor = (sectionId: string, theme: string | undefined) => {
     const isLight = theme === "light";
 
     switch (sectionId) {
-        case "hero": return "rgba(2, 6, 23, 0)"; // Transparent (shows body gradient)
-        case "portfolio": return isLight ? "#f8fafc" : "#0f172a"; // Slate 50 : Slate 900
-        case "services": return isLight ? "#f0f9ff" : "#083344"; // Sky 50 : Cyan 950
-        case "testimonials": return isLight ? "#f0fdf4" : "#022c22"; // Green 50 : Emerald 950
-        case "partners": return isLight ? "#ffffff" : "#000000"; // White : Black
-        case "about": return isLight ? "#f9fafb" : "#111827"; // Gray 50 : Gray 900
-        case "contact": return isLight ? "#f1f5f9" : "#020617"; // Slate 100 : Slate 950
-        default: return "rgba(2, 6, 23, 0)";
+        case "hero":
+            return "rgba(2, 6, 23, 0)";
+        case "portfolio":
+            return isLight ? "#edf3fb" : "#0d1527";
+        case "services":
+            return isLight ? "#eef7ff" : "#0e182d";
+        case "testimonials":
+            return isLight ? "#f3efff" : "#0c1426";
+        case "partners":
+            return isLight ? "#eaf2fb" : "#0f172b";
+        case "about":
+            return isLight ? "#edf1f9" : "#0c1426";
+        case "contact":
+            return isLight ? "#e5edf8" : "#070d1b";
+        default:
+            return "rgba(2, 6, 23, 0)";
     }
 };
 
@@ -73,20 +82,15 @@ const getTransitionVariants = (sectionId: string) => {
     }
 };
 
-import { usePathname } from "next/navigation";
-
 export default function ScrollBackground() {
     const pathname = usePathname();
     const isHomePage = ["/", "/en", "/id"].includes(pathname);
 
     const { scrollYProgress } = useScroll();
     const { resolvedTheme } = useTheme();
-    const [isMounted, setIsMounted] = useState(false);
     const [activeSection, setActiveSection] = useState("hero");
 
     useEffect(() => {
-        setIsMounted(true);
-
         const sections = ["hero", "portfolio", "services", "testimonials", "partners", "about", "contact"];
 
         const observerCallback: IntersectionObserverCallback = (entries) => {
@@ -123,7 +127,7 @@ export default function ScrollBackground() {
 
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0]);
 
-    if (!isHomePage || !isMounted) return null;
+    if (!isHomePage || !resolvedTheme) return null;
 
     return (
         <>
@@ -147,31 +151,19 @@ export default function ScrollBackground() {
 
                 <motion.div
                     style={{ y: y1, rotate: rotate1, opacity }}
-                    className={`absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full blur-[120px] z-10 
-                        ${resolvedTheme === 'dark'
-                            ? "bg-gradient-to-br from-[color-mix(in_srgb,var(--site-accent),transparent_85%)] to-[color-mix(in_srgb,var(--site-accent-next),transparent_95%)]"
-                            : "bg-gradient-to-br from-[color-mix(in_srgb,var(--site-secondary),transparent_80%)] to-white/20"
-                        }`}
+                    className="absolute -top-[28%] -right-[8%] z-10 h-[70vw] w-[70vw] rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.18)_0%,rgba(0,229,255,0.06)_30%,transparent_68%)] blur-[140px]"
                 />
 
                 {/* Bottom Left Orb */}
                 <motion.div
                     style={{ y: y2, rotate: rotate2, opacity }}
-                    className={`absolute top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full blur-[150px] z-10
-                        ${resolvedTheme === 'dark'
-                            ? "bg-gradient-to-tr from-[color-mix(in_srgb,var(--site-accent-prev),transparent_90%)] to-[color-mix(in_srgb,var(--site-accent),transparent_85%)]"
-                            : "bg-gradient-to-tr from-white/30 to-[color-mix(in_srgb,var(--site-secondary),transparent_85%)]"
-                        }`}
+                    className="absolute top-[36%] -left-[22%] z-10 h-[82vw] w-[82vw] rounded-full bg-[radial-gradient(circle,rgba(143,125,255,0.18)_0%,rgba(143,125,255,0.06)_32%,transparent_72%)] blur-[160px]"
                 />
 
                 {/* Floating Circle (Bottom Right) - NEW */}
                 <motion.div
                     style={{ y: y4 }}
-                    className={`absolute bottom-[10%] right-[5%] w-[150px] h-[150px] rounded-full blur-[60px] z-10
-                        ${resolvedTheme === 'dark'
-                            ? "bg-gradient-to-t from-[color-mix(in_srgb,var(--site-accent),transparent_80%)] to-transparent"
-                            : "bg-gradient-to-t from-[color-mix(in_srgb,var(--site-secondary),transparent_85%)] to-transparent"
-                        }`}
+                    className="absolute bottom-[8%] right-[6%] z-10 h-[180px] w-[180px] rounded-full bg-[radial-gradient(circle,rgba(195,245,255,0.12)_0%,transparent_70%)] blur-[70px]"
                 />
             </div>
 

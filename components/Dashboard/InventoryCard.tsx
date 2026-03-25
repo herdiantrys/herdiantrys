@@ -82,7 +82,17 @@ export const InventoryCard = ({
                         <div className="relative w-1/2 h-1/2">
                             {/* Frame Preview Container */}
                             <div className="absolute inset-0 bg-[#222] rounded-full overflow-hidden border border-white/10" />
-                            <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-purple-500 opacity-20" />
+                            {isCustomColorItem ? (
+                                <>
+                                    <div
+                                        className="absolute inset-0 rounded-full"
+                                        style={{ background: `linear-gradient(135deg, ${color || "#22c55e"}, ${color || "#22c55e"})` }}
+                                    />
+                                    <div className="absolute inset-[6px] rounded-full bg-[#111827] border border-white/10" />
+                                </>
+                            ) : (
+                                <div className={`absolute inset-0 bg-gradient-to-br ${item.value || "from-teal-400 to-purple-500"} opacity-90`} />
+                            )}
                             {item.icon && <img src={item.icon} alt="" className="absolute inset-0 w-full h-full object-cover rendering-pixelated" style={{ imageRendering: 'pixelated' }} />}
                         </div>
                     ) : isCustomColorItem ? (

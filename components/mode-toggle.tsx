@@ -15,7 +15,7 @@ export function ModeToggle() {
 
   if (!mounted) {
     return (
-      <button className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 opacity-50"></button>
+      <button className="h-11 w-11 rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] opacity-60 backdrop-blur-xl" />
     );
   }
 
@@ -24,71 +24,27 @@ export function ModeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`relative flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-300 shadow-sm
-        ${isDark
-          ? "bg-neutral-800/80 border-neutral-700 hover:shadow-[0_0_15px_rgba(45,212,191,0.25)]"
-          : "bg-sky-100/80 border-sky-200 hover:shadow-[0_0_15px_rgba(250,204,21,0.3)]"} 
-        border`}
+      className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] shadow-[0_14px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300 hover:border-[var(--site-secondary)]/35 hover:shadow-[0_18px_40px_rgba(0,0,0,0.34),0_0_24px_rgba(0,229,255,0.12)]"
       aria-label="Toggle Theme"
     >
-      {/* Background elements for Light Mode (Clouds/Sky) */}
-      <AnimatePresence>
-        {!isDark && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
-            <div className="absolute top-1 left-1 w-6 h-6 bg-white/60 rounded-full blur-[2px]"></div>
-            <div className="absolute bottom-0 right-1 w-4 h-4 bg-white/40 rounded-full blur-[1px]"></div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Background elements for Dark Mode (Stars) */}
-      <AnimatePresence>
-        {isDark && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 pointer-events-none"
-          >
-            <motion.div
-              animate={{ opacity: [0.2, 1, 0.2] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute top-2 left-2 w-[2px] h-[2px] bg-white rounded-full"
-            />
-            <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ repeat: Infinity, duration: 3, delay: 1 }}
-              className="absolute bottom-2 right-3 w-[2px] h-[2px] bg-white/80 rounded-full"
-            />
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ repeat: Infinity, duration: 4, delay: 0.5 }}
-              className="absolute top-4 right-1 w-[1.5px] h-[1.5px] bg-white/70 rounded-full"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_26%,rgba(0,229,255,0.18),transparent_46%),radial-gradient(circle_at_76%_78%,rgba(143,125,255,0.18),transparent_42%)] opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className={`absolute inset-[5px] rounded-full border transition-colors duration-300 ${isDark ? "border-white/6" : "border-[rgba(195,245,255,0.14)]"}`} />
+      </div>
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={isDark ? "dark" : "light"}
-          initial={{ y: isDark ? 25 : -25, opacity: 0, rotate: isDark ? -180 : 180, scale: 0.5 }}
+          initial={{ y: isDark ? 18 : -18, opacity: 0, rotate: isDark ? -110 : 110, scale: 0.72 }}
           animate={{ y: 0, opacity: 1, rotate: 0, scale: 1 }}
-          exit={{ y: isDark ? -25 : 25, opacity: 0, rotate: isDark ? 180 : -180, scale: 0.5 }}
-          transition={{ type: "spring", stiffness: 250, damping: 20 }}
-          className="absolute z-10"
+          exit={{ y: isDark ? -18 : 18, opacity: 0, rotate: isDark ? 110 : -110, scale: 0.72 }}
+          transition={{ type: "spring", stiffness: 260, damping: 22 }}
+          className="relative z-10"
         >
           {isDark ? (
-            <Moon className="w-5 h-5 text-teal-300 drop-shadow-[0_0_6px_rgba(45,212,191,0.6)] fill-teal-300/20" />
+            <Moon className="h-5 w-5 text-[var(--site-accent)] drop-shadow-[0_0_12px_rgba(143,125,255,0.45)]" />
           ) : (
-            <Sun className="w-5 h-5 text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] fill-amber-500/20" />
+            <Sun className="h-5 w-5 text-[var(--site-secondary)] drop-shadow-[0_0_12px_rgba(0,229,255,0.45)]" />
           )}
         </motion.div>
       </AnimatePresence>

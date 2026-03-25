@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { getRandomDefaultProfilePicture } from "@/lib/default-profile-picture";
 
 export async function registerUser(formData: FormData) {
     const fullName = formData.get("fullName") as string;
@@ -26,8 +27,7 @@ export async function registerUser(formData: FormData) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate Random Default Profile Picture
-        const randomImageId = Math.floor(Math.random() * 5) + 1;
-        const defaultImage = `/images/profile-picture-${randomImageId}.png`;
+        const defaultImage = getRandomDefaultProfilePicture();
 
         // Generate unique username
         const username = `${email.split('@')[0]}_${Math.floor(Date.now() / 1000)}`;

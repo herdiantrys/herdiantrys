@@ -9,7 +9,32 @@ import { createCheckoutSession, purchaseDigitalProductWithRunes } from "@/lib/ac
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function DigitalProductDetailClient({ product, userId, userPoints = 0 }: { product: any, userId?: string, userPoints?: number }) {
+type DigitalProductDetail = {
+    id: string;
+    title: string;
+    description?: string | null;
+    category?: string | null;
+    coverImage?: string | null;
+    currency: string;
+    priceIdr: number;
+    priceRunes: number;
+};
+
+type CheckoutActionResult = {
+    success?: boolean;
+    url?: string;
+    error?: string;
+};
+
+export default function DigitalProductDetailClient({
+    product,
+    userId,
+    userPoints = 0
+}: {
+    product: DigitalProductDetail;
+    userId?: string;
+    userPoints?: number;
+}) {
     const router = useRouter();
     const [isBuying, setIsBuying] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState<"MIDTRANS" | "STRIPE">(product.currency === "IDR" ? "MIDTRANS" : "STRIPE");
@@ -26,7 +51,7 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                     toast.error(`Not enough Runes. You need ${product.priceRunes} but have ${userPoints}.`);
                     return;
                 }
-                const result = await purchaseDigitalProductWithRunes(userId, product.id, product.priceRunes) as any;
+                const result = await purchaseDigitalProductWithRunes(userId, product.id, product.priceRunes) as CheckoutActionResult;
                 if (result.success) {
                     toast.success("Successfully purchased with Runes!");
                     toast.info("Check your inventory for the product link.");
@@ -35,7 +60,7 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                     toast.error(result.error || "Purchase failed.");
                 }
             } else {
-                const result = await createCheckoutSession(product.id, method) as any;
+                const result = await createCheckoutSession(product.id, method) as CheckoutActionResult;
                 if (result.success && result.url) {
                     // Redirect to payment gateway URL
                     window.location.href = result.url;
@@ -43,7 +68,7 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                     toast.error(result.error || "Checkout failed. Please try again or ensure you are logged in.");
                 }
             }
-        } catch (error) {
+        } catch {
             toast.error("An unexpected error occurred during checkout.");
         } finally {
             setIsBuying(false);
@@ -180,7 +205,9 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                                     {product.priceIdr > 0 && product.currency === "IDR" && (
                                         <button
                                             onClick={() => setSelectedGateway("MIDTRANS")}
-                                            className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedGateway === "MIDTRANS" ? "border-[var(--site-secondary)] bg-[var(--site-secondary)]/5 text-[var(--site-secondary)]" : "border-slate-200 dark:border-white/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/20"}`}
+                                            className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedGateway === "MIDTRANS"
+                                                ? "border-transparent bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                                : "border-slate-200 dark:border-white/10 text-slate-500 hover:border-[var(--site-button)]/35 hover:bg-[var(--site-button)]/5 hover:text-[var(--site-secondary)]"}`}
                                         >
                                             <CreditCard size={24} />
                                             <span className="text-xs font-bold text-center">QRIS / Bank<br />(Rp {product.priceIdr.toLocaleString('id-ID')})</span>
@@ -189,7 +216,9 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                                     {product.priceIdr > 0 && (
                                         <button
                                             onClick={() => setSelectedGateway("STRIPE")}
-                                            className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedGateway === "STRIPE" ? "border-blue-500 bg-blue-500/5 text-blue-500" : "border-slate-200 dark:border-white/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/20"}`}
+                                            className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedGateway === "STRIPE"
+                                                ? "border-transparent bg-[var(--site-button)] text-[var(--site-button-text)] shadow-lg shadow-[var(--site-accent)]/20"
+                                                : "border-slate-200 dark:border-white/10 text-slate-500 hover:border-[var(--site-button)]/35 hover:bg-[var(--site-button)]/5 hover:text-[var(--site-secondary)]"}`}
                                         >
                                             <CreditCard size={24} />
                                             <span className="text-xs font-bold text-center">Card (Stripe)<br />(Rp {product.priceIdr.toLocaleString('id-ID')})</span>
@@ -213,7 +242,7 @@ export default function DigitalProductDetailClient({ product, userId, userPoints
                                     <button
                                         onClick={() => handlePurchase("RUNES")}
                                         disabled={isBuying || (userPoints < product.priceRunes)}
-                                        className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-amber-500 text-white font-black text-lg shadow-[0_8px_32px_rgba(245,158,11,0.2)] hover:shadow-[0_16px_48px_rgba(245,158,11,0.3)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-none"
+                                        className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-[var(--site-button)]/20 bg-[var(--site-button)]/10 text-[var(--site-secondary)] font-black text-lg shadow-[0_8px_32px_var(--site-accent)]/10 hover:border-[var(--site-button)]/35 hover:bg-[var(--site-button)]/15 hover:text-[var(--site-secondary)] hover:shadow-[0_16px_48px_var(--site-accent)]/20 hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-none"
                                     >
                                         {isBuying ? <Loader2 size={24} className="animate-spin" /> : <Sparkles size={24} />}
                                         {isBuying ? "Processing..." : `Buy with ${product.priceRunes} RUNES`}

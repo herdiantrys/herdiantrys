@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { getUserByEmail } from "@/lib/actions/user.actions";
+import { getDefaultProfilePicture } from "@/lib/default-profile-picture";
 import Shell from "./layout/Shell";
 
 export default async function AppLayoutAdapter({
@@ -30,7 +31,7 @@ export default async function AppLayoutAdapter({
 
     // Default placeholder if no image resolved
     if (!resolvedImage && session?.user) {
-        resolvedImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name || "User")}&background=random`;
+        resolvedImage = getDefaultProfilePicture(session.user.email || session.user.name || session.user.id);
     }
 
     const user = session?.user

@@ -7,15 +7,14 @@ import MessageCenter from "../Messages/MessageCenter";
 import { usePathname } from "next/navigation";
 import ParticleWaveWrapper from "../ParticleWaveWrapper";
 import ScrollBackground from "../ScrollBackground";
-import { AnimatePresence, motion } from "framer-motion";
 
 import { getUnreadMessageCount as getDirectUnreadCount } from "@/lib/actions/message.actions";
 import { updateUserPresence } from "@/lib/actions/user.actions";
 
 type ShellProps = {
     children: React.ReactNode;
-    dict: any;
-    user: any;
+    dict: Record<string, unknown>;
+    user: { id?: string } | null;
     variant?: 'default' | 'guest';
 };
 
@@ -45,10 +44,8 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
         };
     }, [user]);
     const pathname = usePathname();
-    const isHome = ["/", "/en", "/id"].includes(pathname);
 
     const normalizedPath = pathname?.replace(/^\/[a-z]{2}/, "") || "/";
-    const isAdmin = normalizedPath.startsWith("/admin") || normalizedPath === "/admin";
 
     // Detect Portfolio Route: /profile/[username]/portfolio
     const isPortfolio = /^\/profile\/[^/]+\/portfolio/.test(normalizedPath);
@@ -97,7 +94,16 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
                 />
             )}
 
-            {!isPortfolio && <GlobalNavbar user={user} dict={dict} setIsMessageOpen={setIsMessageOpen} unreadMessages={unreadMessages} />}
+            {!isPortfolio && (
+                <GlobalNavbar
+                    user={user}
+                    dict={dict}
+                    setIsMessageOpen={setIsMessageOpen}
+                    unreadMessages={unreadMessages}
+                    isSidebarOpen={isSidebarOpen}
+                    onToggleSidebar={() => setIsSidebarOpen((current) => !current)}
+                />
+            )}
 
             <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isPortfolio ? '' : isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <main className="flex-1 relative z-10 pt-0 px-0 pb-20 lg:pb-0">

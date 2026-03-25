@@ -1,5 +1,6 @@
 "use client";
 
+import { getDefaultProfilePicture } from "@/lib/default-profile-picture";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
@@ -26,7 +27,7 @@ export default function AvatarWithEffect({
     profileColor,
     frameColor
 }: AvatarWithEffectProps) {
-    const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || "User")}&background=random`;
+    const defaultImage = getDefaultProfilePicture(alt);
     const [imageSrc, setImageSrc] = useState(src || defaultImage);
     const [hasError, setHasError] = useState(false);
 

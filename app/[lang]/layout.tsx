@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "../../components/theme-provider";
 import { Toaster } from "sonner";
@@ -7,13 +7,18 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import ScrollProgressTracker from "@/components/Gamification/ScrollProgressTracker";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-body-default",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-heading-default",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono-default",
   subsets: ["latin"],
 });
 
@@ -70,9 +75,9 @@ export default async function RootLayout({
         where: { id: session.user.id },
         select: { preferences: true }
       });
-      const prefs = dbUser?.preferences as Record<string, any> || {};
+      const prefs = (dbUser?.preferences as Record<string, unknown>) || {};
       if (prefs.language) {
-        userLang = prefs.language;
+        userLang = String(prefs.language);
       }
     }
 
@@ -84,7 +89,7 @@ export default async function RootLayout({
 
     return (
       <html lang={lang} suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
+        <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} min-h-screen antialiased`}>
           <PageTracker />
           {needsSync && <LanguageCookieSyncer userLanguage={resolvedUserLang} currentPathLang={lang} />}
           <ThemeInjector theme={theme} />
@@ -93,14 +98,14 @@ export default async function RootLayout({
             <Toaster
               position="top-center"
               toastOptions={{
-                className: "bg-[var(--site-primary)]/40 backdrop-blur-2xl border-[var(--site-accent)]/20 shadow-[0_12px_40px_rgba(0,0,0,0.3)] rounded-2xl text-[var(--glass-text)] font-medium",
+                className: "rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--glass-text)] font-medium backdrop-blur-2xl shadow-[var(--glass-shadow)]",
                 classNames: {
                   toast: "group relative flex items-center gap-4 border p-4 overflow-hidden min-w-[320px] max-w-sm",
                   title: "text-sm font-bold text-[var(--glass-text)]",
                   description: "text-[13px] text-[var(--glass-text-muted)]",
-                  actionButton: "bg-[var(--site-accent)]/90 text-[var(--site-button-text)] hover:bg-[var(--site-accent)] transition-colors rounded-xl px-3 py-1.5 text-xs font-bold",
-                  cancelButton: "bg-white/5 text-[var(--glass-text-muted)] hover:bg-white/10 transition-colors rounded-xl px-3 py-1.5 text-xs font-bold",
-                  closeButton: "bg-white/5 hover:bg-white/10 border-white/10 text-[var(--glass-text)] transition-colors left-auto right-4",
+                  actionButton: "rounded-xl bg-[var(--site-button)] px-3 py-1.5 text-xs font-bold text-[var(--site-button-text)] transition-opacity hover:opacity-90",
+                  cancelButton: "rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-3 py-1.5 text-xs font-bold text-[var(--glass-text-muted)] transition-colors hover:bg-[var(--glass-bg-strong)] hover:text-[var(--glass-text)]",
+                  closeButton: "left-auto right-4 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--glass-text)] transition-colors hover:bg-[var(--glass-bg-strong)]",
                   success: "bg-green-500/10 border-green-500/20 text-green-500 dark:text-green-400 [&>[data-icon]]:text-green-500",
                   error: "bg-red-500/10 border-red-500/20 text-red-500 dark:text-red-400 [&>[data-icon]]:text-red-500",
                   warning: "bg-orange-500/10 border-orange-500/20 text-orange-500 dark:text-orange-400 [&>[data-icon]]:text-orange-500",
@@ -114,7 +119,7 @@ export default async function RootLayout({
         </body>
       </html>
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CRITICAL LAYOUT ERROR:", error);
     throw error;
   }

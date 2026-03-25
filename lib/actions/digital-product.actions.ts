@@ -7,8 +7,6 @@ export async function getDigitalProducts(adminOnly = false) {
     try {
         const whereClause: any = adminOnly ? {} : { isPublished: true };
 
-        // Return mostly digital stuff here
-        whereClause.type = { in: ['EBOOK', 'COURSE', 'TEMPLATE', 'COMPONENT', 'OTHER'] };
         whereClause.category = { not: "cosmetics" };
 
         const products = await prisma.digitalProduct.findMany({
@@ -60,7 +58,7 @@ export async function createDigitalProduct(data: any) {
                 title: data.title,
                 slug: data.slug,
                 description: data.description || "",
-                price: parseInt(data.price) || 0,
+                price: parseInt(data.priceIdr ?? data.price ?? "0") || 0,
                 currency: data.currency || "IDR",
                 category: data.category || "EBOOK",
                 coverImage: data.coverImage || "",
@@ -90,7 +88,7 @@ export async function updateDigitalProduct(id: string, data: any) {
                 title: data.title,
                 slug: data.slug,
                 description: data.description,
-                price: parseInt(data.price) || 0,
+                price: parseInt(data.priceIdr ?? data.price ?? "0") || 0,
                 currency: data.currency,
                 category: data.category,
                 coverImage: data.coverImage,

@@ -1,11 +1,19 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { serializeForClient } from "@/lib/utils";
 
 import { ThemeConfig, DEFAULT_THEME } from "@/lib/types/theme";
+import { applyColorRule603010 } from "@/lib/theme-color-rule";
+
+const isMissingTableError = (error: unknown, modelName: string) => {
+    return error instanceof Prisma.PrismaClientKnownRequestError
+        && error.code === "P2021"
+        && typeof error.meta?.modelName === "string"
+        && error.meta.modelName === modelName;
+};
 
 export const getGlobalTheme = async (): Promise<ThemeConfig> => {
     try {
@@ -14,28 +22,41 @@ export const getGlobalTheme = async (): Promise<ThemeConfig> => {
         });
 
         if (!setting || !setting.theme) {
-            return DEFAULT_THEME;
+            return applyColorRule603010(DEFAULT_THEME);
         }
 
-        return serializeForClient(setting.theme as ThemeConfig);
+        return applyColorRule603010({
+            ...DEFAULT_THEME,
+            ...serializeForClient(setting.theme as ThemeConfig),
+        });
     } catch (error) {
+        if (isMissingTableError(error, "GlobalSetting")) {
+            return applyColorRule603010(DEFAULT_THEME);
+        }
+
         console.error("Error fetching theme:", error);
-        return DEFAULT_THEME;
+        return applyColorRule603010(DEFAULT_THEME);
     }
 };
 
 export const updateGlobalTheme = async (theme: ThemeConfig) => {
     try {
+        const themeData = applyColorRule603010(theme) as Prisma.InputJsonObject;
+
         // Validation: Ensure the user is a SUPER_ADMIN could be added here or in the page
         await prisma.globalSetting.upsert({
             where: { id: "main" },
-            update: { theme: theme as any },
-            create: { id: "main", theme: theme as any }
+            update: { theme: themeData },
+            create: { id: "main", theme: themeData }
         });
 
         revalidatePath("/", "layout");
         return { success: true };
     } catch (error) {
+        if (isMissingTableError(error, "GlobalSetting")) {
+            return { success: false, error: "Database schema is not initialized yet. Run Prisma sync first." };
+        }
+
         console.error("Error updating theme:", error);
         return { success: false, error: "Failed to update theme" };
     }
@@ -43,7 +64,7 @@ export const updateGlobalTheme = async (theme: ThemeConfig) => {
 
 export type UserPreferences = {
     language: string;
-    [key: string]: any;
+    [key: string]: unknown;
 };
 
 export const updatePreferences = async (userId: string, preferences: UserPreferences) => {
@@ -53,7 +74,7 @@ export const updatePreferences = async (userId: string, preferences: UserPrefere
             select: { preferences: true }
         });
 
-        const currentPrefs = (currentUser?.preferences as Record<string, any>) || {};
+        const currentPrefs = (currentUser?.preferences as Record<string, unknown>) || {};
 
         await prisma.user.update({
             where: { id: userId },
