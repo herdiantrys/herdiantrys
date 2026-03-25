@@ -29,7 +29,7 @@ type HeroDictionary = {
   };
 };
 
-export default function HeroSection({ profile, dict }: { profile: HeroProfile; dict: HeroDictionary }) {
+export default function HeroSection({ profile, dict }: { profile: HeroProfile | null; dict: HeroDictionary }) {
   const [index, setIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const fantasyMasterpiece = encodeURI("/images/ranks/RANK 10_Eternal Sovereign.png");

@@ -24,5 +24,11 @@ export default async function DigitalProductDetailPage({ params }: { params: Pro
         userPoints = dbUser?.points || 0;
     }
 
-    return <DigitalProductDetailClient product={product} userId={session?.user?.id} userPoints={userPoints} />;
+    const normalizedProduct = {
+        ...product,
+        priceIdr: product.price,
+        priceRunes: 0,
+    };
+
+    return <DigitalProductDetailClient product={normalizedProduct} userId={session?.user?.id} userPoints={userPoints} />;
 }

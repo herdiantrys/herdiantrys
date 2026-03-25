@@ -4,24 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Home, ArrowLeft, Compass } from "lucide-react";
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
 import ParticleWave from "@/components/ParticleWave";
 import { ThemeProvider } from "@/components/theme-provider";
-
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-});
 
 export default function NotFound() {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-teal-500/30`}>
+            <body className="antialiased selection:bg-teal-500/30">
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-background text-foreground">
 

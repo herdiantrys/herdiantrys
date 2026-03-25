@@ -75,14 +75,15 @@ export const updatePreferences = async (userId: string, preferences: UserPrefere
         });
 
         const currentPrefs = (currentUser?.preferences as Record<string, unknown>) || {};
+        const mergedPrefs = {
+            ...currentPrefs,
+            ...preferences
+        } as Prisma.InputJsonObject;
 
         await prisma.user.update({
             where: { id: userId },
             data: {
-                preferences: {
-                    ...currentPrefs,
-                    ...preferences
-                }
+                preferences: mergedPrefs
             }
         });
 

@@ -1,26 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "../../components/theme-provider";
 import { Toaster } from "sonner";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import ScrollProgressTracker from "@/components/Gamification/ScrollProgressTracker";
-
-const inter = Inter({
-  variable: "--font-body-default",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-heading-default",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono-default",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://herdiantry.id"),
@@ -89,7 +73,7 @@ export default async function RootLayout({
 
     return (
       <html lang={lang} suppressHydrationWarning>
-        <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} min-h-screen antialiased`}>
+        <body className="min-h-screen antialiased">
           <PageTracker />
           {needsSync && <LanguageCookieSyncer userLanguage={resolvedUserLang} currentPathLang={lang} />}
           <ThemeInjector theme={theme} />

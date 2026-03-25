@@ -25,7 +25,8 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
     const [unreadMessages, setUnreadMessages] = useState(0);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user?.id) return;
+        const userId = user.id;
         const fetchUnread = async () => {
             const res = await getDirectUnreadCount();
             if (res.success) setUnreadMessages(res.count);
@@ -34,7 +35,7 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
         const interval = setInterval(fetchUnread, 15000);
 
         // Presence Heartbeat: Update current user's presence every 1 minute
-        const updatePresence = () => updateUserPresence(user.id);
+        const updatePresence = () => updateUserPresence(userId);
         updatePresence(); // Initial call
         const presenceInterval = setInterval(updatePresence, 60000);
 
@@ -115,7 +116,7 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
             {!isPortfolio && <MobileBottomNav user={user} dict={dict} />}
 
             {/* Live Messaging Hub */}
-            {user && !isPortfolio && (
+            {user?.id && !isPortfolio && (
                 <MessageCenter
                     currentUserId={user.id}
                     isOpen={isMessageOpen}

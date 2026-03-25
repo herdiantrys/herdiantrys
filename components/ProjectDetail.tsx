@@ -43,13 +43,13 @@ interface ProjectGalleryItem {
     url: string;
 }
 
-interface ProjectDictionary {
+type ProjectDictionary = Record<string, unknown> & {
     projects?: {
         login_to_comment?: string;
         commenting_restricted?: string;
         write_thoughts?: string;
     };
-}
+};
 
 interface ProjectRecord {
     id: string;
