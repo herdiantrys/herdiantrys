@@ -5,7 +5,7 @@ import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { getRandomDefaultProfilePicture } from "@/lib/default-profile-picture"
-import { Prisma } from "@prisma/client"
+import { Prisma, Role, UserStatus } from "@prisma/client"
 
 const getLanguagePreference = (preferences: Prisma.JsonValue | null | undefined) => {
   if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) {
@@ -15,6 +15,12 @@ const getLanguagePreference = (preferences: Prisma.JsonValue | null | undefined)
   const language = (preferences as Prisma.JsonObject).language
   return typeof language === "string" ? language : "en"
 }
+
+const isRole = (value: unknown): value is Role =>
+  Object.values(Role).includes(value as Role)
+
+const isUserStatus = (value: unknown): value is UserStatus =>
+  Object.values(UserStatus).includes(value as UserStatus)
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -74,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!existingUser) {
             // Check if this is the first user
             const userCount = await prisma.user.count();
-            const role = userCount === 0 ? 'SUPER_ADMIN' : 'USER';
+            const role = userCount === 0 ? Role.SUPER_ADMIN : Role.USER;
             const profileImage = image || getRandomDefaultProfilePicture();
 
             // Only create if user doesn't exist
@@ -116,9 +122,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.role = token.role;
-        session.user.status = token.status;
-        session.user.language = token.language as string || "en";
+        session.user.role = isRole(token.role) ? token.role : Role.USER;
+        session.user.status = isUserStatus(token.status) ? token.status : UserStatus.ACTIVE;
+        session.user.language = typeof token.language === "string" ? token.language : "en";
       }
       return session;
     },
