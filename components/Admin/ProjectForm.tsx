@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Save, Upload, User as UserIcon, Link as LinkIcon, FileText, Image as ImageIcon, Video, Tag, Folder, Star, X } from "lucide-react";
-import { createProject, updateProject, getCategories, getAuthors, uploadProjectAsset } from "@/lib/actions/project.actions";
+import { createProject, updateProject, getCategories, getAuthors } from "@/lib/actions/project.actions";
 
 interface ProjectFormProps {
     initialData?: any;
@@ -13,6 +13,12 @@ interface ProjectFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
 }
+
+type ProjectAssetUploadResult = {
+    success: boolean;
+    url?: string;
+    error?: string;
+};
 
 export default function ProjectForm({ initialData, isNew = false, onSuccess, onCancel }: ProjectFormProps) {
     const router = useRouter();
@@ -144,7 +150,16 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
         form.append("file", file);
         form.append("type", type);
 
-        const uploadPromise = uploadProjectAsset(form).then((res) => {
+        const uploadPromise = fetch("/api/uploads/project", {
+            method: "POST",
+            body: form,
+        }).then(async (response): Promise<ProjectAssetUploadResult> => {
+            const payload = await response.json() as ProjectAssetUploadResult;
+            if (!response.ok || !payload.success) {
+                throw new Error(payload.error || "Upload failed");
+            }
+            return payload;
+        }).then((res) => {
             if (!res.success) {
                 throw new Error(res.error || "Upload failed");
             }
@@ -166,6 +181,8 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
             },
             error: (err) => err.message || "Upload failed"
         });
+
+        e.target.value = "";
     };
 
     return (
@@ -431,7 +448,16 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                                     form.append("file", file);
                                                     form.append("type", type);
 
-                                                    const uploadPromise = uploadProjectAsset(form).then((res) => {
+                                                    const uploadPromise = fetch("/api/uploads/project", {
+                                                        method: "POST",
+                                                        body: form,
+                                                    }).then(async (response): Promise<ProjectAssetUploadResult> => {
+                                                        const payload = await response.json() as ProjectAssetUploadResult;
+                                                        if (!response.ok || !payload.success) {
+                                                            throw new Error(payload.error || "Upload failed");
+                                                        }
+                                                        return payload;
+                                                    }).then((res) => {
                                                         if (!res.success) {
                                                             throw new Error(res.error || "Upload failed");
                                                         }
@@ -461,6 +487,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                                         error: (err) => err.message || "Upload failed"
                                                     });
                                                 });
+                                                e.target.value = "";
                                             }
                                         }}
                                     />

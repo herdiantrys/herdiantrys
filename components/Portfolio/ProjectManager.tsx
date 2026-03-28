@@ -3,13 +3,19 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Plus, Edit, Trash2, Loader2, Save, X, Image as ImageIcon } from "lucide-react";
-import { createProject, updateProject, deleteProject, uploadProjectAsset } from "@/lib/actions/project.actions";
+import { createProject, updateProject, deleteProject } from "@/lib/actions/project.actions";
 import { useRouter } from "next/navigation";
 
 interface ProjectManagerProps {
     userId: string;
     projects: any[];
 }
+
+type ProjectAssetUploadResult = {
+    success: boolean;
+    url?: string;
+    error?: string;
+};
 
 export default function ProjectManager({ userId, projects }: ProjectManagerProps) {
     const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +92,16 @@ export default function ProjectManager({ userId, projects }: ProjectManagerProps
         formData.append("type", "image");
 
         try {
-            const res = await uploadProjectAsset(formData);
+            const response = await fetch("/api/uploads/project", {
+                method: "POST",
+                body: formData,
+            });
+            const res = await response.json() as ProjectAssetUploadResult;
+
+            if (!response.ok || !res.success) {
+                throw new Error(res.error || "Upload failed");
+            }
+
             if (res.success) {
                 setCurrentProject((prev: any) => ({ ...prev, image: res.url }));
             } else {
@@ -96,6 +111,7 @@ export default function ProjectManager({ userId, projects }: ProjectManagerProps
             console.error(e);
             alert("Upload error");
         }
+        e.target.value = "";
         setIsLoading(false);
     };
 
