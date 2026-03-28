@@ -5,8 +5,19 @@ import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { getRandomDefaultProfilePicture } from "@/lib/default-profile-picture"
+import { Prisma } from "@prisma/client"
+
+const getLanguagePreference = (preferences: Prisma.JsonValue | null | undefined) => {
+  if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) {
+    return "en"
+  }
+
+  const language = (preferences as Prisma.JsonObject).language
+  return typeof language === "string" ? language : "en"
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Google,
     GitHub,
@@ -49,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === 'google' || account?.provider === 'github') {
         const { email, name, image } = user;
         if (!email) return false;
@@ -105,8 +116,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.role = token.role as any;
-        session.user.status = token.status as any;
+        session.user.role = token.role;
+        session.user.status = token.status;
         session.user.language = token.language as string || "en";
       }
       return session;
@@ -119,8 +130,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.sub = dbUser.id;
           token.role = dbUser.role;
           token.status = dbUser.status; // Include status for social logins
-          const prefs: any = dbUser.preferences || {};
-          token.language = prefs.language || "en";
+          token.language = getLanguagePreference(dbUser.preferences);
         }
       } else if (user) {
         token.sub = user.id;
@@ -129,8 +139,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Search user to get preferences since credentials login only returns basic fields via authorize
         const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
         if (dbUser) {
-          const prefs: any = dbUser.preferences || {};
-          token.language = prefs.language || "en";
+          token.language = getLanguagePreference(dbUser.preferences);
         }
       }
       return token;

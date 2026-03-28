@@ -240,12 +240,12 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                                         >
                                             {isAdminMode ? (
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-m font-bold tracking-tight text-slate-800 dark:text-white">
+                                                    <span className="text-m font-bold tracking-tight text-[var(--site-sidebar-fg)]">
                                                         Admin <span className="text-[var(--site-accent)]">Panel.</span>
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-m font-bold tracking-tight text-slate-800 dark:text-white">
+                                                <span className="text-m font-bold tracking-tight text-[var(--site-sidebar-fg)]">
                                                     Herdiantry<span className="text-[var(--site-accent)]">.</span>
                                                 </span>
                                             )}
