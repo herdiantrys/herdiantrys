@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resolveAssetUrl } from "@/lib/media";
 
 // Zod Schema
 const testimonialSchema = z.object({
@@ -151,7 +152,7 @@ export default function TestimonialForm({ testimonial, isEdit = false }: { testi
                             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {photoUrl ? (
                                     <div className="relative w-full h-full">
-                                        <Image src={photoUrl} alt="Photo" fill className="object-cover" />
+                                        <Image src={resolveAssetUrl(photoUrl)} alt="Photo" fill className="object-cover" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("photo", "")}

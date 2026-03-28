@@ -13,11 +13,14 @@ import { ZoomableImage } from "@/components/ui/ZoomableImage";
 import { Project } from "@/components/ProjectCard";
 import { ShareModal } from "@/components/ShareModal";
 import { getComments, Comment, createComment } from "@/lib/actions/comment.actions"; // Imported createComment
+import { resolveAssetUrl } from "@/lib/media";
 
 export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { project: Project; onClose: () => void, dict: any, initialIsBookmarked?: boolean }) => {
     // Determine the main media type and URL.
     // If it's a video project but no video file is available, fall back to treating it as an image (thumbnail).
-    const initialUrl = (project.type === 'video' && project.videoFile) ? project.videoFile : project.image;
+    const initialUrl = (project.type === 'video' && project.videoFile)
+        ? resolveAssetUrl(project.videoFile, "")
+        : resolveAssetUrl(project.image);
     // Force type to 'image' if type is video but no videoFile exists, to prevent broken player.
     const initialType = (project.type === 'video' && !project.videoFile) ? 'image' : project.type;
 
@@ -26,7 +29,10 @@ export const ProjectModal = ({ project, onClose, dict, initialIsBookmarked }: { 
             type: initialType,
             url: initialUrl
         },
-        ...(project.gallery || []).map(item => ({ type: item.type, url: item.url }))
+        ...(project.gallery || []).map(item => ({
+            type: item.type,
+            url: resolveAssetUrl(item.url, item.type === "video" ? "" : resolveAssetUrl(null))
+        }))
     ];
 
     const [optimisticProject, addOptimisticProject] = useOptimistic(

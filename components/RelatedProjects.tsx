@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface RelatedProject {
     id: string;
@@ -24,7 +25,7 @@ export default function RelatedProjects({ projects }: { projects: RelatedProject
                 {projects.map(project => (
                     <Link href={`/projects/${project.slug}`} key={project.id} className="group relative aspect-video rounded-2xl overflow-hidden border border-[var(--glass-border)]">
                         <Image
-                            src={project.image}
+                            src={resolveAssetUrl(project.image)}
                             alt={project.title}
                             fill
                             className="object-cover transition-transform duration-500 group-hover:scale-110"

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Plus, Edit, Trash2, Loader2, Save, X, Image as ImageIcon } from "lucide-react";
 import { createProject, updateProject, deleteProject } from "@/lib/actions/project.actions";
 import { useRouter } from "next/navigation";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface ProjectManagerProps {
     userId: string;
@@ -161,7 +162,7 @@ export default function ProjectManager({ userId, projects }: ProjectManagerProps
                         <div className="flex items-start gap-4">
                             {currentProject.image && (
                                 <div className="relative w-32 h-20 rounded-xl overflow-hidden border border-white/10 bg-black/50">
-                                    <Image src={currentProject.image} alt="Preview" fill className="object-cover" />
+                                    <Image src={resolveAssetUrl(currentProject.image)} alt="Preview" fill className="object-cover" />
                                 </div>
                             )}
                             <label className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl hover:bg-white/5 text-[var(--glass-text)] transition-colors">
@@ -253,7 +254,7 @@ export default function ProjectManager({ userId, projects }: ProjectManagerProps
                         <div key={project.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-colors group">
                             <div className="w-16 h-12 relative rounded-lg overflow-hidden bg-black/50 shrink-0">
                                 {project.image ? (
-                                    <Image src={project.image} alt={project.title} fill className="object-cover" />
+                                    <Image src={resolveAssetUrl(project.image)} alt={project.title} fill className="object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-xs text-white/20">Img</div>
                                 )}

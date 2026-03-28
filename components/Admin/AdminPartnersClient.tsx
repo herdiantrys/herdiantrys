@@ -11,6 +11,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 export default function AdminPartnersClient({ partners }: { partners: any[] }) {
     const router = useRouter();
@@ -221,7 +222,7 @@ export default function AdminPartnersClient({ partners }: { partners: any[] }) {
                                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700/50 relative flex-shrink-0 border border-white/5">
                                             {partner.icon ? (
                                                 <Image
-                                                    src={partner.icon}
+                                                    src={resolveAssetUrl(partner.icon)}
                                                     alt={partner.name}
                                                     fill
                                                     className="object-contain p-1"

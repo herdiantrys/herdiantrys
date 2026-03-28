@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { formatViewCount, formatDate } from "@/lib/utils";
 import Lightbox from "./Lightbox";
 import { ShareModal } from "@/components/ShareModal";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface Comment {
     _id: string;
@@ -81,6 +82,7 @@ interface ProjectDetailProps {
 export default function ProjectDetail({ project, dict, initialIsBookmarked = false }: ProjectDetailProps) {
     const { data: session } = useSession();
     const router = useRouter();
+    const avatarPlaceholder = "/avatar-placeholder.png";
     const [likedOverride, setLikedOverride] = useState<boolean | null>(null);
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
 
@@ -113,30 +115,17 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
     const bgScale = useSpring(useTransform(scrollY, [0, 1000], [1.2, 1.38]), springConfig);
     const bgY = useSpring(useTransform(scrollY, [0, 1000], [0, 200]), springConfig);
 
-    const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
-    // Helpers
-    const resolveImageUrl = (image: unknown) => {
-        if (!image) return "/placeholder.jpg";
-        if (typeof image === "string") return image;
-        if (isObjectRecord(image) && typeof image.url === "string") return image.url;
-        if (isObjectRecord(image) && isObjectRecord(image.asset) && typeof image.asset.url === "string") {
-            return image.asset.url;
-        }
-        return "";
-    };
-
     const mainMedia = typeof project.videoFile === "string" && project.videoFile ? {
         type: 'video' as const,
-        url: project.videoFile
+        url: resolveAssetUrl(project.videoFile, "")
     } : {
         type: 'image' as const,
-        url: resolveImageUrl(project.image)
+        url: resolveAssetUrl(project.image)
     };
 
     const galleryItems = (project.gallery || []).map(item => ({
         type: (item.type === 'video' ? 'video' : 'image') as 'image' | 'video',
-        url: item.url
+        url: resolveAssetUrl(item.url, item.type === "video" ? "" : resolveAssetUrl(null))
     }));
 
     const allMedia = [mainMedia, ...galleryItems];
@@ -831,7 +820,12 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] backdrop-blur-md shadow-sm">
                                             {session?.user?.id ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={session.user.image || "/placeholder.jpg"} alt="User" onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }} className="h-full w-full object-cover" />
+                                                <img
+                                                    src={resolveAssetUrl(session.user.image, avatarPlaceholder)}
+                                                    alt="User"
+                                                    onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                    className="h-full w-full object-cover"
+                                                />
                                             ) : (
                                                 <UserIcon size={22} className="text-[var(--glass-text-muted)]" />
                                             )}
@@ -871,7 +865,12 @@ export default function ProjectDetail({ project, dict, initialIsBookmarked = fal
                                                     <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] shadow-sm">
                                                         {comment.user.image ? (
                                                             // eslint-disable-next-line @next/next/no-img-element
-                                                            <img src={comment.user.image} alt={comment.user.username} onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }} className="h-full w-full object-cover" />
+                                                            <img
+                                                                src={resolveAssetUrl(comment.user.image, avatarPlaceholder)}
+                                                                alt={comment.user.username}
+                                                                onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                                className="h-full w-full object-cover"
+                                                            />
                                                         ) : (
                                                             <div className="flex h-full w-full items-center justify-center text-xs font-bold font-mono text-[var(--glass-text-muted)]">
                                                                 {comment.user.username[0]}

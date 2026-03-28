@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Mail, FileText, ExternalLink, Github, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface PortfolioLandingPageProps {
     user: any;
@@ -50,7 +51,7 @@ export default function PortfolioLandingPage({ user, config, projects, isPreview
                 {config?.heroImage ? (
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={config.heroImage}
+                            src={resolveAssetUrl(config.heroImage)}
                             alt="Hero Background"
                             className="w-full h-full object-cover opacity-30"
                         />
@@ -71,7 +72,7 @@ export default function PortfolioLandingPage({ user, config, projects, isPreview
                 >
                     {user.imageURL && (
                         <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl mb-8">
-                            <img src={user.imageURL} alt={user.username} className="w-full h-full object-cover" />
+                            <img src={resolveAssetUrl(user.imageURL)} alt={user.username} className="w-full h-full object-cover" />
                         </div>
                     )}
 
@@ -132,7 +133,7 @@ export default function PortfolioLandingPage({ user, config, projects, isPreview
                                 <div className="aspect-video rounded-2xl overflow-hidden bg-slate-800 relative mb-6">
                                     {project.image ? (
                                         <img
-                                            src={project.image}
+                                            src={resolveAssetUrl(project.image)}
                                             alt={project.title}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />

@@ -11,6 +11,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatNumber, formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 export default function AdminServicesClient({ services }: { services: any[] }) {
     const router = useRouter();
@@ -224,7 +225,7 @@ export default function AdminServicesClient({ services }: { services: any[] }) {
                                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700/50 relative flex-shrink-0 border border-white/5">
                                             {service.imageUrl ? (
                                                 <Image
-                                                    src={service.imageUrl}
+                                                    src={resolveAssetUrl(service.imageUrl)}
                                                     alt={service.title}
                                                     fill
                                                     className="object-cover"

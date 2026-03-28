@@ -12,6 +12,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface Project {
     id: string;
@@ -315,7 +316,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700/50 relative flex-shrink-0 border border-gray-200 dark:border-white/5">
                                             {project.image ? (
                                                 <Image
-                                                    src={project.image}
+                                                    src={resolveAssetUrl(project.image)}
                                                     alt={project.title}
                                                     fill
                                                     className="object-cover"
@@ -338,7 +339,12 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
                                         <div className="flex items-center gap-2">
                                             {project.author?.image && (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <img src={project.author.image} alt={project.author.name} onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={resolveAssetUrl(project.author.image, "/avatar-placeholder.png")}
+                                                        alt={project.author.name}
+                                                        onError={(e) => { e.currentTarget.src = "/avatar-placeholder.png"; }}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                             )}
                                             <span className="text-sm text-gray-700 dark:text-gray-300">

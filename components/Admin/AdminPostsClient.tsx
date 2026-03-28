@@ -14,9 +14,11 @@ import { Plus, Image as ImageIcon, Music, Video, User as UserIcon } from "lucide
 import { useEffect } from "react";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 export default function AdminPostsClient({ posts, currentUserId }: { posts: any[], currentUserId?: string }) {
     const router = useRouter();
+    const avatarPlaceholder = "/avatar-placeholder.png";
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     // Delete State
@@ -322,7 +324,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-700/50 relative flex-shrink-0">
                                             {post.image ? (
                                                 <Image
-                                                    src={post.image}
+                                                    src={resolveAssetUrl(post.image)}
                                                     alt="Post Image"
                                                     fill
                                                     className="object-cover"
@@ -337,9 +339,14 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                     </td>
                                     <td className="px-6 py-4 text-sm font-medium">
                                         <div className="flex items-center gap-2">
-                                            {post.author.imageURL && (
+                                            {(post.author.imageURL || post.author.image) && (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <img src={post.author.imageURL} alt="" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={resolveAssetUrl(post.author.imageURL || post.author.image, avatarPlaceholder)}
+                                                        alt=""
+                                                        onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                             )}
                                             {post.author.name}

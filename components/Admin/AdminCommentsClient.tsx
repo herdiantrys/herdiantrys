@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface Comment {
     id: string;
@@ -44,6 +45,7 @@ export default function AdminCommentsClient({
     initialComments: Comment[],
     pagination: PaginationProps
 }) {
+    const avatarPlaceholder = "/avatar-placeholder.png";
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -226,7 +228,12 @@ export default function AdminCommentsClient({
                                         <div className="flex items-center gap-2">
                                             {comment.user.image || comment.user.imageURL ? (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                                                    <img src={comment.user.imageURL || comment.user.image || ""} alt={comment.user.name || "User"} onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={resolveAssetUrl(comment.user.imageURL || comment.user.image, avatarPlaceholder)}
+                                                        alt={comment.user.name || "User"}
+                                                        onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
@@ -347,7 +354,12 @@ export default function AdminCommentsClient({
 
                                 <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
                                     {viewComment.user.image || viewComment.user.imageURL ? (
-                                        <img src={viewComment.user.imageURL || viewComment.user.image || ""} alt="" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-10 h-10 rounded-full object-cover" />
+                                        <img
+                                            src={resolveAssetUrl(viewComment.user.imageURL || viewComment.user.image, avatarPlaceholder)}
+                                            alt=""
+                                            onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                            className="w-10 h-10 rounded-full object-cover"
+                                        />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600" />
                                     )}

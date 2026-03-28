@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { updateSiteContent, uploadSiteImage } from "@/lib/actions/content.actions";
 import { useRouter } from "next/navigation";
+import { resolveAssetUrl } from "@/lib/media";
 
 const tabVariants: Variants = {
     hidden: { opacity: 0, y: 12, scale: 0.98 },
@@ -269,7 +270,12 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                     <FieldLabel>Hero Banner Image</FieldLabel>
                                     <div className="relative h-52 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-black/20 border-2 border-dashed border-slate-300 dark:border-white/10 group hover:border-[var(--site-accent)]/50 transition-all duration-300 shadow-inner">
                                         {initialData.bannerImage ? (
-                                            <img src={initialData.bannerImage} alt="Banner" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                            <img
+                                                src={resolveAssetUrl(initialData.bannerImage)}
+                                                alt="Banner"
+                                                onError={(e) => { e.currentTarget.src = "/images/default-banner.jpg"; }}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
                                         ) : (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                                                 <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-white/10 flex items-center justify-center">
@@ -349,7 +355,12 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                         <div className="relative w-28 h-28 flex-shrink-0">
                                             <div className="w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/10 dark:to-black/20 border-2 border-slate-200 dark:border-white/10 group cursor-pointer shadow-lg">
                                                 {initialData.profileImage ? (
-                                                    <img src={initialData.profileImage} alt="Profile" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                                    <img
+                                                        src={resolveAssetUrl(initialData.profileImage, "/avatar-placeholder.png")}
+                                                        alt="Profile"
+                                                        onError={(e) => { e.currentTarget.src = "/avatar-placeholder.png"; }}
+                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                                    />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
                                                         <User size={36} className="text-slate-300 dark:text-slate-600" />

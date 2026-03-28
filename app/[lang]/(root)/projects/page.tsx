@@ -3,6 +3,7 @@ import WorksExplorer from "@/components/WorksExplorer";
 import WorksHero from "@/components/WorksHero";
 import { getDictionary } from "@/get-dictionary";
 import { auth } from "@/auth";
+import { resolveAssetUrl } from "@/lib/media";
 
 
 export default async function ProjectsPage({ params }: { params: Promise<{ lang: string }> }) {
@@ -22,11 +23,11 @@ export default async function ProjectsPage({ params }: { params: Promise<{ lang:
             try {
                 // Determine if it's a string URL or a Sanity Image Object
                 if (typeof randomProject.image === 'string') {
-                    bgImage = randomProject.image;
+                    bgImage = resolveAssetUrl(randomProject.image);
                 } else if (randomProject.image && typeof randomProject.image === 'object' && (randomProject.image as any).asset) {
-                    bgImage = randomProject.image;
+                    bgImage = resolveAssetUrl(randomProject.image);
                 } else if ((randomProject as any).imageUrl) {
-                    bgImage = (randomProject as any).imageUrl;
+                    bgImage = resolveAssetUrl((randomProject as any).imageUrl);
                 }
             } catch (e) {
                 console.error("Error resolving random hero image:", e);

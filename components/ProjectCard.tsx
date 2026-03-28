@@ -11,6 +11,7 @@ import { XPToast } from "@/components/Gamification/XPToast";
 import { formatViewCount } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { resolveAssetUrl } from "@/lib/media";
 
 export type Project = {
     id: string | number;
@@ -39,13 +40,14 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
     const [isLoading, setIsLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
     const imgRef = useRef<HTMLImageElement>(null);
+    const placeholderUrl = resolveAssetUrl(null);
 
     // Priority: Thumbnail -> Image -> VideoFile -> First gallery item -> Empty
     const getInitialMedia = () => {
-        if (project.thumbnail) return { type: 'image' as const, url: project.thumbnail };
-        if (project.image) return { type: 'image' as const, url: project.image };
-        if (project.videoFile) return { type: 'video' as const, url: project.videoFile };
-        return { type: 'image' as const, url: "" };
+        if (project.thumbnail) return { type: 'image' as const, url: resolveAssetUrl(project.thumbnail) };
+        if (project.image) return { type: 'image' as const, url: resolveAssetUrl(project.image) };
+        if (project.videoFile) return { type: 'video' as const, url: resolveAssetUrl(project.videoFile, "") };
+        return { type: 'image' as const, url: placeholderUrl };
     };
 
     const [activeMedia, setActiveMedia] = useState<{ type: 'image' | 'video'; url: string }>(getInitialMedia());
@@ -136,9 +138,14 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
         // Main Media
         {
             type: project.type as "image" | "video",
-            url: project.type === 'video' && project.videoFile ? project.videoFile : (project.thumbnail || project.image || project.videoFile || "")
+            url: project.type === 'video' && project.videoFile
+                ? resolveAssetUrl(project.videoFile, "")
+                : resolveAssetUrl(project.thumbnail || project.image || project.videoFile)
         },
-        ...(project.gallery || []).map(item => ({ type: item.type as "image" | "video", url: item.url }))
+        ...(project.gallery || []).map(item => ({
+            type: item.type as "image" | "video",
+            url: resolveAssetUrl(item.url, item.type === "video" ? "" : placeholderUrl)
+        }))
     ];
 
     const showVideoPreview = isHovered && project.type === 'video' && project.videoFile;
@@ -192,17 +199,23 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                         src={activeMedia.url}
                         alt={project.title}
                         onLoad={() => setIsLoading(false)}
-                        onError={() => setIsLoading(false)}
+                        onError={(e) => {
+                            e.currentTarget.src = placeholderUrl;
+                            setIsLoading(false);
+                        }}
                         className="w-full h-auto object-cover"
                     />
                 ) : project.thumbnail || project.image ? (
                     // If active media is video, we still render the thumbnail image underneath to hold height
                     <img
                         ref={imgRef}
-                        src={project.thumbnail}
+                        src={resolveAssetUrl(project.thumbnail || project.image)}
                         alt={project.title}
                         onLoad={() => setIsLoading(false)}
-                        onError={() => setIsLoading(false)}
+                        onError={(e) => {
+                            e.currentTarget.src = placeholderUrl;
+                            setIsLoading(false);
+                        }}
                         className="w-full h-auto object-cover"
                     />
                 ) : (
@@ -255,11 +268,11 @@ export const ProjectCard = ({ project, onClick, initialIsBookmarked = false }: {
                                         onClick={(e) => handleThumbnailClick(e, media)}
                                         className={`relative w-12 h-8 rounded overflow-hidden border transition-all flex-shrink-0 ${activeMedia.url === media.url ? 'border-[var(--site-secondary)] scale-110' : 'border-white/30 hover:border-white/80'}`}
                                     >
-                                        {media.type === 'video' ? (
-                                            <video src={media.url} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Image src={media.url} alt={`Thumb ${idx}`} fill className="object-cover" />
-                                        )}
+                                                {media.type === 'video' ? (
+                                                    <video src={media.url} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Image src={media.url || placeholderUrl} alt={`Thumb ${idx}`} fill className="object-cover" />
+                                                )}
                                     </button>
                                 ))}
                                 {allMedia.length > 5 && (

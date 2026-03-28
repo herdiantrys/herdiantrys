@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resolveAssetUrl } from "@/lib/media";
 
 // Zod Schema
 const partnerSchema = z.object({
@@ -136,7 +137,7 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
                             <div className="relative aspect-square rounded-xl overflow-hidden bg-white/50 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {iconUrl ? (
                                     <div className="relative w-full h-full">
-                                        <Image src={iconUrl} alt="Logo Light" fill className="object-contain p-4" />
+                                        <Image src={resolveAssetUrl(iconUrl)} alt="Logo Light" fill className="object-contain p-4" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("icon", "")}
@@ -166,7 +167,7 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
                             <div className="relative aspect-square rounded-xl overflow-hidden bg-black/80 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {iconDarkUrl ? (
                                     <div className="relative w-full h-full">
-                                        <Image src={iconDarkUrl} alt="Logo Dark" fill className="object-contain p-4" />
+                                        <Image src={resolveAssetUrl(iconDarkUrl)} alt="Logo Dark" fill className="object-contain p-4" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("iconDark", "")}

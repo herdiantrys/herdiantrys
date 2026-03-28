@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface Notification {
     id: string;
@@ -38,6 +39,7 @@ export default function AdminNotificationsClient({
     initialNotifications: Notification[],
     pagination: PaginationProps
 }) {
+    const avatarPlaceholder = "/avatar-placeholder.png";
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -251,9 +253,14 @@ export default function AdminNotificationsClient({
                                         <div className="flex items-center gap-2">
                                             {/* Sender */}
                                             <div className="flex items-center gap-1.5" title={`From: ${notification.sender.username}`}>
-                                                {notification.sender.image ? (
+                                                {notification.sender.image || notification.sender.imageURL ? (
                                                     <div className="w-6 h-6 rounded-full overflow-hidden relative border border-gray-200 dark:border-white/10">
-                                                        <img src={notification.sender.image} alt="S" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={resolveAssetUrl(notification.sender.imageURL || notification.sender.image, avatarPlaceholder)}
+                                                            alt="S"
+                                                            onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
                                                 ) : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />}
                                                 <span className="text-xs font-medium max-w-[80px] truncate">{notification.sender.username}</span>
@@ -261,9 +268,14 @@ export default function AdminNotificationsClient({
                                             <span className="text-gray-300 dark:text-gray-600">â†’</span>
                                             {/* Recipient */}
                                             <div className="flex items-center gap-1.5" title={`To: ${notification.recipient.username}`}>
-                                                {notification.recipient.image ? (
+                                                {notification.recipient.image || notification.recipient.imageURL ? (
                                                     <div className="w-6 h-6 rounded-full overflow-hidden relative border border-gray-200 dark:border-white/10">
-                                                        <img src={notification.recipient.image} alt="R" onError={(e) => { e.currentTarget.src = "/placeholder.jpg" }} className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={resolveAssetUrl(notification.recipient.imageURL || notification.recipient.image, avatarPlaceholder)}
+                                                            alt="R"
+                                                            onError={(e) => { e.currentTarget.src = avatarPlaceholder; }}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
                                                 ) : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />}
                                                 <span className="text-xs font-medium max-w-[80px] truncate">{notification.recipient.username}</span>

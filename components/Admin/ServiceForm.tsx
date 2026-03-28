@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resolveAssetUrl } from "@/lib/media";
 
 // Zod Schema
 const serviceSchema = z.object({
@@ -238,7 +239,7 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                             <div className="relative h-64 w-full rounded-2xl overflow-hidden bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all duration-300">
                                 {imageUrl ? (
                                     <>
-                                        <Image src={imageUrl} alt="Cover" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                                        <Image src={resolveAssetUrl(imageUrl)} alt="Cover" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                             <p className="text-white font-medium flex items-center gap-2"><Upload size={18} /> Change Image</p>
                                         </div>
@@ -327,7 +328,7 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                                 {item.type === 'video' ? (
                                     <video src={item.url} className="w-full h-full object-cover opacity-80" />
                                 ) : (
-                                    <Image src={item.url} alt={`Gallery ${index}`} fill className="object-cover" />
+                                    <Image src={resolveAssetUrl(item.url)} alt={`Gallery ${index}`} fill className="object-cover" />
                                 )}
 
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

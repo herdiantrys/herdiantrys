@@ -6,6 +6,7 @@ import { Save, ArrowLeft, Loader2, Image as ImageIcon, Link as LinkIcon, FileTex
 import { createDigitalProduct, updateDigitalProduct, uploadDigitalProductAsset } from "@/lib/actions/digital-product.actions";
 import { toast } from "sonner";
 import Image from "next/image";
+import { resolveAssetUrl } from "@/lib/media";
 
 interface AdminProductFormProps {
     initialData?: any;
@@ -227,7 +228,7 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                     <div className="space-y-3">
                                         {formData.coverImage && (
                                             <div className="relative h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10">
-                                                <Image src={formData.coverImage} alt="Cover preview" fill className="object-cover" />
+                                                <Image src={resolveAssetUrl(formData.coverImage)} alt="Cover preview" fill className="object-cover" />
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, coverImage: "" }))}
@@ -277,7 +278,7 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                         <div className="flex-1 relative">
                                             {formData.thumbnail ? (
                                                 <div className="relative w-full h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 flex items-center justify-center">
-                                                    <Image src={formData.thumbnail} alt="Thumbnail preview" fill className="object-cover" />
+                                                    <Image src={resolveAssetUrl(formData.thumbnail)} alt="Thumbnail preview" fill className="object-cover" />
                                                     <button
                                                         type="button"
                                                         onClick={() => setFormData(prev => ({ ...prev, thumbnail: "" }))}

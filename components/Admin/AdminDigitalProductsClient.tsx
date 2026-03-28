@@ -9,6 +9,7 @@ import { deleteDigitalProduct } from "@/lib/actions/digital-product.actions";
 import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { resolveAssetUrl } from "@/lib/media";
 
 export default function AdminDigitalProductsClient({ initialProducts }: { initialProducts: any[] }) {
     const router = useRouter();
@@ -238,7 +239,7 @@ export default function AdminDigitalProductsClient({ initialProducts }: { initia
                                         <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-200 dark:bg-gray-800 relative flex-shrink-0 border border-slate-200/50 dark:border-white/5">
                                             {(item.thumbnail || item.coverImage) ? (
                                                 <Image
-                                                    src={item.thumbnail || item.coverImage}
+                                                    src={resolveAssetUrl(item.thumbnail || item.coverImage)}
                                                     alt={item.title}
                                                     fill
                                                     className="object-cover"
