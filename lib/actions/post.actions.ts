@@ -80,7 +80,7 @@ export const toggleArchivePost = async (postId: string, userId: string, alternat
         if (!post) return serializeForClient({ success: false, error: "Post not found" });
 
         // 3. Check permissions (Author OR Admin)
-        // Check if author matches EITHER the primary userId (Prisma) OR the alternative (Sanity/Legacy)
+        // Check if author matches either the primary Prisma userId or a legacy mapped id.
         const isAuthor = post.authorId === userId || (alternativeUserId && post.authorId === alternativeUserId);
         const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
@@ -204,9 +204,7 @@ export const deletePost = async (postId: string, userId: string) => {
 
         if (!post) return serializeForClient({ success: false, error: "Post not found" });
 
-        // 3. Delete from Sanity if assets exist (Best effort)
-        // Note: We skip actual Sanity deletion for now as in the image logic, 
-        // but we verify we have the fields to do so later.
+        // 3. Asset cleanup can be added later if we want to remove local files too.
 
         // 4. Delete from Database
         await prisma.post.delete({
@@ -236,8 +234,8 @@ export const bulkDeletePosts = async (postIds: string[], userId: string) => {
         }
 
         // 2. Delete posts
-        // Note: For strict correctness regarding Sanity images, we'd need to fetch all images first causing extra reads.
-        // For bulk operations, we might accept that images might be orphaned in Sanity for now, or implement a cleanup job later.
+        // Note: For strict correctness regarding uploaded assets, we'd need to fetch all file paths first causing extra reads.
+        // For bulk operations, we currently prefer fast deletes and can add cleanup in a follow-up job later.
         // Or we could do:
         // const posts = await prisma.post.findMany({ where: { id: { in: postIds } }, select: { image: true } });
         // ... delete images ...

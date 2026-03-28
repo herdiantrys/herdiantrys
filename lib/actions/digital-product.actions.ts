@@ -2,6 +2,17 @@
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { uploadLocalFile } from "@/lib/upload";
+
+type DigitalProductAssetType = "thumbnail" | "cover" | "file";
+
+const DIGITAL_PRODUCT_UPLOAD_FOLDERS: Record<DigitalProductAssetType, string> = {
+    thumbnail: "digitalproducts",
+    cover: "digitalproducts_covers",
+    file: "digitalproduct_files",
+};
+
+const isAdminRole = (role?: string | null) => role === "SUPER_ADMIN" || role === "ADMIN";
 
 export async function getDigitalProducts(adminOnly = false) {
     try {
@@ -27,7 +38,6 @@ export async function getDigitalProductById(id: string) {
             where: { id }
         });
         return product;
-        return product;
     } catch (error) {
         console.error("Failed to fetch digital product:", error);
         return null;
@@ -49,7 +59,7 @@ export async function getDigitalProductBySlug(slug: string) {
 export async function createDigitalProduct(data: any) {
     try {
         const session = await auth();
-        if (!session?.user || session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+        if (!session?.user || !isAdminRole(session.user.role)) {
             return { success: false, error: "Unauthorized" };
         }
 
@@ -78,7 +88,7 @@ export async function createDigitalProduct(data: any) {
 export async function updateDigitalProduct(id: string, data: any) {
     try {
         const session = await auth();
-        if (!session?.user || session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+        if (!session?.user || !isAdminRole(session.user.role)) {
             return { success: false, error: "Unauthorized" };
         }
 
@@ -108,7 +118,7 @@ export async function updateDigitalProduct(id: string, data: any) {
 export async function deleteDigitalProduct(id: string) {
     try {
         const session = await auth();
-        if (!session?.user || session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+        if (!session?.user || !isAdminRole(session.user.role)) {
             return { success: false, error: "Unauthorized" };
         }
 
@@ -123,24 +133,39 @@ export async function deleteDigitalProduct(id: string) {
     }
 }
 
-export async function uploadDigitalProductThumbnail(formData: FormData) {
+export async function uploadDigitalProductAsset(formData: FormData) {
     try {
         const session = await auth();
-        if (!session?.user || session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+        if (!session?.user || !isAdminRole(session.user.role)) {
             return { success: false, error: "Unauthorized" };
         }
 
         const file = formData.get("file") as File;
+        const assetType = formData.get("assetType") as DigitalProductAssetType | null;
+
         if (!file) return { success: false, error: "No file provided" };
+        if (!assetType || !(assetType in DIGITAL_PRODUCT_UPLOAD_FOLDERS)) {
+            return { success: false, error: "Invalid asset type" };
+        }
 
-        const { uploadLocalFile } = await import("@/lib/upload");
+        if (file.size > 50 * 1024 * 1024) {
+            return { success: false, error: "File size must be less than 50MB" };
+        }
 
-        // Use the existing local upload utility to save in /public/uploads/digitalproducts
-        const publicUrl = await uploadLocalFile(file, "digitalproducts");
+        if (assetType !== "file" && !file.type.startsWith("image/")) {
+            return { success: false, error: "Only image files are allowed for this asset" };
+        }
+
+        const publicUrl = await uploadLocalFile(file, DIGITAL_PRODUCT_UPLOAD_FOLDERS[assetType]);
 
         return { success: true, url: publicUrl };
     } catch (error: any) {
-        console.error("Thumbnail upload error:", error);
-        return { success: false, error: error.message || "Failed to upload thumbnail" };
+        console.error("Digital product asset upload error:", error);
+        return { success: false, error: error.message || "Failed to upload asset" };
     }
+}
+
+export async function uploadDigitalProductThumbnail(formData: FormData) {
+    formData.set("assetType", "thumbnail");
+    return uploadDigitalProductAsset(formData);
 }

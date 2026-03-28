@@ -160,7 +160,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                     } else {
                         updateFormData({ videoFile: res.url });
                     }
-                    return "Uploaded to Sanity!";
+                    return `${type === "image" ? "Image" : "Video"} uploaded successfully`;
                 }
                 throw new Error(res.error || "Failed");
             },
@@ -392,7 +392,7 @@ export default function ProjectForm({ initialData, isNew = false, onSuccess, onC
                                         placeholder="https://... OR Upload Video"
                                     />
                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                        <label className="p-2 cursor-pointer text-gray-400 hover:text-red-500 transition-colors" title="Upload Video to Sanity">
+                                        <label className="p-2 cursor-pointer text-gray-400 hover:text-red-500 transition-colors" title="Upload video from your device">
                                             <Upload size={18} />
                                             <input
                                                 type="file"

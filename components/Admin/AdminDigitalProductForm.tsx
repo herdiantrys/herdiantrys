@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, Loader2, Image as ImageIcon, Link as LinkIcon, FileText, Tag, DollarSign, Globe, Sparkles, X } from "lucide-react";
-import Link from "next/link";
-import { createDigitalProduct, updateDigitalProduct, uploadDigitalProductThumbnail } from "@/lib/actions/digital-product.actions";
+import { Save, ArrowLeft, Loader2, Image as ImageIcon, Link as LinkIcon, FileText, Tag, DollarSign, Sparkles, Upload, X } from "lucide-react";
+import { createDigitalProduct, updateDigitalProduct, uploadDigitalProductAsset } from "@/lib/actions/digital-product.actions";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -16,7 +15,7 @@ interface AdminProductFormProps {
 export default function AdminDigitalProductForm({ initialData, isEdit = false }: AdminProductFormProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploadingThumb, setIsUploadingThumb] = useState(false);
+    const [uploadingField, setUploadingField] = useState<null | "coverImage" | "thumbnail" | "fileUrl">(null);
 
     const [formData, setFormData] = useState({
         title: initialData?.title || "",
@@ -52,8 +51,8 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        e?.preventDefault();
 
         if (!formData.title || !formData.slug || !formData.category) {
             toast.error("Please fill in all required fields (Title, Slug, Category)");
@@ -89,36 +88,49 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
         }
     };
 
-    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const getAssetFileName = (url: string) => {
+        const value = url.split("/").pop() || url;
+        return decodeURIComponent(value);
+    };
+
+    const handleAssetUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        assetType: "cover" | "thumbnail" | "file",
+        fieldName: "coverImage" | "thumbnail" | "fileUrl"
+    ) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Basic validation
-        if (!file.type.startsWith('image/')) {
+        if (assetType !== "file" && !file.type.startsWith("image/")) {
             toast.error("Please select an image file");
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            toast.error("File size must be less than 5MB");
+            e.target.value = "";
             return;
         }
 
-        setIsUploadingThumb(true);
+        if (file.size > 50 * 1024 * 1024) {
+            toast.error("File size must be less than 50MB");
+            e.target.value = "";
+            return;
+        }
+
+        setUploadingField(fieldName);
         try {
-            const formData = new FormData();
-            formData.append("file", file);
+            const uploadFormData = new FormData();
+            uploadFormData.append("file", file);
+            uploadFormData.append("assetType", assetType);
 
-            const result = await uploadDigitalProductThumbnail(formData);
+            const result = await uploadDigitalProductAsset(uploadFormData);
             if (result.success && result.url) {
-                setFormData(prev => ({ ...prev, thumbnail: result.url }));
-                toast.success("Thumbnail uploaded successfully");
+                setFormData(prev => ({ ...prev, [fieldName]: result.url }));
+                toast.success(`${assetType === "file" ? "Product file" : assetType === "cover" ? "Cover image" : "Thumbnail"} uploaded successfully`);
             } else {
-                toast.error(result.error || "Failed to upload thumbnail");
+                toast.error(result.error || "Failed to upload asset");
             }
         } catch (error) {
             toast.error("An error occurred during upload");
         } finally {
-            setIsUploadingThumb(false);
+            setUploadingField(null);
+            e.target.value = "";
         }
     };
 
@@ -142,7 +154,7 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                     </div>
                 </div>
                 <button
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                     disabled={isSaving}
                     className="flex items-center gap-2 px-6 py-3 bg-[var(--site-button)] text-[var(--site-button-text)] rounded-xl font-bold shadow-lg shadow-[var(--site-accent)]/20 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
                 >
@@ -211,21 +223,51 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                         <div className="space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">Cover Image URL</label>
-                                    <div className="flex gap-4">
-                                        <div className="flex-1 relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <ImageIcon size={16} className="text-slate-400 dark:text-gray-500" />
+                                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">Cover Image</label>
+                                    <div className="space-y-3">
+                                        {formData.coverImage && (
+                                            <div className="relative h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10">
+                                                <Image src={formData.coverImage} alt="Cover preview" fill className="object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData(prev => ({ ...prev, coverImage: "" }))}
+                                                    className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-red-500/80 rounded-lg text-white backdrop-blur-md transition-colors"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             </div>
-                                            <input
-                                                type="url"
-                                                name="coverImage"
-                                                value={formData.coverImage}
-                                                onChange={handleChange}
-                                                placeholder="https://..."
-                                                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium text-sm"
-                                            />
+                                        )}
+
+                                        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <ImageIcon size={16} className="text-slate-400 dark:text-gray-500" />
+                                                </div>
+                                                <input
+                                                    type="url"
+                                                    name="coverImage"
+                                                    value={formData.coverImage}
+                                                    onChange={handleChange}
+                                                    placeholder="/uploads/digitalproducts_covers/... or https://..."
+                                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium text-sm"
+                                                />
+                                            </div>
+                                            <label className={`relative inline-flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all ${uploadingField === "coverImage"
+                                                ? "border-[var(--site-accent)]/50 bg-[var(--site-accent)]/10 text-[var(--site-accent)]"
+                                                : "cursor-pointer border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                                }`}>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleAssetUpload(e, "cover", "coverImage")}
+                                                    disabled={uploadingField !== null}
+                                                    className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                                />
+                                                {uploadingField === "coverImage" ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                                {uploadingField === "coverImage" ? "Uploading..." : "Upload Local"}
+                                            </label>
                                         </div>
+                                        <p className="text-[10px] text-slate-400 dark:text-gray-500 ml-1">Upload image cover langsung ke direktori lokal atau tempel URL jika memang diperlukan.</p>
                                     </div>
                                 </div>
 
@@ -249,12 +291,12 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                                     <input
                                                         type="file"
                                                         accept="image/png, image/jpeg, image/webp"
-                                                        onChange={handleThumbnailUpload}
-                                                        disabled={isUploadingThumb}
+                                                        onChange={(e) => handleAssetUpload(e, "thumbnail", "thumbnail")}
+                                                        disabled={uploadingField !== null}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                                                     />
-                                                    <div className={`w-full h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed ${isUploadingThumb ? 'border-[var(--site-accent)]/50 bg-[var(--site-accent)]/5' : 'border-slate-300 dark:border-white/20 hover:border-slate-400 dark:hover:border-white/40 hover:bg-slate-50 dark:hover:bg-white/5'} transition-all`}>
-                                                        {isUploadingThumb ? (
+                                                    <div className={`w-full h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed ${uploadingField === "thumbnail" ? 'border-[var(--site-accent)]/50 bg-[var(--site-accent)]/5' : 'border-slate-300 dark:border-white/20 hover:border-slate-400 dark:hover:border-white/40 hover:bg-slate-50 dark:hover:bg-white/5'} transition-all`}>
+                                                        {uploadingField === "thumbnail" ? (
                                                             <>
                                                                 <Loader2 size={24} className="text-[var(--site-accent)] animate-spin" />
                                                                 <span className="text-sm font-medium text-[var(--site-accent)]">Uploading...</span>
@@ -265,7 +307,7 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                                                     <ImageIcon size={20} className="text-slate-500 dark:text-gray-400" />
                                                                 </div>
                                                                 <span className="text-sm font-medium text-slate-500 dark:text-gray-400">Click to upload thumbnail</span>
-                                                                <span className="text-[10px] text-slate-400">JPG, PNG, WebP (Max 5MB)</span>
+                                                                <span className="text-[10px] text-slate-400">JPG, PNG, WebP (Max 50MB)</span>
                                                             </>
                                                         )}
                                                     </div>
@@ -279,20 +321,41 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
 
                             <div className="space-y-2 pt-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-gray-400 ml-1">Product File / Access URL</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <LinkIcon size={16} className="text-slate-400 dark:text-gray-500" />
+                                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <LinkIcon size={16} className="text-slate-400 dark:text-gray-500" />
+                                        </div>
+                                        <input
+                                            type="url"
+                                            name="fileUrl"
+                                            value={formData.fileUrl}
+                                            onChange={handleChange}
+                                            placeholder="/uploads/digitalproduct_files/... or external URL"
+                                            className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium"
+                                        />
                                     </div>
-                                    <input
-                                        type="url"
-                                        name="fileUrl"
-                                        value={formData.fileUrl}
-                                        onChange={handleChange}
-                                        placeholder="Google Drive link or downloadable file..."
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium"
-                                    />
+                                    <label className={`relative inline-flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all ${uploadingField === "fileUrl"
+                                        ? "border-[var(--site-accent)]/50 bg-[var(--site-accent)]/10 text-[var(--site-accent)]"
+                                        : "cursor-pointer border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                        }`}>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => handleAssetUpload(e, "file", "fileUrl")}
+                                            disabled={uploadingField !== null}
+                                            className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        />
+                                        {uploadingField === "fileUrl" ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                        {uploadingField === "fileUrl" ? "Uploading..." : "Upload File"}
+                                    </label>
                                 </div>
-                                <p className="text-[10px] text-slate-400 dark:text-gray-500 ml-1">Only accessible after successful payment.</p>
+                                {formData.fileUrl && (
+                                    <div className="ml-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                                        <FileText size={12} />
+                                        {getAssetFileName(formData.fileUrl)}
+                                    </div>
+                                )}
+                                <p className="text-[10px] text-slate-400 dark:text-gray-500 ml-1">Bisa upload file lokal ke server atau tetap tempel link eksternal. File hanya bisa diakses setelah pembelian berhasil.</p>
                             </div>
                         </div>
                     </div>

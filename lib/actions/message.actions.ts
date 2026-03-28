@@ -202,7 +202,7 @@ export async function getUnreadMessageCount() {
 }
 
 /**
- * Upload an attachment for a message to Sanity.
+ * Upload an attachment for a message to local storage.
  */
 export async function uploadMessageAttachment(formData: FormData) {
     const session = await auth();

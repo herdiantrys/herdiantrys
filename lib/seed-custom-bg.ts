@@ -23,7 +23,7 @@ async function main() {
             price: 500,
             type: "BACKGROUND",
             value: "custom-color", // Marker value
-            icon: "https://cdn.sanity.io/images/q8119565/production/60d81c81062b339486c42935266522c091910609-500x500.png" // Placeholder or specific icon
+            icon: "/images/chat-bg.png"
         }
     });
 
