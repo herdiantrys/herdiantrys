@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Briefcase, GraduationCap } from "lucide-reac
 import { PortableText } from "@portabletext/react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { formatDate } from "@/lib/utils";
+import { resolveAssetUrl } from "@/lib/media";
 
 const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
     const stats = [
@@ -33,8 +34,8 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
 
     const getImageUrl = (image: any) => {
         if (!image) return null;
-        if (typeof image === 'string') return image;
-        return image.asset?.url || image.url || null;
+        const rawUrl = typeof image === 'string' ? image : image.asset?.url || image.url || null;
+        return rawUrl ? resolveAssetUrl(rawUrl, "/avatar-placeholder.png") : null;
     };
 
     return (
@@ -85,8 +86,9 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                         <div className="glass p-4 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] relative group overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             <div className="aspect-[3/4] rounded-2xl overflow-hidden relative">
                                 <img
-                                    src={getImageUrl(profile?.aboutImage) || getImageUrl(profile?.profileImage) || "/placeholder-user.jpg"}
+                                    src={getImageUrl(profile?.aboutImage) || getImageUrl(profile?.profileImage) || "/avatar-placeholder.png"}
                                     alt={profile?.fullName || "Profile"}
+                                    onError={(e) => { e.currentTarget.src = "/avatar-placeholder.png"; }}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

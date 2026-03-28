@@ -1,4 +1,5 @@
 import { getSiteContent } from "@/lib/actions/content.actions";
+import { resolveAssetUrl } from "@/lib/media";
 
 export const getProfile = async () => {
     try {
@@ -6,12 +7,19 @@ export const getProfile = async () => {
 
         if (!content) return null;
 
+        const resolvedProfileImage = content.profileImage
+            ? resolveAssetUrl(content.profileImage, "/avatar-placeholder.png")
+            : null;
+        const resolvedBannerImage = content.bannerImage
+            ? resolveAssetUrl(content.bannerImage, "/images/default-banner.jpg")
+            : null;
+
         return {
             fullName: content.fullName,
             headline: content.headline,
-            profileImage: content.profileImage ? { asset: { url: content.profileImage } } : null,
-            bannerImage: content.bannerImage,
-            aboutImage: content.profileImage ? { asset: { url: content.profileImage } } : null,
+            profileImage: resolvedProfileImage ? { asset: { url: resolvedProfileImage } } : null,
+            bannerImage: resolvedBannerImage,
+            aboutImage: resolvedProfileImage ? { asset: { url: resolvedProfileImage } } : null,
             bio: content.bio,
             aboutTitle: content.aboutTitle,
             // email: content.displayEmail, // Add to schema if needed

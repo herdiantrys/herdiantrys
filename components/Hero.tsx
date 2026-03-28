@@ -4,6 +4,7 @@ import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { resolveAssetUrl } from "@/lib/media";
 
 type HeroMedia = {
   asset?: {
@@ -75,8 +76,8 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
 
   const getImageUrl = (image: string | HeroMedia | null | undefined) => {
     if (!image) return null;
-    if (typeof image === "string") return image;
-    return image.asset?.url || image.url || null;
+    const rawUrl = typeof image === "string" ? image : image.asset?.url || image.url || null;
+    return rawUrl ? resolveAssetUrl(rawUrl, "/profile.png") : null;
   };
 
   const heroImage = getImageUrl(profile?.bannerImage) || getImageUrl(profile?.profileImage) || "/profile.png";

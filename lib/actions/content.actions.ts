@@ -3,6 +3,15 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { serializeForClient } from "@/lib/utils";
+import { i18n } from "@/i18n-config";
+
+const revalidateSiteContentPaths = () => {
+    revalidatePath("/");
+    for (const locale of i18n.locales) {
+        revalidatePath(`/${locale}`);
+        revalidatePath(`/${locale}/admin/content`);
+    }
+};
 
 export const getSiteContent = async () => {
     try {
@@ -71,7 +80,7 @@ export const updateSiteContent = async (data: any) => {
             data: cleanData
         });
 
-        revalidatePath("/"); // Homepage
+        revalidateSiteContentPaths();
         return { success: true };
     } catch (error: any) {
         console.error("Error updating site content:", error);
@@ -96,7 +105,7 @@ export const uploadSiteImage = async (type: "profile" | "banner", formData: Form
             data: { [field]: url }
         });
 
-        revalidatePath("/");
+        revalidateSiteContentPaths();
         return { success: true, imageUrl: url };
     } catch (error) {
         console.error(`Error uploading site ${type} image:`, error);
