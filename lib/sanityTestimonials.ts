@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { resolveAssetUrl } from "@/lib/media";
 
 export type Testimonial = {
     id: string;
@@ -6,6 +7,7 @@ export type Testimonial = {
     role: string;
     content: string;
     avatar: string;
+    avatarType: "image" | "initial";
     color: string;
 };
 
@@ -28,7 +30,10 @@ export async function getSanityTestimonials(): Promise<Testimonial[]> {
             name: t.name,
             role: t.role || "Client",
             content: t.content || "",
-            avatar: t.photo || t.name.charAt(0).toUpperCase(),
+            avatar: t.photo
+                ? resolveAssetUrl(t.photo, "/avatar-placeholder.png")
+                : t.name.charAt(0).toUpperCase(),
+            avatarType: t.photo ? "image" : "initial",
             color: colors[index % colors.length],
         }));
     } catch (error) {

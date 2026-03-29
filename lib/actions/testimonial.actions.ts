@@ -3,6 +3,15 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadLocalFile } from "@/lib/upload";
+import { i18n } from "@/i18n-config";
+
+const revalidateTestimonialPaths = () => {
+    revalidatePath("/admin/testimonials");
+    for (const locale of i18n.locales) {
+        revalidatePath(`/${locale}`);
+        revalidatePath(`/${locale}/admin/testimonials`);
+    }
+};
 
 export async function getTestimonials() {
     try {
@@ -38,7 +47,7 @@ export async function createTestimonial(data: any) {
                 photo: data.photo
             }
         });
-        revalidatePath("/admin/testimonials");
+        revalidateTestimonialPaths();
         return { success: true };
     } catch (error) {
         console.error("Error creating testimonial:", error);
@@ -57,7 +66,7 @@ export async function updateTestimonial(id: string, data: any) {
                 photo: data.photo
             }
         });
-        revalidatePath("/admin/testimonials");
+        revalidateTestimonialPaths();
         return { success: true };
     } catch (error) {
         console.error("Error updating testimonial:", error);
@@ -70,7 +79,7 @@ export async function deleteTestimonial(id: string) {
         await prisma.testimonial.delete({
             where: { id }
         });
-        revalidatePath("/admin/testimonials");
+        revalidateTestimonialPaths();
         return { success: true };
     } catch (error) {
         console.error("Error deleting testimonial:", error);
@@ -87,7 +96,7 @@ export async function bulkDeleteTestimonials(ids: string[]) {
                 }
             }
         });
-        revalidatePath("/admin/testimonials");
+        revalidateTestimonialPaths();
         return { success: true };
     } catch (error) {
         console.error("Error bulk deleting testimonials:", error);
