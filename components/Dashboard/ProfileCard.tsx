@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner"; // Assuming sonner is used for toasts, if not I'll adjust
 import { formatNumber } from "@/lib/utils";
+import { resolveUserBannerMedia } from "@/lib/user-banner";
 
 export default function ProfileCard({
     user,
@@ -91,7 +92,7 @@ export default function ProfileCard({
         return image;
     };
 
-    const bannerUrl = resolveImageUrl(user.bannerImage);
+    const bannerMedia = resolveUserBannerMedia(user);
     const fallbackProfileUrl = getDefaultProfilePicture(user.email || user.username || user.fullName || user._id || user.id);
     const profileUrl = resolveImageUrl(user.profileImage) || user.imageURL || user.image || fallbackProfileUrl;
 
@@ -125,22 +126,25 @@ export default function ProfileCard({
             {/* Banner Section with Refined Overlay */}
             {!isCollapsed && (
                 <div className="w-full h-32 relative bg-gradient-to-r from-[var(--site-primary)]/30 to-[var(--site-primary)]/50 overflow-hidden group/banner">
-                    {user.equippedBanner === 'custom-video' && user.bannerVideo ? (
+                    {bannerMedia.kind === "video" ? (
                         <video
-                            src={user.bannerVideo}
+                            src={bannerMedia.src}
                             autoPlay
                             loop
                             muted
                             playsInline
                             className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
                         />
-                    ) : bannerUrl ? (
+                    ) : (
                         <img
-                            src={bannerUrl}
-                            alt="Profile Banner"
+                            src={bannerMedia.src}
+                            alt={bannerMedia.alt}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
+                            onError={(event) => {
+                                event.currentTarget.src = "/images/default-banner.jpg";
+                            }}
                         />
-                    ) : null}
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/20 dark:from-black/60 dark:via-black/20 to-transparent" />
 
                     {/* Decorative Arcane Orb */}

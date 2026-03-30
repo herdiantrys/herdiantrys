@@ -1,18 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import {
     Upload, Plus, Trash2, Save, Layout, User, Briefcase,
     GraduationCap, MapPin, Globe, Camera, Sparkles,
-    Building2, Calendar, BookOpen, Code2, Star, Check
+    Building2, Calendar, BookOpen, Code2, Star, Check, ExternalLink, Link2
 } from "lucide-react";
 import { updateSiteContent, uploadSiteImage } from "@/lib/actions/content.actions";
 import { useRouter } from "next/navigation";
 import { resolveAssetUrl } from "@/lib/media";
+import {
+    createEmptySocialLink,
+    getSocialLinkDisplayValue,
+    getSocialLinkHref,
+    getSocialLinkLabel,
+    getSocialPlatformOption,
+    resolveSocialPlatformId,
+    SOCIAL_PLATFORM_OPTIONS,
+} from "@/lib/social-links";
+import { SocialIcon } from "@/components/ui/SocialIcon";
 
 const tabVariants: Variants = {
     hidden: { opacity: 0, y: 12, scale: 0.98 },
@@ -24,6 +33,10 @@ const itemVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
     visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.25 } })
 };
+
+function joinClasses(...parts: Array<string | false | null | undefined>) {
+    return parts.filter(Boolean).join(" ");
+}
 
 // ─── Reusable Field Components ────────────────────────────────────────────────
 
@@ -37,6 +50,21 @@ function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: stri
 }
 
 function StyledInput({ icon: Icon, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { icon?: React.ElementType }) {
+    const inputClassName = joinClasses(
+        "w-full",
+        Icon ? "pl-10" : "pl-4",
+        "pr-4 py-3 rounded-xl",
+        "bg-white/60 dark:bg-black/20",
+        "border border-slate-200 dark:border-white/10",
+        "text-slate-800 dark:text-slate-100",
+        "placeholder-slate-400 dark:placeholder-slate-600",
+        "focus:outline-none focus:ring-2 focus:ring-[var(--site-accent)]/30 focus:border-[var(--site-accent)]/60",
+        "hover:bg-white/80 dark:hover:bg-black/30",
+        "transition-all duration-200 text-sm font-medium",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        props.className,
+    );
+
     return (
         <div className="relative group">
             {Icon && (
@@ -46,35 +74,61 @@ function StyledInput({ icon: Icon, ...props }: React.InputHTMLAttributes<HTMLInp
             )}
             <input
                 {...props}
-                className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl
-                    bg-white/60 dark:bg-black/20 
-                    border border-slate-200 dark:border-white/10
-                    text-slate-800 dark:text-slate-100 
-                    placeholder-slate-400 dark:placeholder-slate-600
-                    focus:outline-none focus:ring-2 focus:ring-[var(--site-accent)]/30 focus:border-[var(--site-accent)]/60
-                    hover:bg-white/80 dark:hover:bg-black/30
-                    transition-all duration-200 text-sm font-medium
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    ${props.className || ""}`}
+                className={inputClassName}
             />
         </div>
     );
 }
 
 function StyledTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+    const textareaClassName = joinClasses(
+        "w-full px-4 py-3 rounded-xl",
+        "bg-white/60 dark:bg-black/20",
+        "border border-slate-200 dark:border-white/10",
+        "text-slate-800 dark:text-slate-100",
+        "placeholder-slate-400 dark:placeholder-slate-600",
+        "focus:outline-none focus:ring-2 focus:ring-[var(--site-accent)]/30 focus:border-[var(--site-accent)]/60",
+        "hover:bg-white/80 dark:hover:bg-black/30",
+        "transition-all duration-200 text-sm font-medium resize-none custom-scrollbar",
+        props.className,
+    );
+
     return (
         <textarea
             {...props}
-            className={`w-full px-4 py-3 rounded-xl
-                bg-white/60 dark:bg-black/20 
-                border border-slate-200 dark:border-white/10
-                text-slate-800 dark:text-slate-100 
-                placeholder-slate-400 dark:placeholder-slate-600
-                focus:outline-none focus:ring-2 focus:ring-[var(--site-accent)]/30 focus:border-[var(--site-accent)]/60
-                hover:bg-white/80 dark:hover:bg-black/30
-                transition-all duration-200 text-sm font-medium resize-none custom-scrollbar
-                ${props.className || ""}`}
+            className={textareaClassName}
         />
+    );
+}
+
+function StyledSelect({ icon: Icon, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { icon?: React.ElementType }) {
+    const selectClassName = joinClasses(
+        "w-full appearance-none",
+        Icon ? "pl-10" : "pl-4",
+        "pr-10 py-3 rounded-xl",
+        "bg-white/60 dark:bg-black/20",
+        "border border-slate-200 dark:border-white/10",
+        "text-slate-800 dark:text-slate-100",
+        "focus:outline-none focus:ring-2 focus:ring-[var(--site-accent)]/30 focus:border-[var(--site-accent)]/60",
+        "hover:bg-white/80 dark:hover:bg-black/30",
+        "transition-all duration-200 text-sm font-medium",
+        props.className,
+    );
+
+    return (
+        <div className="relative group">
+            {Icon && (
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Icon size={16} className="text-slate-400 dark:text-slate-500 group-focus-within:text-[var(--site-accent)] transition-colors duration-200" />
+                </div>
+            )}
+            <select
+                {...props}
+                className={selectClassName}
+            >
+                {children}
+            </select>
+        </div>
     );
 }
 
@@ -87,14 +141,18 @@ function SectionCard({ children, className = "" }: { children: React.ReactNode; 
 }
 
 function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+    const buttonClassName = joinClasses(
+        "flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg",
+        "bg-[var(--site-accent)]/10 hover:bg-[var(--site-accent)]/20",
+        "text-[var(--site-accent)] text-sm font-semibold",
+        "border border-[var(--site-accent)]/20 hover:border-[var(--site-accent)]/40",
+        "transition-all duration-200 hover:scale-[1.02] active:scale-95",
+    );
+
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg
-                bg-[var(--site-accent)]/10 hover:bg-[var(--site-accent)]/20
-                text-[var(--site-accent)] text-sm font-semibold
-                border border-[var(--site-accent)]/20 hover:border-[var(--site-accent)]/40
-                transition-all duration-200 hover:scale-[1.02] active:scale-95"
+            className={buttonClassName}
         >
             <Plus size={14} />
             {label}
@@ -167,6 +225,45 @@ export default function ContentManager({ initialData }: { initialData: any }) {
             },
             error: "Failed to upload image"
         });
+    };
+
+    const addSocialLink = () => {
+        setFormData(prev => ({
+            ...prev,
+            socialLinks: [...(prev.socialLinks as any[]), createEmptySocialLink()]
+        }));
+    };
+
+    const removeSocialLink = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            socialLinks: (prev.socialLinks as any[]).filter((_, i) => i !== index)
+        }));
+    };
+
+    const updateSocialLink = (index: number, key: string, value: string) => {
+        const nextLinks = [...(formData.socialLinks as any[])];
+        nextLinks[index] = { ...nextLinks[index], [key]: value };
+        setFormData(prev => ({ ...prev, socialLinks: nextLinks }));
+    };
+
+    const updateSocialLinkPlatform = (index: number, nextPlatformId: string) => {
+        const nextOption = getSocialPlatformOption(nextPlatformId);
+        const nextLinks = [...(formData.socialLinks as any[])];
+        const currentLink = nextLinks[index] || createEmptySocialLink();
+        const currentPlatformId = resolveSocialPlatformId(currentLink.icon, currentLink.platform);
+
+        nextLinks[index] = {
+            ...currentLink,
+            icon: nextOption.id,
+            platform: nextOption.id === "custom"
+                ? currentPlatformId === "custom"
+                    ? currentLink.platform || ""
+                    : ""
+                : nextOption.label,
+        };
+
+        setFormData(prev => ({ ...prev, socialLinks: nextLinks }));
     };
 
     const addItem = (field: "skills" | "experience" | "education") => {
@@ -247,7 +344,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                         <div>
                             <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg leading-none">{activeTabDef?.label}</h2>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-                                {activeTab === "general" && "Hero banner, display name, headline & links"}
+                                {activeTab === "general" && "Hero banner, display name, headline, links & social media"}
                                 {activeTab === "about" && "Profile photo, biography, and about section title"}
                                 {activeTab === "skills" && "Technical skills with proficiency levels"}
                                 {activeTab === "experience" && "Work history and professional roles"}
@@ -341,6 +438,147 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                         />
                                     </div>
                                 </div>
+
+                                <SectionCard>
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Social Media Links</h3>
+                                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                Choose the icon/platform, set the social media name, and add the link that will open in a new tab on the front page.
+                                            </p>
+                                        </div>
+                                        <AddButton onClick={addSocialLink} label="Add Social Media" />
+                                    </div>
+
+                                    <div className="mt-5 space-y-4">
+                                        <AnimatePresence>
+                                            {(formData.socialLinks as any[]).length === 0 && (
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    className="rounded-2xl border border-dashed border-slate-300 bg-white/40 px-5 py-10 text-center dark:border-white/10 dark:bg-black/10"
+                                                >
+                                                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-white/5 dark:text-slate-500">
+                                                        <Link2 size={20} />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">No social media links yet</p>
+                                                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                                        Add your links so they show up in the contact section.
+                                                    </p>
+                                                </motion.div>
+                                            )}
+
+                                            {(formData.socialLinks as any[]).map((link, idx) => {
+                                                const platformId = resolveSocialPlatformId(link.icon, link.platform, link.url);
+                                                const selectedOption = getSocialPlatformOption(platformId);
+                                                const previewHref = getSocialLinkHref(link);
+                                                const previewLabel = getSocialLinkLabel(link);
+                                                const previewValue = getSocialLinkDisplayValue(link.url, link.icon || link.platform);
+
+                                                return (
+                                                    <motion.div
+                                                        key={`social-link-${idx}`}
+                                                        custom={idx}
+                                                        variants={itemVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                        exit={{ opacity: 0, x: -20 }}
+                                                        className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/70 transition-all duration-200 hover:border-violet-300/50 dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-violet-500/20"
+                                                    >
+                                                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-gradient-to-r from-violet-500/5 to-indigo-500/5 px-5 py-3.5 dark:border-white/[0.05]">
+                                                            <div className="flex min-w-0 items-center gap-3">
+                                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20">
+                                                                    <SocialIcon iconKey={link.icon} platform={link.platform} size={18} />
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <p className="truncate text-sm font-bold leading-none text-slate-700 dark:text-slate-200">
+                                                                        {previewLabel}
+                                                                    </p>
+                                                                    <p className="mt-1 truncate text-xs text-slate-400 dark:text-slate-500">
+                                                                        {previewValue || selectedOption.placeholder}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <DeleteButton onClick={() => removeSocialLink(idx)} />
+                                                        </div>
+
+                                                        <div className="grid gap-4 p-5 lg:grid-cols-[1.1fr_1fr]">
+                                                            <div className="space-y-4">
+                                                                <div>
+                                                                    <FieldLabel hint="Selecting a platform also updates the icon used on the front page">Platform & Icon</FieldLabel>
+                                                                    <StyledSelect
+                                                                        icon={Globe}
+                                                                        value={platformId}
+                                                                        onChange={(e) => updateSocialLinkPlatform(idx, e.target.value)}
+                                                                    >
+                                                                        {SOCIAL_PLATFORM_OPTIONS.map((option) => (
+                                                                            <option key={option.id} value={option.id}>
+                                                                                {option.label}
+                                                                            </option>
+                                                                        ))}
+                                                                    </StyledSelect>
+                                                                </div>
+
+                                                                <div>
+                                                                    <FieldLabel>Social Media Name</FieldLabel>
+                                                                    <StyledInput
+                                                                        icon={User}
+                                                                        type="text"
+                                                                        value={link.platform || ""}
+                                                                        onChange={(e) => updateSocialLink(idx, "platform", e.target.value)}
+                                                                        placeholder={selectedOption.label}
+                                                                    />
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-4">
+                                                                <div>
+                                                                    <FieldLabel hint="This link will open in a new browser tab from the contact section">Link URL</FieldLabel>
+                                                                    <StyledInput
+                                                                        icon={Link2}
+                                                                        type="text"
+                                                                        value={link.url || ""}
+                                                                        onChange={(e) => updateSocialLink(idx, "url", e.target.value)}
+                                                                        placeholder={selectedOption.placeholder}
+                                                                    />
+                                                                </div>
+
+                                                                <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 dark:border-white/[0.06] dark:bg-black/20">
+                                                                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                                                                        Front Page Preview
+                                                                    </p>
+                                                                    <div className="mt-2 flex items-center justify-between gap-3">
+                                                                        <div className="min-w-0">
+                                                                            <p className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                                                                {previewLabel}
+                                                                            </p>
+                                                                            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                                                                {previewValue || selectedOption.placeholder}
+                                                                            </p>
+                                                                        </div>
+                                                                        {previewHref ? (
+                                                                            <a
+                                                                                href={previewHref}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:text-[var(--site-accent)] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                                                                            >
+                                                                                Preview
+                                                                                <ExternalLink size={12} />
+                                                                            </a>
+                                                                        ) : (
+                                                                            <span className="text-xs text-slate-400 dark:text-slate-500">Enter a link to preview</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </AnimatePresence>
+                                    </div>
+                                </SectionCard>
                             </motion.div>
                         )}
 
@@ -729,14 +967,15 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm 
-                            shadow-lg transition-all duration-300 overflow-hidden 
-                            disabled:opacity-60 disabled:cursor-not-allowed
-                            hover:scale-[1.03] hover:shadow-xl active:scale-95
-                            ${saveSuccess
+                        className={joinClasses(
+                            "relative flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm",
+                            "shadow-lg transition-all duration-300 overflow-hidden",
+                            "disabled:opacity-60 disabled:cursor-not-allowed",
+                            "hover:scale-[1.03] hover:shadow-xl active:scale-95",
+                            saveSuccess
                                 ? "bg-emerald-500 text-white shadow-emerald-500/30"
-                                : "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-[var(--site-accent)]/30"
-                            }`}
+                                : "bg-[var(--site-button)] text-[var(--site-button-text)] shadow-[var(--site-accent)]/30",
+                        )}
                     >
                         <AnimatePresence mode="wait">
                             {loading ? (

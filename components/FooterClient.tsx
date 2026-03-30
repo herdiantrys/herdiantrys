@@ -3,28 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import {
-    Github, Twitter, Linkedin, Instagram, Mail, Globe,
-    Facebook, Youtube, ArrowUpRight, MapPin, Clock, Send, Sparkles
-} from "lucide-react";
+import { ArrowUpRight, Clock, MapPin, Send, Sparkles } from "lucide-react";
+import { SocialIcon } from "@/components/ui/SocialIcon";
+import { getSocialLinkHref, getSocialLinkLabel, normalizeSocialLinks } from "@/lib/social-links";
 
 interface FooterClientProps {
     dict: any;
     profile: any;
 }
-
-const getIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-        case "github": return <Github size={18} />;
-        case "twitter": return <Twitter size={18} />;
-        case "linkedin": return <Linkedin size={18} />;
-        case "instagram": return <Instagram size={18} />;
-        case "facebook": return <Facebook size={18} />;
-        case "youtube": return <Youtube size={18} />;
-        case "email": return <Mail size={18} />;
-        default: return <Globe size={18} />;
-    }
-};
 
 // --- Staggered Link Item ---
 const NavLinkItem = ({ href, children, delay = 0 }: { href: string; children: React.ReactNode; delay?: number }) => (
@@ -48,6 +34,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
     const [time, setTime] = useState("");
     const [mounted, setMounted] = useState(false);
     const footerRef = useRef<HTMLElement>(null);
+    const socialLinks = normalizeSocialLinks(profile?.socialMedia);
 
     // Mouse Parallax
     const mouseX = useMotionValue(0);
@@ -62,20 +49,29 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
     useEffect(() => {
         setMounted(true);
 
+        const updateTime = () => {
+            setTime(new Date().toLocaleTimeString("en-US", {
+                hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+            }));
+        };
+
+        updateTime();
+
+        const supportsFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
         const onMouseMove = (e: MouseEvent) => {
             mouseX.set(e.clientX);
             mouseY.set(e.clientY);
         };
-        window.addEventListener("mousemove", onMouseMove);
+        if (supportsFinePointer) {
+            window.addEventListener("mousemove", onMouseMove, { passive: true });
+        }
 
-        const timer = setInterval(() => {
-            setTime(new Date().toLocaleTimeString("en-US", {
-                hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
-            }));
-        }, 1000);
+        const timer = setInterval(updateTime, 1000);
 
         return () => {
-            window.removeEventListener("mousemove", onMouseMove);
+            if (supportsFinePointer) {
+                window.removeEventListener("mousemove", onMouseMove);
+            }
             clearInterval(timer);
         };
     }, [mouseX, mouseY]);
@@ -133,10 +129,10 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
             </div>
 
             {/* ── Content ── */}
-            <div className="relative z-10 container mx-auto px-6 lg:px-12 py-20 lg:py-28">
+            <div className="relative z-10 container mx-auto px-4 py-16 sm:px-6 sm:py-20 lg:px-12 lg:py-28">
 
                 {/* === HERO ROW === */}
-                <div className="flex flex-col lg:flex-row items-start gap-16 mb-20 pb-20 border-b border-foreground/5">
+                <div className="mb-16 flex flex-col items-start gap-10 border-b border-foreground/5 pb-16 sm:mb-20 sm:gap-12 sm:pb-20 lg:flex-row lg:gap-16">
 
                     {/* Brand Block */}
                     <motion.div
@@ -159,11 +155,11 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                             </span>
                         </div>
 
-                        <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-foreground leading-none mb-6">
+                        <h2 className="mb-6 text-[clamp(2.8rem,12vw,4.5rem)] font-black leading-none tracking-tighter text-foreground lg:text-7xl">
                             {profile?.fullName || "Herdian"}
                         </h2>
 
-                        <p className="text-base leading-relaxed text-foreground/50 font-medium max-w-sm mb-10">
+                        <p className="mb-8 max-w-xl text-base font-medium leading-relaxed text-foreground/50 sm:mb-10">
                             {profile?.bio || dict.footer.headline_fallback}
                         </p>
 
@@ -200,10 +196,10 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-                        className="w-full lg:w-[420px] shrink-0"
+                        className="w-full shrink-0 lg:w-[420px] xl:w-[440px]"
                     >
                         <div
-                            className="relative overflow-hidden rounded-[32px] p-8 group"
+                            className="group relative overflow-hidden rounded-[32px] p-6 sm:p-8"
                             style={{
                                 background: "var(--glass-bg)",
                                 border: "1px solid var(--glass-border)",
@@ -229,7 +225,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                                 {dict.footer.newsletter_desc}
                             </p>
 
-                            <form className="flex gap-2.5" onSubmit={(e) => e.preventDefault()}>
+                            <form className="flex flex-col gap-2.5 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
                                 <input
                                     type="email"
                                     placeholder={dict.footer.newsletter_placeholder}
@@ -243,7 +239,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="flex items-center gap-2 px-5 py-3.5 rounded-2xl text-sm font-black text-foreground shrink-0 transition-all"
+                                    className="flex shrink-0 items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black text-foreground transition-all"
                                     style={{
                                         background: "var(--glass-border)",
                                         border: "1px solid rgba(255,255,255,0.15)",
@@ -258,7 +254,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                 </div>
 
                 {/* === LINKS GRID === */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mb-20">
+                <div className="mb-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 sm:gap-y-12 xl:mb-20 xl:grid-cols-4">
                     {/* Quick Links */}
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.35em] text-foreground/25 mb-7">
@@ -305,7 +301,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                     </div>
 
                     {/* Back to Top */}
-                    <div className="flex items-end justify-center md:justify-end">
+                    <div className="flex items-start justify-start sm:items-end sm:justify-end">
                         <motion.button
                             onClick={scrollToTop}
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -342,23 +338,23 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                 </div>
 
                 {/* === BOTTOM BAR === */}
-                <div className="relative pt-8 border-t border-foreground/5">
+                <div className="relative border-t border-foreground/5 pt-8">
                     {/* Hairline highlight */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px"
                         style={{ background: "linear-gradient(90deg, transparent, var(--glass-border), transparent)" }} />
 
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:flex-wrap sm:text-left">
                         {/* Copyright */}
                         <p className="text-[11px] font-bold tracking-widest uppercase text-foreground/25">
                             &copy; {new Date().getFullYear()} <span className="text-foreground/60">{profile?.fullName || "Herdian"}</span>. {dict.footer.rights}
                         </p>
 
                         {/* Social Icons */}
-                        <div className="flex items-center gap-2.5">
-                            {profile?.socialMedia?.map((social: any, i: number) => (
+                        <div className="flex flex-wrap items-center justify-center gap-2.5">
+                            {socialLinks.map((social: any, i: number) => (
                                 <motion.a
-                                    key={social.platform}
-                                    href={social.url}
+                                    key={`${social.platform}-${social.url}-${i}`}
+                                    href={getSocialLinkHref(social)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     initial={{ opacity: 0, y: 8 }}
@@ -367,7 +363,7 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                                     transition={{ delay: i * 0.07 }}
                                     whileHover={{ y: -5, scale: 1.15 }}
                                     whileTap={{ scale: 0.9 }}
-                                    aria-label={social.platform}
+                                    aria-label={getSocialLinkLabel(social)}
                                     className="w-10 h-10 rounded-2xl flex items-center justify-center text-foreground/40 hover:text-foreground transition-all duration-300"
                                     style={{
                                         background: "var(--glass-bg)",
@@ -375,13 +371,13 @@ const FooterClient = ({ dict, profile }: FooterClientProps) => {
                                         backdropFilter: "blur(20px)",
                                     }}
                                 >
-                                    {getIcon(social.platform)}
+                                    <SocialIcon iconKey={social.icon} platform={social.platform} size={18} />
                                 </motion.a>
                             ))}
                         </div>
 
                         {/* Legal */}
-                        <div className="flex gap-8 text-[11px] font-bold tracking-widest uppercase text-foreground/25">
+                        <div className="flex flex-wrap justify-center gap-5 text-[11px] font-bold tracking-widest uppercase text-foreground/25 sm:justify-end sm:gap-8">
                             <Link href="/privacy" className="hover:text-foreground/70 transition-colors">{dict.footer.privacy}</Link>
                             <Link href="/terms" className="hover:text-foreground/70 transition-colors">{dict.footer.terms}</Link>
                         </div>

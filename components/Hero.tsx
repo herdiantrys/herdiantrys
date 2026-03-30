@@ -87,7 +87,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
   return (
     <section
       ref={containerRef}
-      className="relative isolate overflow-hidden px-6 pb-16 pt-[5.75rem] sm:px-8 sm:pt-24 lg:px-12 lg:pb-24 lg:pt-[6.25rem] xl:pt-[6.75rem]"
+      className="relative isolate overflow-hidden px-4 pb-12 pt-[4.75rem] sm:px-8 sm:pb-14 sm:pt-[5.25rem] lg:px-12 lg:pb-20 lg:pt-[5rem] xl:pt-[5.5rem]"
     >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[8%] top-[6%] h-56 w-56 rounded-full bg-[var(--surface-cyan-glow)] blur-[100px]" />
@@ -147,24 +147,24 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
         </motion.div>
       </div>
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-10rem)] max-w-7xl items-center gap-16 lg:grid-cols-[1.08fr_0.92fr]">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-6rem)] max-w-7xl items-start gap-12 pt-3 sm:min-h-[calc(100svh-6.5rem)] sm:gap-14 sm:pt-4 lg:min-h-[calc(100svh-6.25rem)] lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-16 lg:pt-0">
         <motion.div style={{ y: yText, opacity: opacityText }} className="relative">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--site-secondary)] shadow-[0_0_24px_rgba(0,229,255,0.08)] backdrop-blur-xl"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--site-secondary)] shadow-[0_0_24px_rgba(0,229,255,0.08)] backdrop-blur-xl sm:px-5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.32em]"
           >
             <Sparkles size={14} className="text-[var(--site-accent)]" />
             {dict.hero.creative_role || "Digital Architect"}
           </motion.div>
 
-          <div className="mt-8 max-w-3xl">
+          <div className="mt-7 max-w-3xl sm:mt-8">
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-5 font-mono text-[11px] uppercase tracking-[0.34em] text-[var(--glass-text-muted)]"
+              className="mb-4 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--glass-text-muted)] sm:mb-5 sm:text-[11px] sm:tracking-[0.34em]"
             >
               The Ethereal Professional
             </motion.p>
@@ -173,14 +173,14 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-5xl text-[3.25rem] font-black leading-[0.9] tracking-[-0.06em] text-[var(--foreground)] sm:text-[4.5rem] lg:text-[6.5rem]"
+              className="max-w-5xl text-[clamp(3rem,15vw,6.5rem)] font-black leading-[0.9] tracking-[-0.06em] text-[var(--foreground)]"
             >
               {dict.hero.greeting}
               <br />
               <span className="text-gradient">{profileName}</span>
             </motion.h1>
 
-            <div className="mt-6 min-h-[3.5rem] overflow-hidden">
+            <div className="mt-5 min-h-[3rem] overflow-hidden sm:mt-6 sm:min-h-[3.5rem]">
               <AnimatePresence mode="wait">
                 <motion.h2
                   key={roles[index]}
@@ -188,7 +188,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: -18, filter: "blur(12px)" }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-xl font-medium tracking-[-0.03em] text-[var(--glass-text-muted)] sm:text-2xl lg:text-3xl"
+                  className="text-lg font-medium tracking-[-0.03em] text-[var(--glass-text-muted)] sm:text-2xl lg:text-3xl"
                 >
                   {roles[index]}
                 </motion.h2>
@@ -199,7 +199,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.28, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 max-w-xl text-base leading-8 text-[var(--glass-text-muted)] sm:text-lg"
+              className="mt-6 max-w-xl text-[15px] leading-7 text-[var(--glass-text-muted)] sm:mt-8 sm:text-lg sm:leading-8"
             >
               {dict.hero.description}
             </motion.p>
@@ -209,11 +209,11 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.38, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-10 flex flex-col gap-4 sm:flex-row"
+            className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4"
           >
             <button
               onClick={() => document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth" })}
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--site-button)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--site-button-text)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_18px_45px_rgba(0,229,255,0.24)]"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--site-button)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--site-button-text)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_18px_45px_rgba(0,229,255,0.24)] sm:w-auto"
             >
               {dict.hero.view_portfolio}
               <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -221,7 +221,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
 
             <button
               onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center justify-center rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--glass-text)] transition-all duration-300 hover:border-[var(--site-accent)]/40 hover:bg-[var(--glass-bg-strong)]"
+              className="inline-flex w-full items-center justify-center rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--glass-text)] transition-all duration-300 hover:border-[var(--site-accent)]/40 hover:bg-[var(--glass-bg-strong)] sm:w-auto"
             >
               {dict.hero.contact_me}
             </button>
@@ -231,7 +231,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.46, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-14 grid gap-4 sm:grid-cols-3"
+            className="mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3"
           >
             <div className="glass-liquid p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--glass-text-muted)]">
@@ -303,7 +303,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
               </p>
             </div>
 
-            <div className="glass-liquid relative z-20 overflow-hidden p-4 sm:p-5">
+            <div className="glass-liquid relative z-20 overflow-hidden p-3 sm:p-5">
               <div className="absolute inset-x-[18%] top-0 z-0 h-32 bg-[radial-gradient(circle,rgba(0,229,255,0.2)_0%,transparent_70%)] blur-3xl" />
               <div className="absolute bottom-[-10%] right-[12%] z-0 h-40 w-40 rounded-full bg-[rgba(143,125,255,0.18)] blur-[90px]" />
 
@@ -314,13 +314,13 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
                     "linear-gradient(180deg, color-mix(in srgb, var(--glass-bg-strong) 76%, transparent), color-mix(in srgb, var(--glass-bg) 48%, transparent))",
                 }}
               >
-                <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-4">
+                <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4">
                   <div className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-[rgba(255,117,143,0.85)]" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[rgba(255,214,102,0.85)]" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[rgba(0,229,255,0.9)]" />
                   </div>
-                  <span className="rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--glass-text-muted)]">
+                  <span className="rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--glass-text-muted)] sm:px-3 sm:text-[10px] sm:tracking-[0.28em]">
                     Digital Architect
                   </span>
                 </div>
@@ -331,7 +331,7 @@ export default function HeroSection({ profile, dict }: { profile: HeroProfile | 
                   width={1080}
                   height={1275}
                   priority
-                  className="relative z-10 h-[28rem] w-full object-cover object-top sm:h-[34rem] lg:h-[42rem]"
+                  className="relative z-10 h-[22rem] w-full object-cover object-top sm:h-[30rem] lg:h-[42rem]"
                 />
 
                 <div

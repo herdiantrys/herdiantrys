@@ -17,7 +17,7 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
     const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
     return (
-        <section ref={ref} className="relative w-full h-[45vh] min-h-[350px] flex items-center justify-center overflow-hidden mt-[-110px]">
+        <section ref={ref} className="relative mt-[-96px] flex h-[40vh] min-h-[300px] w-full items-center justify-center overflow-hidden sm:mt-[-110px] sm:h-[45vh] sm:min-h-[350px]">
             {/* Background Effects */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 {bgImage ? (
@@ -35,8 +35,8 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     />
                 ) : (
                     <>
-                        <div className="absolute top-[-20%] left-0 w-[500px] h-[500px] bg-[var(--site-secondary)]/10 dark:bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[var(--site-secondary)]/10 dark:bg-[var(--site-secondary)]/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                        <div className="absolute left-0 top-[-20%] h-[320px] w-[320px] animate-pulse rounded-full bg-[var(--site-secondary)]/10 blur-[100px] dark:bg-[var(--site-secondary)]/20 sm:h-[500px] sm:w-[500px]"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] h-[320px] w-[320px] animate-pulse rounded-full bg-[var(--site-secondary)]/10 blur-[100px] dark:bg-[var(--site-secondary)]/20 sm:h-[500px] sm:w-[500px]" style={{ animationDelay: '2s' }}></div>
                     </>
                 )}
                 <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 brightness-100 contrast-150"></div>
@@ -44,15 +44,15 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                 <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--glass-bg)] to-transparent"></div>
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 text-center">
+            <div className="relative z-10 container mx-auto px-4 text-center sm:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--site-secondary)]/10 border border-[var(--site-secondary)]/20 text-[var(--site-secondary)] mb-6 shadow-sm"
+                    className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--site-secondary)]/20 bg-[var(--site-secondary)]/10 px-3.5 py-2 text-[var(--site-secondary)] shadow-sm sm:mb-6 sm:px-4"
                 >
                     <Sparkles size={16} />
-                    <span className="text-sm font-bold tracking-wide uppercase">
+                    <span className="text-xs font-bold uppercase tracking-wide sm:text-sm">
                         {projectCount} Featured Projects
                     </span>
                 </motion.div>
@@ -61,7 +61,7 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
-                    className="text-5xl md:text-7xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[var(--site-secondary)] via-[var(--glass-text)] to-[var(--site-secondary)]"
+                    className="mb-4 bg-gradient-to-r from-[var(--site-secondary)] via-[var(--glass-text)] to-[var(--site-secondary)] bg-clip-text text-[clamp(2.75rem,11vw,4.5rem)] font-bold text-transparent md:text-7xl sm:mb-6"
                 >
                     {dict.portfolio.title}
                 </motion.h1>
@@ -70,7 +70,7 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.6 }}
-                    className="text-xl md:text-2xl text-[var(--glass-text-muted)] max-w-2xl mx-auto leading-relaxed mb-12"
+                    className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-[var(--glass-text-muted)] sm:mb-12 sm:text-lg md:text-2xl"
                 >
                     {dict.portfolio.description}
                 </motion.p>
@@ -81,7 +81,7 @@ export default function WorksHero({ dict, projectCount, bgImage }: { dict: any, 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1, duration: 1 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-400"
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce text-gray-400 sm:bottom-10"
             >
                 <ArrowDown size={24} />
             </motion.div>

@@ -56,7 +56,7 @@ export default function SectionWrapper({
         <section
             ref={containerRef}
             id={id}
-            className={`relative py-24 sm:py-28 lg:py-32 flex flex-col items-center overflow-visible ${className}`}
+            className={`relative flex scroll-mt-[6.5rem] flex-col items-center overflow-visible overflow-x-clip py-0 sm:scroll-mt-28 ${className}`}
         >
             <motion.div
                 initial="hidden"

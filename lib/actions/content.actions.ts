@@ -1,9 +1,11 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { serializeForClient } from "@/lib/utils";
 import { i18n } from "@/i18n-config";
+import { normalizeSocialLinks } from "@/lib/social-links";
 
 const revalidateSiteContentPaths = () => {
     revalidatePath("/");
@@ -41,7 +43,7 @@ export const getSiteContent = async () => {
                     website: adminUser?.website,
                     profileImage: adminUser?.image,
                     bannerImage: adminUser?.bannerImage,
-                    socialLinks: adminUser?.socialLinks || [],
+                    socialLinks: normalizeSocialLinks(adminUser?.socialLinks || []),
                     skills: adminUser?.skills || [],
                     experience: adminUser?.experience || [],
                     education: adminUser?.education || []
@@ -56,24 +58,26 @@ export const getSiteContent = async () => {
     }
 };
 
-export const updateSiteContent = async (data: any) => {
+export const updateSiteContent = async (data: Record<string, unknown>) => {
     try {
-        // Clean data similar to user profile
-        const cleanData = serializeForClient({
-            fullName: data.fullName,
-            headline: data.headline,
-            bio: data.bio,
-            aboutTitle: data.aboutTitle,
-            location: data.location,
-            website: data.website,
-            skills: data.skills || [],
-            experience: data.experience || [],
-            education: data.education || [],
-            socialLinks: data.socialLinks || [],
-            // Add image fields if they are passed as strings (URLs)
-            // But usually images are uploaded separately or handled via state, 
-            // if passed here they are likely just strings.
-        });
+        const asNullableString = (value: unknown) => {
+            if (typeof value !== "string") return null;
+            const trimmedValue = value.trim();
+            return trimmedValue.length > 0 ? trimmedValue : null;
+        };
+
+        const cleanData: Prisma.SiteContentUpdateInput = {
+            fullName: asNullableString(data.fullName),
+            headline: asNullableString(data.headline),
+            bio: asNullableString(data.bio),
+            aboutTitle: asNullableString(data.aboutTitle),
+            location: asNullableString(data.location),
+            website: asNullableString(data.website),
+            skills: (Array.isArray(data.skills) ? data.skills : []) as Prisma.InputJsonValue,
+            experience: (Array.isArray(data.experience) ? data.experience : []) as Prisma.InputJsonValue,
+            education: (Array.isArray(data.education) ? data.education : []) as Prisma.InputJsonValue,
+            socialLinks: normalizeSocialLinks(Array.isArray(data.socialLinks) ? data.socialLinks : []) as Prisma.InputJsonValue,
+        };
 
         await prisma.siteContent.update({
             where: { id: "main" },
@@ -82,9 +86,9 @@ export const updateSiteContent = async (data: any) => {
 
         revalidateSiteContentPaths();
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error updating site content:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: error instanceof Error ? error.message : "Update failed" };
     }
 };
 

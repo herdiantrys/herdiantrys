@@ -175,7 +175,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                 id="sidebar"
                 className={`fixed top-0 left-0 z-[120] h-screen transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
                     ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:z-40"}
-                    ${isExpanded ? "w-[min(88vw,320px)] lg:w-64" : "w-[min(88vw,320px)] lg:w-[72px]"}
+                    ${isExpanded ? "w-[min(88vw,320px)] lg:w-[var(--shell-sidebar-expanded-width)]" : "w-[min(88vw,320px)] lg:w-[var(--shell-sidebar-collapsed-width)]"}
                 `}
             >
                 <div className="relative flex h-full flex-col border-r border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] shadow-[4px_0_24px_rgba(0,0,0,0.04)] backdrop-blur-3xl dark:shadow-[4px_0_32px_rgba(0,0,0,0.3)]">
@@ -199,25 +199,26 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                     <button
                         id="sidebar-desktop-toggle"
                         onClick={() => setIsCollapsed(!isCollapsed)}
+                        aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
                         className={`
-                            hidden lg:flex absolute -right-3 top-20 z-[150]
-                            w-6 h-6 items-center justify-center
-                            bg-[var(--site-sidebar-bg)]
-                            border border-[var(--site-sidebar-border)]
-                            rounded-full shadow-md shadow-black/10 dark:shadow-black/30
+                            hidden lg:flex absolute right-0 top-[var(--shell-topbar-height)] z-[150]
+                            h-8 w-8 translate-x-1/2 -translate-y-1/2 items-center justify-center
+                            rounded-full border border-[var(--site-sidebar-border-strong)]
+                            bg-[color-mix(in_srgb,var(--site-sidebar-bg)_94%,transparent)]
+                            shadow-[0_10px_28px_rgba(8,16,32,0.16)] backdrop-blur-xl dark:shadow-[0_12px_28px_rgba(0,0,0,0.35)]
                             hover:bg-[var(--site-sidebar-accent)] hover:border-[var(--site-sidebar-accent)]
-                            hover:shadow-[0_0_12px_var(--site-sidebar-accent)]/40
+                            hover:shadow-[0_0_18px_color-mix(in_srgb,var(--site-sidebar-accent)_38%,transparent)]
                             transition-all duration-300 group
                         `}
                     >
                         <ChevronLeft
-                            size={12}
+                            size={14}
                             className={`text-[var(--site-sidebar-fg)]/50 group-hover:text-white transition-all duration-300 ${isExpanded ? "rotate-0" : "rotate-180"}`}
                         />
                     </button>
 
                     {/* Logo Header */}
-                    <div className="flex h-[84px] shrink-0 items-center border-b border-[var(--site-sidebar-border)] px-5 pt-[max(env(safe-area-inset-top),0px)] lg:h-[70px] lg:pt-0">
+                    <div className="flex h-[84px] shrink-0 items-center border-b border-[var(--site-sidebar-border)] px-5 pt-[max(env(safe-area-inset-top),0px)] lg:h-[var(--shell-topbar-height)] lg:pt-0">
                         <Link href={isAdminMode ? "/admin" : "/"} onClick={() => setIsOpen(false)} className="block w-full">
                             <div className={`flex items-center gap-3 ${!isExpanded ? "lg:justify-center" : ""}`}>
                                 <div className="relative shrink-0">
@@ -826,6 +827,23 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
         };
     }, [isMobileSearchOpen]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const shouldLockBody = isMobileSearchOpen || (isProfileOpen && window.innerWidth < 640);
+        if (!shouldLockBody) return;
+
+        const previousOverflow = document.body.style.overflow;
+        const previousTouchAction = document.body.style.touchAction;
+        document.body.style.overflow = "hidden";
+        document.body.style.touchAction = "none";
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.body.style.touchAction = previousTouchAction;
+        };
+    }, [isMobileSearchOpen, isProfileOpen]);
+
     const getBreadcrumbs = () => {
         if (!pathname || pathname === "/") return [];
 
@@ -865,18 +883,25 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
             transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
             id="global-navbar"
             style={isFloatingNav ? {} : { left: "var(--navbar-left)", width: "calc(100% - var(--navbar-left))" }}
-            className={`flex items-center justify-between transition-all duration-500 ease-in-out
+            className={`overflow-hidden flex transition-all duration-500 ease-in-out
                 ${isFloatingNav
-                    ? "floating-dock fixed left-1/2 top-[max(env(safe-area-inset-top),1rem)] z-50 w-[calc(100%-1rem)] max-w-6xl -translate-x-1/2 rounded-full px-3 py-2.5 sm:top-6 sm:w-[92%] sm:px-5"
-                    : `fixed top-0 right-0 z-40 min-h-[76px] px-3 py-[max(env(safe-area-inset-top),0.75rem)] sm:px-6 md:px-8 md:py-0 ${scrolled
-                        ? "border-b border-[var(--ghost-border)] bg-[var(--glass-bg)] backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.24)]"
+                    ? "floating-dock fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.75rem)] z-50 w-[calc(100%-1rem)] max-w-6xl -translate-x-1/2 flex-col items-stretch gap-2 rounded-[2rem] border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_82%,transparent)] px-3 py-2.5 shadow-[0_18px_42px_rgba(8,16,32,0.14)] sm:top-6 sm:w-[92%] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:rounded-full sm:px-5"
+                    : `fixed right-0 top-0 z-40 min-h-[var(--shell-topbar-height)] w-full items-center justify-between px-3 py-[max(env(safe-area-inset-top),0.75rem)] sm:px-6 md:px-8 md:py-0 ${scrolled
+                        ? "border-b border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_88%,transparent)] backdrop-blur-2xl shadow-[0_18px_44px_rgba(8,16,32,0.14)] dark:shadow-[0_18px_44px_rgba(0,0,0,0.34)]"
                         : "border-b border-transparent bg-transparent"
                     }`
                 }`}
         >
-            <nav aria-label="Main Navigation" className="flex min-w-0 items-center">
+            {!isFloatingNav && scrolled && (
+                <>
+                    <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--site-sidebar-border)] to-transparent sm:inset-x-6 md:inset-x-8" />
+                    <div className="pointer-events-none absolute bottom-0 right-10 h-20 w-48 bg-[radial-gradient(circle_at_bottom_right,var(--site-sidebar-glow),transparent_68%)] opacity-80" />
+                </>
+            )}
+
+            <nav aria-label="Main Navigation" className={`relative z-10 flex min-w-0 items-center ${isFloatingNav ? "w-full sm:w-auto" : ""}`}>
                 {isFloatingNav ? (
-                    <div className="scrollbar-hide flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-white/[0.02] p-1">
+                    <div className="scrollbar-hide flex w-full max-w-full snap-x snap-mandatory items-center gap-1 overflow-x-auto rounded-full border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-active)_76%,transparent)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:w-auto">
                         {[
                             { label: dict.nav?.home || "Home", href: "#hero", id: "hero" },
                             { label: dict.nav?.works || "Portfolio", href: "#portfolio", id: "portfolio" },
@@ -903,19 +928,19 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                             }, 1000);
                                         }
                                     }}
-                                    className={`relative rounded-full px-3 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all sm:px-5 sm:text-[11px]
-                                        ${isActive ? "text-[var(--site-secondary)]" : "text-[var(--glass-text)]/70 hover:text-[var(--site-secondary)]"}`}
+                                    className={`relative shrink-0 snap-start whitespace-nowrap rounded-full px-3 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-all sm:px-5 sm:text-[11px]
+                                        ${isActive ? "text-[var(--site-sidebar-accent)]" : "text-[var(--site-sidebar-fg)]/70 hover:text-[var(--site-sidebar-accent)]"}`}
                                 >
                                     {isActive && (
                                         <motion.div
                                             layoutId="floating-nav-active"
-                                            className="absolute inset-0 -z-10 rounded-full bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_24px_rgba(0,229,255,0.12)]"
+                                            className="absolute inset-0 -z-10 rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
                                             transition={{ type: "spring", stiffness: 350, damping: 35 }}
                                         />
                                     )}
                                     <span>{item.label}</span>
                                     {isActive && (
-                                        <span className="absolute bottom-[5px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--site-secondary)] shadow-[0_0_16px_rgba(0,229,255,0.8)]" />
+                                        <span className="absolute bottom-[5px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--site-sidebar-accent)] shadow-[0_0_12px_var(--site-sidebar-accent)]" />
                                     )}
                                 </Link>
                             );
@@ -930,7 +955,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                     aria-label={isSidebarOpen ? "Close navigation menu" : "Open navigation menu"}
                                     aria-expanded={isSidebarOpen}
                                     onClick={onToggleSidebar}
-                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--ghost-border)] bg-[var(--glass-bg)] text-[var(--glass-text)] shadow-[var(--glass-shadow)] transition-all hover:border-[var(--site-secondary)]/30 hover:text-[var(--site-secondary)]"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] text-[var(--site-sidebar-fg)] shadow-[0_10px_24px_rgba(8,16,32,0.1)] transition-all hover:border-[var(--site-sidebar-accent)]/28 hover:bg-[var(--site-sidebar-active)] hover:text-[var(--site-sidebar-accent)]"
                                 >
                                     {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
                                 </button>
@@ -938,17 +963,17 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                 <Link
                                     href="/"
                                     aria-label="Go home"
-                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--ghost-border)] bg-[var(--glass-bg)] text-[var(--glass-text)] shadow-[var(--glass-shadow)] transition-all hover:border-[var(--site-secondary)]/30 hover:text-[var(--site-secondary)]"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] text-[var(--site-sidebar-fg)] shadow-[0_10px_24px_rgba(8,16,32,0.1)] transition-all hover:border-[var(--site-sidebar-accent)]/28 hover:bg-[var(--site-sidebar-active)] hover:text-[var(--site-sidebar-accent)]"
                                 >
                                     <HomeIcon className="h-4 w-4" />
                                 </Link>
                             )}
 
                             <div className="min-w-0">
-                                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-[var(--glass-text-muted)]">
+                                <p className="text-[9px] font-black uppercase tracking-[0.28em] text-[var(--site-sidebar-fg)]/42">
                                     Navigation
                                 </p>
-                                <p className="truncate text-sm font-bold tracking-tight text-[var(--glass-text)]">
+                                <p className="truncate text-sm font-bold tracking-tight text-[var(--site-sidebar-fg)]">
                                     {dict?.nav?.[currentPageLabel.toLowerCase().replace(/ /g, "-")] || currentPageLabel}
                                 </p>
                             </div>
@@ -963,18 +988,18 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                         exit={{ opacity: 0, x: -10 }}
                                         className="flex items-center gap-1"
                                     >
-                                        <Link href="/" className="rounded-full p-2 text-[var(--glass-text)]/40 transition-all hover:bg-white/[0.04] hover:text-[var(--glass-text)]">
+                                        <Link href="/" className="rounded-full p-2 text-[var(--site-sidebar-fg)]/40 transition-all hover:bg-[var(--site-sidebar-active)]/70 hover:text-[var(--site-sidebar-fg)]">
                                             <HomeIcon className="h-3.5 w-3.5" />
                                         </Link>
                                         {breadcrumbs.map((item, index) => (
                                             <div key={item.href} className="flex items-center">
-                                                <ChevronRight className="mx-0.5 h-3 w-3 text-[var(--glass-text)]/20" />
+                                                <ChevronRight className="mx-0.5 h-3 w-3 text-[var(--site-sidebar-fg)]/20" />
                                                 <Link
                                                     href={item.href}
                                                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200
                                                         ${index === breadcrumbs.length - 1
-                                                            ? "border border-[var(--ghost-border)] bg-white/[0.04] text-[var(--site-secondary)]"
-                                                            : "text-[var(--glass-text)]/55 hover:bg-white/[0.04] hover:text-[var(--glass-text)]"
+                                                            ? "border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-accent)]"
+                                                            : "text-[var(--site-sidebar-fg)]/55 hover:bg-[var(--site-sidebar-active)]/70 hover:text-[var(--site-sidebar-fg)]"
                                                         }`}
                                                 >
                                                     <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.08 }}>
@@ -991,16 +1016,16 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                 )}
             </nav>
 
-            <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <div className={`relative z-10 flex shrink-0 items-center gap-1.5 sm:gap-2 ${isFloatingNav ? "ml-0 w-full justify-end sm:ml-auto sm:w-auto" : "ml-auto"}`}>
                 {!isFloatingNav && (
                     <button
                         type="button"
                         onClick={() => setIsMobileSearchOpen((open) => !open)}
                         aria-expanded={isMobileSearchOpen}
                         aria-label={isMobileSearchOpen ? "Close search" : "Open search"}
-                        className={`group rounded-full border p-2.5 text-[var(--glass-text-muted)] transition-all md:hidden ${isMobileSearchOpen
-                            ? "border-[var(--site-secondary)]/28 bg-[var(--glass-bg-strong)] text-[var(--site-secondary)]"
-                            : "border-transparent hover:border-[var(--ghost-border)] hover:bg-white/[0.04] hover:text-[var(--site-secondary)]"
+                        className={`group rounded-full border p-2.5 text-[var(--site-sidebar-fg)]/55 transition-all md:hidden ${isMobileSearchOpen
+                            ? "border-[var(--site-sidebar-accent)]/28 bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-accent)]"
+                            : "border-transparent hover:border-[var(--site-sidebar-border)] hover:bg-[var(--site-sidebar-active)]/70 hover:text-[var(--site-sidebar-accent)]"
                             }`}
                     >
                         {isMobileSearchOpen ? <X size={18} /> : <Search size={18} className="transition-transform group-hover:scale-110" />}
@@ -1008,16 +1033,16 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                 )}
 
                 <form onSubmit={handleSearch} className="group relative hidden md:block">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--glass-text-muted)] transition-colors group-focus-within:text-[var(--site-secondary)]" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--site-sidebar-fg)]/45 transition-colors group-focus-within:text-[var(--site-sidebar-accent)]" />
                     <input
                         ref={searchInputRef}
                         type="text"
                         placeholder={dict.nav?.search_placeholder || "Search..."}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
-                        className="w-56 rounded-full border border-[var(--ghost-border)] bg-white/[0.04] py-2.5 pl-9 pr-11 text-sm text-[var(--glass-text)] transition-all duration-300 placeholder:text-[var(--glass-text-muted)] focus:w-64 focus:border-[var(--site-accent)]/45 focus:bg-[var(--glass-bg-strong)]"
+                        className="w-56 rounded-full border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_74%,transparent)] py-2.5 pl-9 pr-11 text-sm text-[var(--site-sidebar-fg)] transition-all duration-300 placeholder:text-[var(--site-sidebar-fg)]/38 focus:w-64 focus:border-[var(--site-sidebar-accent)]/26 focus:bg-[var(--site-sidebar-active)]"
                     />
-                    <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 select-none items-center rounded-full border border-[var(--ghost-border)] bg-black/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[var(--glass-text-muted)] transition-opacity group-focus-within:opacity-0 sm:inline-flex">
+                    <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 select-none items-center rounded-full border border-[var(--site-sidebar-border)] bg-black/5 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[var(--site-sidebar-fg)]/44 transition-opacity group-focus-within:opacity-0 sm:inline-flex">
                         Ctrl K
                     </kbd>
                 </form>
@@ -1025,7 +1050,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                 <div className="mx-1 hidden h-8 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent lg:block" />
 
                 {user && (
-                    <div className="hidden items-center gap-1.5 rounded-full border border-[var(--ghost-border)] bg-white/[0.04] px-3 py-1.5 text-[var(--site-secondary)] sm:flex">
+                    <div className="hidden items-center gap-1.5 rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] px-3 py-1.5 text-[var(--site-sidebar-accent)] sm:flex">
                         <Coins size={13} />
                         <span className="font-mono text-xs font-black tabular-nums">{user.points || 0}</span>
                     </div>
@@ -1034,7 +1059,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                 {user && (
                     <button
                         onClick={() => setIsMessageOpen(true)}
-                        className="group relative rounded-full border border-transparent p-2.5 text-[var(--glass-text-muted)] transition-all hover:border-[var(--ghost-border)] hover:bg-white/[0.04] hover:text-[var(--site-secondary)]"
+                        className="group relative rounded-full border border-transparent p-2.5 text-[var(--site-sidebar-fg)]/55 transition-all hover:border-[var(--site-sidebar-border)] hover:bg-[var(--site-sidebar-active)]/70 hover:text-[var(--site-sidebar-accent)]"
                     >
                         <MessageSquare size={18} className="transition-transform group-hover:scale-110" />
                         {unreadMessages > 0 && (
@@ -1072,15 +1097,15 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                             aria-haspopup="menu"
                             className={`group relative flex items-center gap-2.5 overflow-hidden rounded-full py-1.5 pl-2 pr-1.5 transition-all duration-200
                                 ${isProfileOpen
-                                    ? "border border-[var(--ghost-border)] bg-white/[0.06]"
-                                    : "border border-[var(--ghost-border)] bg-white/[0.03] hover:border-[var(--site-secondary)]/30 hover:bg-white/[0.05]"
+                                    ? "border border-[var(--site-sidebar-border-strong)] bg-[var(--site-sidebar-active)]"
+                                    : "border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_70%,transparent)] hover:border-[var(--site-sidebar-accent)]/28 hover:bg-[var(--site-sidebar-active)]"
                                 }`}
                         >
-                            <span className="hidden text-xs font-bold tracking-tight text-[var(--glass-text)] sm:block">
+                            <span className="hidden text-xs font-bold tracking-tight text-[var(--site-sidebar-fg)] sm:block">
                                 {user.name?.split(" ")[0]}
                             </span>
                             <div className="relative">
-                                <div className={`rounded-xl bg-gradient-to-tr p-[1.5px] transition-all duration-300 ${isProfileOpen ? "from-[var(--site-secondary)] to-[var(--site-accent)]/40" : "from-[var(--site-sidebar-border)] to-transparent group-hover:from-[var(--site-secondary)]/60"}`}>
+                                <div className={`rounded-xl bg-gradient-to-tr p-[1.5px] transition-all duration-300 ${isProfileOpen ? "from-[var(--site-sidebar-accent)] to-[var(--site-secondary)]/35" : "from-[var(--site-sidebar-border)] to-transparent group-hover:from-[var(--site-sidebar-accent)]/55"}`}>
                                     <AvatarWithEffect
                                         src={user.image}
                                         alt={user.name || "User"}
@@ -1114,9 +1139,9 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                                         exit={{ opacity: 0, y: 8, scale: 0.96, filter: "blur(8px)" }}
                                         transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-                                        className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.9rem)] z-50 overflow-hidden rounded-[2rem] border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:absolute sm:right-0 sm:top-full sm:inset-x-auto sm:mt-3 sm:w-72"
+                                        className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.9rem)] z-50 overflow-hidden rounded-[2rem] border border-[var(--site-sidebar-border-strong)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_94%,black_6%)] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-2xl sm:absolute sm:right-0 sm:top-full sm:inset-x-auto sm:mt-3 sm:w-72"
                                     >
-                                    <div className="border-b border-[var(--ghost-border)] p-4">
+                                    <div className="border-b border-[var(--site-sidebar-border)] p-4">
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <AvatarWithEffect
@@ -1132,37 +1157,37 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                                 <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[var(--glass-bg)] bg-[var(--site-accent)]" />
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-bold text-[var(--glass-text)]">{user.name}</p>
-                                                <p className="truncate text-[11px] text-[var(--glass-text-muted)]">{user.email}</p>
+                                                <p className="truncate text-sm font-bold text-[var(--site-sidebar-fg)]">{user.name}</p>
+                                                <p className="truncate text-[11px] text-[var(--site-sidebar-fg)]/52">{user.email}</p>
                                             </div>
-                                            <span className="shrink-0 rounded-full border border-[var(--ghost-border)] bg-white/[0.04] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--site-secondary)]">
+                                            <span className="shrink-0 rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--site-sidebar-accent)]">
                                                 {user.role || "User"}
                                             </span>
                                         </div>
 
-                                        <div className="mt-3 flex items-center justify-between rounded-[1.4rem] border border-[var(--ghost-border)] bg-white/[0.03] p-3">
+                                        <div className="mt-3 flex items-center justify-between rounded-[1.4rem] border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] p-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--site-secondary)]/10">
-                                                    <Coins size={14} className="text-[var(--site-secondary)]" />
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--site-sidebar-accent)]/12">
+                                                    <Coins size={14} className="text-[var(--site-sidebar-accent)]" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-[var(--glass-text-muted)]">Balance</p>
-                                                    <p className="mt-0.5 text-sm font-black leading-none text-[var(--glass-text)]">
-                                                        {user.points || 0} <span className="text-[10px] font-bold text-[var(--site-secondary)]">PTS</span>
+                                                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-[var(--site-sidebar-fg)]/45">Balance</p>
+                                                    <p className="mt-0.5 text-sm font-black leading-none text-[var(--site-sidebar-fg)]">
+                                                        {user.points || 0} <span className="text-[10px] font-bold text-[var(--site-sidebar-accent)]">PTS</span>
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Link href="/digitalproducts" onClick={() => setIsProfileOpen(false)} className="text-xs font-bold text-[var(--site-secondary)] transition-opacity hover:opacity-80">
+                                            <Link href="/digitalproducts" onClick={() => setIsProfileOpen(false)} className="text-xs font-bold text-[var(--site-sidebar-accent)] transition-opacity hover:opacity-80">
                                                 Digital Products
                                             </Link>
                                         </div>
 
                                         <div className="mt-3 flex items-center justify-between gap-3 sm:hidden">
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--glass-text-muted)]">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--site-sidebar-fg)]/45">
                                                     Quick preferences
                                                 </p>
-                                                <p className="mt-1 text-xs text-[var(--glass-text-muted)]">
+                                                <p className="mt-1 text-xs text-[var(--site-sidebar-fg)]/52">
                                                     Theme toggle and account actions stay one tap away.
                                                 </p>
                                             </div>
@@ -1175,7 +1200,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                             <Link
                                                 href="/admin"
                                                 onClick={() => setIsProfileOpen(false)}
-                                                className="group mb-1 flex items-center gap-3 rounded-[1.35rem] border border-[var(--ghost-border)] bg-gradient-to-r from-[var(--site-secondary)]/10 to-transparent px-3 py-2.5 text-sm font-bold text-[var(--site-secondary)] transition-all hover:from-[var(--site-secondary)]/18"
+                                                className="group mb-1 flex items-center gap-3 rounded-[1.35rem] border border-[var(--site-sidebar-border)] bg-gradient-to-r from-[var(--site-secondary)]/10 to-transparent px-3 py-2.5 text-sm font-bold text-[var(--site-secondary)] transition-all hover:border-[var(--site-secondary)]/28 hover:from-[var(--site-secondary)]/18"
                                             >
                                                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--site-secondary)]/10">
                                                     <ShieldCheck size={14} />
@@ -1193,9 +1218,9 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                                 key={item.href}
                                                 href={item.href}
                                                 onClick={() => setIsProfileOpen(false)}
-                                                className="group flex items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--glass-text)]/72 transition-all hover:bg-white/[0.04] hover:text-[var(--glass-text)]"
+                                                className="group flex items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--site-sidebar-fg)]/72 transition-all hover:bg-[var(--site-sidebar-active)] hover:text-[var(--site-sidebar-fg)]"
                                             >
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.03] transition-colors group-hover:bg-[var(--site-secondary)]/10 group-hover:text-[var(--site-secondary)]">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--site-sidebar-active)]/62 transition-colors group-hover:bg-[var(--site-sidebar-accent)]/10 group-hover:text-[var(--site-sidebar-accent)]">
                                                     <item.icon size={14} />
                                                 </div>
                                                 {item.label}
@@ -1205,19 +1230,19 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                         <Link
                                             href="/notifications"
                                             onClick={() => setIsProfileOpen(false)}
-                                            className="group flex items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--glass-text)]/72 transition-all hover:bg-white/[0.04] hover:text-[var(--glass-text)] sm:hidden"
+                                            className="group flex items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--site-sidebar-fg)]/72 transition-all hover:bg-[var(--site-sidebar-active)] hover:text-[var(--site-sidebar-fg)] sm:hidden"
                                         >
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.03] transition-colors group-hover:bg-[var(--site-secondary)]/10 group-hover:text-[var(--site-secondary)]">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--site-sidebar-active)]/62 transition-colors group-hover:bg-[var(--site-sidebar-accent)]/10 group-hover:text-[var(--site-sidebar-accent)]">
                                                 <Bell size={14} />
                                             </div>
                                             {dict.nav?.notifications || "Notifications"}
                                         </Link>
 
-                                        <div className="mx-1 my-1.5 h-px bg-[var(--ghost-border)]" />
+                                        <div className="mx-1 my-1.5 h-px bg-gradient-to-r from-transparent via-[var(--site-sidebar-border)] to-transparent" />
 
                                         <button
                                             onClick={() => signOut()}
-                                            className="group flex w-full items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--glass-text-muted)] transition-all hover:bg-red-500/10 hover:text-red-400"
+                                            className="group flex w-full items-center gap-3 rounded-[1.35rem] px-3 py-2.5 text-sm font-medium text-[var(--site-sidebar-fg)]/58 transition-all hover:bg-red-500/10 hover:text-red-400"
                                         >
                                             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-400 transition-colors group-hover:bg-red-500/20">
                                                 <LogOut size={14} />
@@ -1233,7 +1258,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                 ) : (
                     <Link
                         href="/login"
-                        className="whitespace-nowrap rounded-full bg-[var(--site-button)] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.16em] text-[var(--site-button-text)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_18px_40px_rgba(0,229,255,0.2)]"
+                        className={`inline-flex items-center justify-center rounded-full bg-[var(--site-button)] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.16em] text-[var(--site-button-text)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_18px_40px_rgba(0,229,255,0.2)] ${isFloatingNav ? "w-full sm:w-auto" : "whitespace-nowrap"}`}
                     >
                         {dict.nav?.login || "Sign In"}
                     </Link>
@@ -1258,23 +1283,23 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.98 }}
                             transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-                            className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.8rem)] z-[41] rounded-[1.8rem] border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] p-3 shadow-[var(--glass-shadow)] backdrop-blur-2xl md:hidden"
+                            className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.8rem)] z-[41] max-h-[calc(100svh-6rem-env(safe-area-inset-bottom))] overflow-y-auto rounded-[1.8rem] border border-[var(--site-sidebar-border-strong)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_94%,black_6%)] p-3 shadow-[0_20px_44px_rgba(0,0,0,0.24)] backdrop-blur-2xl md:hidden"
                         >
-                            <form onSubmit={handleSearch} className="flex items-center gap-2">
+                            <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <div className="relative flex-1">
-                                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--glass-text-muted)]" />
+                                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--site-sidebar-fg)]/45" />
                                     <input
                                         ref={mobileSearchInputRef}
                                         type="text"
                                         placeholder={dict.nav?.search_placeholder || "Search..."}
                                         value={searchQuery}
                                         onChange={(event) => setSearchQuery(event.target.value)}
-                                        className="h-12 w-full rounded-2xl border border-[var(--ghost-border)] bg-[var(--glass-bg)] py-3 pl-10 pr-4 text-sm font-medium text-[var(--glass-text)] placeholder:text-[var(--glass-text-muted)] focus:border-[var(--site-accent)]/45 focus:bg-[var(--glass-bg-strong)]"
+                                        className="h-12 w-full rounded-2xl border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] py-3 pl-10 pr-4 text-sm font-medium text-[var(--site-sidebar-fg)] placeholder:text-[var(--site-sidebar-fg)]/38 focus:border-[var(--site-sidebar-accent)]/28 focus:bg-[color-mix(in_srgb,var(--site-sidebar-bg)_92%,white_8%)]"
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--site-button)] px-4 text-xs font-black uppercase tracking-[0.18em] text-[var(--site-button-text)] shadow-[0_16px_34px_rgba(0,229,255,0.16)]"
+                                    className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-2xl bg-[var(--site-button)] px-4 text-xs font-black uppercase tracking-[0.18em] text-[var(--site-button-text)] shadow-[0_16px_34px_rgba(0,229,255,0.16)] sm:w-auto"
                                 >
                                     Go
                                 </button>
@@ -1290,7 +1315,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
                                         key={item.href}
                                         href={item.href}
                                         onClick={() => setIsMobileSearchOpen(false)}
-                                        className="rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--glass-text)] transition-all hover:border-[var(--site-secondary)]/28 hover:text-[var(--site-secondary)]"
+                                        className="rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--site-sidebar-fg)] transition-all hover:border-[var(--site-sidebar-accent)]/28 hover:text-[var(--site-sidebar-accent)]"
                                     >
                                         {item.label}
                                     </Link>

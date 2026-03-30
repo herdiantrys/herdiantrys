@@ -86,6 +86,11 @@
   --radius-panel: calc(var(--radius) + 0.375rem);
   --radius-sheet: calc(var(--radius) + 0.75rem);
   --radius-dock: calc(var(--radius) + 1.25rem);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --content-gutter: clamp(1rem, 2vw, 1.5rem);
 
   --site-primary: var(--theme-light-primary, #eef4fb);
   --site-secondary: var(--theme-secondary, #a7ebff);
@@ -104,7 +109,10 @@
 
   --site-sidebar-bg: var(--theme-sidebar-bg, #f2f6fc);
   --site-sidebar-fg: var(--theme-sidebar-fg, #10213d);
-  --site-sidebar-border: var(--theme-sidebar-border, #d9e2ee);
+  --site-sidebar-border-soft: color-mix(in srgb, var(--theme-sidebar-border, #d9e2ee) 42%, transparent);
+  --site-sidebar-border: color-mix(in srgb, var(--theme-sidebar-border, #d9e2ee) 62%, transparent);
+  --site-sidebar-border-strong: color-mix(in srgb, var(--theme-sidebar-border, #d9e2ee) 84%, white 16%);
+  --site-sidebar-glow: color-mix(in srgb, var(--theme-sidebar-accent, #8fe5ff) 18%, transparent);
   --site-sidebar-accent: var(--theme-sidebar-accent, #8fe5ff);
   --site-sidebar-active: var(--theme-sidebar-active, #e8eff8);
 
@@ -152,6 +160,9 @@
   --glass-text: #10213d;
   --glass-text-muted: rgba(16, 33, 61, 0.68);
   --ghost-border: rgba(104, 118, 152, 0.2);
+  --site-chrome-border: color-mix(in srgb, rgba(104, 118, 152, 0.18) 68%, transparent);
+  --site-chrome-border-strong: color-mix(in srgb, rgba(104, 118, 152, 0.18) 88%, white 12%);
+  --site-chrome-glow: color-mix(in srgb, var(--site-accent) 10%, transparent);
   --surface-low: #ebf1f9;
   --surface-high: #f6f9fd;
   --surface-highest: #f8fbff;
@@ -189,7 +200,10 @@
 
   --site-sidebar-bg: var(--theme-dark-sidebar-bg, #091224);
   --site-sidebar-fg: var(--theme-dark-sidebar-fg, #dae2fd);
-  --site-sidebar-border: var(--theme-dark-sidebar-border, #2b3450);
+  --site-sidebar-border-soft: color-mix(in srgb, var(--theme-dark-sidebar-border, #2b3450) 46%, transparent);
+  --site-sidebar-border: color-mix(in srgb, var(--theme-dark-sidebar-border, #2b3450) 68%, transparent);
+  --site-sidebar-border-strong: color-mix(in srgb, var(--theme-dark-sidebar-border, #2b3450) 88%, white 12%);
+  --site-sidebar-glow: color-mix(in srgb, var(--theme-dark-sidebar-accent, #c3f5ff) 22%, transparent);
   --site-sidebar-accent: var(--theme-dark-sidebar-accent, #c3f5ff);
   --site-sidebar-active: var(--theme-dark-sidebar-active, #111a2f);
 
@@ -232,6 +246,9 @@
   --glass-text: #dae2fd;
   --glass-text-muted: rgba(218, 226, 253, 0.68);
   --ghost-border: rgba(72, 89, 122, 0.22);
+  --site-chrome-border: color-mix(in srgb, rgba(133, 151, 189, 0.15) 72%, transparent);
+  --site-chrome-border-strong: color-mix(in srgb, rgba(133, 151, 189, 0.15) 92%, white 8%);
+  --site-chrome-glow: color-mix(in srgb, var(--site-accent) 14%, transparent);
   --surface-low: #0d1527;
   --surface-high: #11192c;
   --surface-highest: #232c41;
@@ -257,10 +274,13 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground;
+    min-width: 320px;
+    overflow-x: clip;
     background-attachment: fixed;
     background-color: var(--background);
     background-image:
@@ -271,6 +291,9 @@
     color: var(--foreground);
     font-family: var(--font-body-family, var(--font-body-default, ui-sans-serif, sans-serif));
     transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior-x: none;
   }
 
   .dark body {
@@ -350,6 +373,21 @@
 
   button {
     cursor: pointer;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  body {
+    background-attachment: scroll;
   }
 }
 

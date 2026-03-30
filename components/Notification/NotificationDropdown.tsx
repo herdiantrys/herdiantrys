@@ -64,7 +64,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={handleToggleClick}
-                className="relative p-2 rounded-full hover:bg-[var(--glass-border)] transition-colors text-[var(--glass-text)] group"
+                className="group relative rounded-full border border-transparent p-2.5 text-[var(--site-sidebar-fg)]/58 transition-all hover:border-[var(--site-sidebar-border)] hover:bg-[var(--site-sidebar-active)]/72 hover:text-[var(--site-sidebar-accent)]"
             >
                 <Bell size={20} className={`transition-transform duration-300 ${isOpen ? 'text-[var(--site-secondary)] scale-110' : ''} group-hover:scale-110`} />
 
@@ -83,11 +83,11 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                         exit={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
                         transition={{ duration: 0.3, ease: [0.19, 1.0, 0.22, 1.0] }}
-                        className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-4 sm:w-96 rounded-[24px] sm:rounded-[32px] backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/40 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.25)] overflow-hidden z-[100] ring-1 ring-white/20 dark:ring-white/5"
+                        className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-4 sm:w-96 rounded-[24px] sm:rounded-[32px] border border-[var(--site-sidebar-border-strong)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_94%,black_6%)] shadow-[0_30px_70px_rgba(0,0,0,0.25)] overflow-hidden z-[100] backdrop-blur-2xl"
                     >
-                        <div className="px-5 py-4 border-b border-white/10 bg-white/10">
+                        <div className="border-b border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)]/68 px-5 py-4">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-black text-xl tracking-tighter text-foreground flex items-center gap-2">
+                                <h3 className="flex items-center gap-2 text-xl font-black tracking-tighter text-[var(--site-sidebar-fg)]">
                                     {dict?.dashboard?.notifications_nav || nm.page_title || "Notifications"}
                                     {unreadCount > 0 && (
                                         <span className="bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] text-[10px] font-black px-2 py-0.5 rounded-md border border-[var(--site-secondary)]/20 shadow-sm transition-all duration-300">
@@ -98,7 +98,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                                 {unreadCount > 0 && (
                                     <button
                                         onClick={handleMarkAllRead}
-                                        className="text-[10px] font-black uppercase tracking-tighter text-[var(--site-secondary)] hover:text-foreground transition-colors flex items-center gap-1.5"
+                                        className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-tighter text-[var(--site-sidebar-accent)] transition-colors hover:text-[var(--site-sidebar-fg)]"
                                     >
                                         <CheckCheck size={14} className="opacity-70" />
                                         {nm.mark_all_read || "Mark all read"}
@@ -107,20 +107,20 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                             </div>
 
                             {/* Tabs */}
-                            <div className="flex p-1.5 bg-black/10 dark:bg-white/5 rounded-2xl border border-white/5">
+                            <div className="flex rounded-2xl border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_68%,transparent)] p-1.5">
                                 {['all', 'unread'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab as 'all' | 'unread')}
-                                        className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all relative ${activeTab === tab
-                                            ? "text-black dark:text-white"
-                                            : "text-muted-foreground/60 hover:text-muted-foreground"
+                                        className={`relative flex-1 rounded-xl py-2 text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab
+                                            ? "text-[var(--site-sidebar-fg)]"
+                                            : "text-[var(--site-sidebar-fg)]/58 hover:text-[var(--site-sidebar-fg)]"
                                             }`}
                                     >
                                         {activeTab === tab && (
                                             <motion.div
                                                 layoutId="activeTabBg"
-                                                className="absolute inset-0 bg-white dark:bg-zinc-800 rounded-lg shadow-sm"
+                                                className="absolute inset-0 rounded-lg border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)] shadow-sm"
                                                 transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                                             />
                                         )}
@@ -135,7 +135,7 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                             {loading && notifications.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                                     <Loader2 size={24} className="animate-spin text-[var(--site-secondary)]" />
-                                    <p className="text-xs text-gray-500">{nm.loading || "Loading updates..."}</p>
+                                    <p className="text-xs text-[var(--site-sidebar-fg)]/52">{nm.loading || "Loading updates..."}</p>
                                 </div>
                             ) : filteredNotifications.length > 0 ? (
                                 <AnimatePresence initial={false} mode="popLayout">
@@ -164,12 +164,12 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                                 </AnimatePresence>
                             ) : (
                                 <div className="text-center py-20 px-8">
-                                    <div className="bg-white/5 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-inner relative group">
-                                        <div className="absolute inset-0 bg-[var(--site-secondary)]/5 rounded-3xl blur-xl group-hover:bg-[var(--site-secondary)]/10 transition-colors" />
-                                        <Bell size={32} className="text-muted-foreground/30 relative z-10 group-hover:scale-110 transition-transform duration-500" />
+                                    <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)]/72 shadow-inner group">
+                                        <div className="absolute inset-0 rounded-3xl bg-[var(--site-sidebar-accent)]/5 blur-xl transition-colors group-hover:bg-[var(--site-sidebar-accent)]/10" />
+                                        <Bell size={32} className="relative z-10 text-[var(--site-sidebar-fg)]/26 transition-transform duration-500 group-hover:scale-110" />
                                     </div>
-                                    <h4 className="text-lg font-black tracking-tighter text-foreground mb-2">{nm.all_caught_up || "All caught up!"}</h4>
-                                    <p className="text-xs text-muted-foreground max-w-[200px] mx-auto leading-relaxed font-medium">
+                                    <h4 className="mb-2 text-lg font-black tracking-tighter text-[var(--site-sidebar-fg)]">{nm.all_caught_up || "All caught up!"}</h4>
+                                    <p className="mx-auto max-w-[200px] text-xs font-medium leading-relaxed text-[var(--site-sidebar-fg)]/55">
                                         {activeTab === 'unread' ? (nm.no_unread || "You have no unread notifications.") : (nm.no_notifications_time || "You have no notifications at this time.")}
                                     </p>
                                 </div>
@@ -177,16 +177,16 @@ export default function NotificationDropdown({ userId, dict, isOpen, onToggle, o
                         </div>
 
                         {/* Footer */}
-                        <div className="p-3 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-center">
+                        <div className="border-t border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-active)]/62 p-3 text-center">
                             <button
                                 onClick={() => {
                                     router.push('/notifications');
                                     onClose();
                                 }}
-                                className="w-full py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-white hover:bg-[var(--site-secondary)] transition-all flex items-center justify-center gap-2 group"
+                                className="group flex w-full items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-[var(--site-sidebar-fg)]/58 transition-all hover:bg-[var(--site-sidebar-accent)] hover:text-[#081019]"
                             >
                                 {nm.view_history || "View full history"}
-                                <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                <span className="group-hover:translate-x-1 transition-transform">-&gt;</span>
                             </button>
                         </div>
                     </motion.div>

@@ -9,6 +9,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import ImageCropper from "../ImageCropper";
 import { formatDate } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type EditProfileModalProps = {
     isOpen: boolean;
@@ -20,6 +21,7 @@ import { useProfileColor } from "@/components/Profile/ProfileColorContext";
 
 export default function EditProfileModal({ isOpen, onClose, user }: EditProfileModalProps) {
     const { setColor } = useProfileColor();
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0); // Simulated progress
     const [formData, setFormData] = useState({
@@ -246,6 +248,7 @@ export default function EditProfileModal({ isOpen, onClose, user }: EditProfileM
             setUploadProgress(100);
 
             if (result.success) {
+                router.refresh();
                 toast.success("Profile updated successfully!", {
                     description: "Your changes are now live on your profile.",
                 });

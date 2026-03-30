@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 
@@ -88,6 +88,11 @@ export default function ScrollBackground() {
 
     const { scrollYProgress } = useScroll();
     const { resolvedTheme } = useTheme();
+    const isMounted = useSyncExternalStore(
+        () => () => undefined,
+        () => true,
+        () => false,
+    );
     const [activeSection, setActiveSection] = useState("hero");
 
     useEffect(() => {
@@ -127,7 +132,7 @@ export default function ScrollBackground() {
 
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0]);
 
-    if (!isHomePage || !resolvedTheme) return null;
+    if (!isMounted || !isHomePage || !resolvedTheme) return null;
 
     return (
         <>

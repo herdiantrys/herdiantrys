@@ -56,7 +56,7 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
 
     if (variant === 'guest') {
         return (
-            <div className={`flex flex-col min-h-screen transition-colors duration-300 ${bgClass}`}>
+            <div className={`flex min-h-screen flex-col overflow-x-clip transition-colors duration-300 ${bgClass}`}>
                 <ParticleWaveWrapper />
                 {!isPortfolio && <GlobalNavbar user={user} dict={dict} setIsMessageOpen={setIsMessageOpen} unreadMessages={unreadMessages} />}
                 <main className="flex-1 relative">
@@ -67,11 +67,14 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
     }
 
     return (
-        <div className={`flex min-h-screen transition-colors duration-300 ${bgClass}`}>
+        <div className={`flex min-h-screen overflow-x-clip transition-colors duration-300 ${bgClass}`}>
             <style dangerouslySetInnerHTML={{
                 __html: `
                 :root {
-                    --navbar-left: ${isCollapsed ? "5rem" : "16rem"};
+                    --shell-topbar-height: 76px;
+                    --shell-sidebar-collapsed-width: 72px;
+                    --shell-sidebar-expanded-width: 16rem;
+                    --navbar-left: ${isCollapsed ? "var(--shell-sidebar-collapsed-width)" : "var(--shell-sidebar-expanded-width)"};
                 }
                 @media (max-width: 768px) {
                     :root {
@@ -106,8 +109,8 @@ export default function Shell({ children, dict, user, variant = 'default' }: She
                 />
             )}
 
-            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isPortfolio ? '' : isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-                <main className="flex-1 relative z-10 pt-0 px-0 pb-20 lg:pb-0">
+            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isPortfolio ? '' : isCollapsed ? 'md:ml-[var(--shell-sidebar-collapsed-width)]' : 'md:ml-[var(--shell-sidebar-expanded-width)]'}`}>
+                <main className="relative z-10 flex-1 px-0 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-0 md:pb-24 lg:pb-0">
                     {children}
                 </main>
             </div>

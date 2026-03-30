@@ -103,11 +103,11 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
     }, [selectedId, isFilterOpen]);
 
     return (
-        <section className="relative z-10 w-full">
+        <section className="relative z-10 w-full pb-[calc(2rem+env(safe-area-inset-bottom))] lg:pb-0">
             {/* Floating Search and Filters Dock */}
-            <div className="sticky top-24 z-[45] container mx-auto px-4 mb-10">
+            <div className="sticky top-[calc(env(safe-area-inset-top)+5rem)] z-[45] container mx-auto mb-8 px-4 sm:mb-10 sm:px-6 md:top-24">
                 <div className="bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] shadow-2xl rounded-2xl p-2 md:p-3 transition-all duration-300">
-                    <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
+                    <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row lg:items-center">
 
                         {/* Search Input */}
                         <div className="relative w-full lg:max-w-xs group">
@@ -148,7 +148,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                         </div>
 
                         {/* Actions Right */}
-                        <div className="flex items-center gap-2 w-full lg:w-auto justify-end border-t lg:border-t-0 border-white/10 pt-2 lg:pt-0">
+                        <div className="flex w-full items-center justify-between gap-2 border-t border-white/10 pt-2 sm:justify-end lg:w-auto lg:border-t-0 lg:pt-0">
                             {/* Clear Filters (Conditional) */}
                             {(activeCategory !== dict.portfolio.all || searchQuery || activeTags.length > 0) && (
                                 <button
@@ -210,7 +210,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
 
             <div className="container mx-auto px-4 min-h-[50vh]">
                 {/* Results Count */}
-                <div className="mb-6 text-gray-400 text-sm">
+                <div className="mb-6 px-1 text-sm text-gray-400">
                     Showing {visibleProjects.length} of {filteredProjects.length} results
                     {searchQuery && ` for "${searchQuery}"`}
                     {activeCategory !== dict.portfolio.all && ` in ${activeCategory}`}
@@ -219,7 +219,7 @@ const WorksExplorer = ({ projects, dict, initialBookmarkedIds = [] }: { projects
                 {/* Grid */}
                 <motion.div
                     layout
-                    className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6"
+                    className="columns-1 gap-4 sm:columns-2 sm:gap-6 lg:columns-3 xl:columns-4"
                 >
                     <AnimatePresence mode="popLayout">
                         {visibleProjects.map((project) => (

@@ -40,7 +40,7 @@ export const SectionTitle = ({
     return (
         <div
             ref={containerRef}
-            className={`flex flex-col mb-16 relative z-10 ${alignClass} ${className}`}
+            className={`relative z-10 mb-12 flex flex-col sm:mb-16 ${alignClass} ${className}`}
         >
             {/* Decorative Line */}
             <motion.div
@@ -48,7 +48,7 @@ export const SectionTitle = ({
                 whileInView={{ scaleX: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: "circOut" }}
-                className="w-24 h-1 bg-[var(--site-secondary)] mb-6 rounded-full"
+                className="mb-5 h-1 w-16 rounded-full bg-[var(--site-secondary)] sm:mb-6 sm:w-24"
             />
 
             {/* Main Title with Coordinated Reveal */}
@@ -61,7 +61,7 @@ export const SectionTitle = ({
                     visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } }
                 }}
             >
-                <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 leading-tight">
+                <h2 className="mb-4 text-[clamp(2.35rem,9vw,4.5rem)] font-extrabold leading-[0.95] tracking-tight md:text-7xl">
                     <span className="bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-gray-200 dark:to-gray-400 drop-shadow-sm">
                         {title}
                     </span>
@@ -79,7 +79,7 @@ export const SectionTitle = ({
                         visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] } }
                     }}
                 >
-                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light tracking-wide">
+                    <p className="max-w-3xl text-base font-light tracking-wide text-gray-600 dark:text-gray-400 sm:text-lg md:text-xl">
                         {subtitle}
                     </p>
                 </motion.div>

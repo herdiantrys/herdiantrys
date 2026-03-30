@@ -15,7 +15,7 @@ export function ModeToggle() {
 
   if (!mounted) {
     return (
-      <button className="h-11 w-11 rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] opacity-60 backdrop-blur-xl" />
+      <button className="h-11 w-11 rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] opacity-60 backdrop-blur-xl" />
     );
   }
 
@@ -24,12 +24,12 @@ export function ModeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--ghost-border)] bg-[var(--glass-bg)] shadow-[0_14px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300 hover:border-[var(--site-secondary)]/35 hover:shadow-[0_18px_40px_rgba(0,0,0,0.34),0_0_24px_rgba(0,229,255,0.12)]"
+      className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] shadow-[0_14px_34px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:border-[var(--site-sidebar-accent)]/30 hover:bg-[var(--site-sidebar-active)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.26)]"
       aria-label="Toggle Theme"
     >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_26%,rgba(0,229,255,0.18),transparent_46%),radial-gradient(circle_at_76%_78%,rgba(143,125,255,0.18),transparent_42%)] opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className={`absolute inset-[5px] rounded-full border transition-colors duration-300 ${isDark ? "border-white/6" : "border-[rgba(195,245,255,0.14)]"}`} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_26%,color-mix(in_srgb,var(--site-sidebar-accent)_18%,transparent),transparent_46%),radial-gradient(circle_at_76%_78%,color-mix(in_srgb,var(--site-secondary)_14%,transparent),transparent_42%)] opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className={`absolute inset-[5px] rounded-full border transition-colors duration-300 ${isDark ? "border-white/6" : "border-[var(--site-sidebar-border)]/60"}`} />
       </div>
 
       <AnimatePresence mode="wait" initial={false}>
@@ -42,9 +42,9 @@ export function ModeToggle() {
           className="relative z-10"
         >
           {isDark ? (
-            <Moon className="h-5 w-5 text-[var(--site-accent)] drop-shadow-[0_0_12px_rgba(143,125,255,0.45)]" />
+            <Moon className="h-5 w-5 text-[var(--site-sidebar-accent)] drop-shadow-[0_0_12px_var(--site-sidebar-accent)]" />
           ) : (
-            <Sun className="h-5 w-5 text-[var(--site-secondary)] drop-shadow-[0_0_12px_rgba(0,229,255,0.45)]" />
+            <Sun className="h-5 w-5 text-[var(--site-secondary)] drop-shadow-[0_0_12px_rgba(0,229,255,0.28)]" />
           )}
         </motion.div>
       </AnimatePresence>

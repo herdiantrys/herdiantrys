@@ -12,6 +12,10 @@ export default async function AdminContentPage() {
     }
 
     const content = await getSiteContent();
+    const skillsCount = Array.isArray(content?.skills) ? content.skills.length : 0;
+    const jobsCount = Array.isArray(content?.experience) ? content.experience.length : 0;
+    const degreesCount = Array.isArray(content?.education) ? content.education.length : 0;
+    const socialsCount = Array.isArray(content?.socialLinks) ? content.socialLinks.length : 0;
 
     return (
         <div className="space-y-6">
@@ -35,7 +39,7 @@ export default async function AdminContentPage() {
                                 Portfolio Management
                             </h1>
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                                Manage your homepage content, bio, skills &amp; experience
+                                Manage your homepage content, bio, social links, skills &amp; experience
                             </p>
                         </div>
                     </div>
@@ -44,16 +48,20 @@ export default async function AdminContentPage() {
                 {/* Quick Stats */}
                 <div className="flex items-center gap-3 shrink-0">
                     <div className="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.07] backdrop-blur-sm text-center">
-                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{(content?.skills as any[])?.length ?? 0}</p>
+                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{skillsCount}</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Skills</p>
                     </div>
                     <div className="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.07] backdrop-blur-sm text-center">
-                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{(content?.experience as any[])?.length ?? 0}</p>
+                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{jobsCount}</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Jobs</p>
                     </div>
                     <div className="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.07] backdrop-blur-sm text-center">
-                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{(content?.education as any[])?.length ?? 0}</p>
+                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{degreesCount}</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Degrees</p>
+                    </div>
+                    <div className="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.07] backdrop-blur-sm text-center">
+                        <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">{socialsCount}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Socials</p>
                     </div>
                 </div>
             </div>

@@ -39,11 +39,11 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
     };
 
     return (
-        <section className="py-20 relative z-10">
+        <section className="relative z-10 py-16 sm:py-20">
             <div className="container mx-auto px-4">
                 {/* Stats Counter (Mobile) */}
-                <div className="md:hidden mb-12 flex justify-center">
-                    <div className="glass px-8 py-4 rounded-2xl border-[var(--glass-border)] bg-[var(--glass-bg)]/50 backdrop-blur-md flex items-center gap-4">
+                <div className="mb-10 flex justify-center md:hidden sm:mb-12">
+                    <div className="glass flex items-center gap-4 rounded-2xl border-[var(--glass-border)] bg-[var(--glass-bg)]/50 px-5 py-3.5 backdrop-blur-md sm:px-8 sm:py-4">
                         <AnimatePresence mode="wait">
                             <motion.span
                                 key={stats[currentStat].value}
@@ -61,7 +61,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
                     {/* Left Column: Image & Skills */}
                     <motion.div
                         initial="hidden"
@@ -80,10 +80,10 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                 }
                             }
                         }}
-                        className="lg:col-span-4 space-y-8"
+                        className="space-y-6 lg:col-span-4 sm:space-y-8"
                     >
                         {/* Profile Image Card */}
-                        <div className="glass p-4 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] relative group overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
+                        <div className="glass group relative overflow-hidden rounded-3xl border-white/60 bg-[var(--glass-bg)] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:border-[var(--glass-border)] dark:shadow-none">
                             <div className="aspect-[3/4] rounded-2xl overflow-hidden relative">
                                 <img
                                     src={getImageUrl(profile?.aboutImage) || getImageUrl(profile?.profileImage) || "/avatar-placeholder.png"}
@@ -100,8 +100,8 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                         </div>
 
                         {/* Skills */}
-                        <div className="glass p-8 rounded-3xl border-white/60 dark:border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
-                            <h3 className="text-xl font-bold text-[var(--glass-text)] mb-6">{dict.about.skills_title}</h3>
+                        <div className="glass rounded-3xl border-white/60 bg-[var(--glass-bg)] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl dark:border-[var(--glass-border)] dark:shadow-none sm:p-8">
+                            <h3 className="mb-6 text-lg font-bold text-[var(--glass-text)] sm:text-xl">{dict.about.skills_title}</h3>
                             <div className="space-y-6">
                                 {skills.map((skill: any, index: number) => (
                                     <div key={index}>
@@ -145,7 +145,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                             }}
                         >
                             {/* Desktop Stats */}
-                            <div className="hidden md:grid grid-cols-4 gap-4 mb-12">
+                            <div className="mb-12 hidden gap-4 md:grid md:grid-cols-2 xl:grid-cols-4">
                                 {stats.map((stat, index) => (
                                     <motion.div
                                         key={index}
@@ -179,7 +179,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                 className="mb-8"
                             />
 
-                            <div className="text-[var(--glass-text-muted)] mb-12 leading-relaxed text-lg prose prose-invert max-w-none">
+                            <div className="prose prose-invert mb-12 max-w-none text-base leading-relaxed text-[var(--glass-text-muted)] sm:text-lg">
                                 {profile?.bio ? (
                                     typeof profile.bio === 'string' ? (
                                         profile.bio.split('\n').map((line: string, i: number) => (
@@ -201,7 +201,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                             </div>
 
                             {/* Experience Timeline */}
-                            <div className="grid md:grid-cols-2 gap-12">
+                            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
                                 <div>
                                     <div className="flex items-center gap-3 mb-8">
                                         <div className="p-3 rounded-lg bg-[var(--site-secondary)]/10 text-[var(--site-secondary)]">
@@ -210,7 +210,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                         <h3 className="text-2xl font-bold text-[var(--glass-text)]">{dict.about.experience_title}</h3>
                                     </div>
 
-                                    <div className="border-l border-[var(--glass-border)] ml-3 space-y-12">
+                                    <div className="ml-3 space-y-8 border-l border-[var(--glass-border)] sm:space-y-12">
                                         {profile?.experience?.map((exp: any, index: number) => {
                                             const start = formatDate(exp.startDate);
                                             const end = exp.isCurrent ? dict.about.present : exp.endDate ? formatDate(exp.endDate) : '';
@@ -253,7 +253,7 @@ const GlassAbout = ({ profile, dict }: { profile: any, dict: any }) => {
                                         <h3 className="text-2xl font-bold text-[var(--glass-text)]">{dict.about.education_title}</h3>
                                     </div>
 
-                                    <div className="border-l border-[var(--glass-border)] ml-3 space-y-12">
+                                    <div className="ml-3 space-y-8 border-l border-[var(--glass-border)] sm:space-y-12">
                                         {profile?.education?.map((edu: any, index: number) => {
                                             const start = formatDate(edu.startDate);
                                             const end = edu.endDate ? formatDate(edu.endDate) : dict.about.present;

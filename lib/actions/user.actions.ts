@@ -7,14 +7,33 @@ import { trackFirstBannerSetup } from "./gamification.actions";
 import { serializeForClient } from "@/lib/utils";
 import { auth } from "@/auth";
 import { DEFAULT_PROFILE_PICTURES } from "@/lib/default-profile-picture";
+import { i18n } from "@/i18n-config";
 
 const revalidateUserSurfacePaths = (username?: string | null) => {
-    revalidatePath("/dashboard");
-    revalidatePath("/");
+    const paths = new Set<string>([
+        "/",
+        "/dashboard",
+        "/notifications",
+    ]);
+
+    for (const locale of i18n.locales) {
+        paths.add(`/${locale}`);
+        paths.add(`/${locale}/dashboard`);
+        paths.add(`/${locale}/notifications`);
+    }
 
     if (username) {
-        revalidatePath(`/profile/${username}`);
-        revalidatePath(`/user/${username}`);
+        paths.add(`/profile/${username}`);
+        paths.add(`/user/${username}`);
+
+        for (const locale of i18n.locales) {
+            paths.add(`/${locale}/profile/${username}`);
+            paths.add(`/${locale}/user/${username}`);
+        }
+    }
+
+    for (const path of paths) {
+        revalidatePath(path);
     }
 };
 
@@ -138,11 +157,7 @@ export const updateUserProfile = async (userId: string, data: any) => {
             data: cleanData
         });
 
-        // Optional: Revalidate paths that might display this info
-        if (data.username) {
-            revalidatePath(`/profile/${data.username}`);
-        }
-        revalidatePath("/"); // Homepage
+        revalidateUserSurfacePaths(data.username);
 
         return { success: true };
     } catch (error: any) {
@@ -240,9 +255,7 @@ export const uploadBannerImage = async (userId: string, formData: FormData) => {
             }
         });
 
-        if (currentUser?.username) {
-            revalidatePath(`/profile/${currentUser.username}`);
-        }
+        revalidateUserSurfacePaths(currentUser?.username);
 
         // Track Achievement
         trackFirstBannerSetup(userId).catch(err => console.error("First Banner Track Error:", err));
@@ -262,9 +275,7 @@ export const removeBannerImage = async (userId: string) => {
         });
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user) {
-            revalidatePath(`/user/${user.username}`);
-        }
+        revalidateUserSurfacePaths(user?.username);
 
         return { success: true };
     } catch (error) {
@@ -291,10 +302,7 @@ export const uploadBannerVideo = async (userId: string, formData: FormData) => {
         });
 
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
-        if (user?.username) {
-            revalidatePath(`/profile/${user.username}`);
-            revalidatePath(`/user/${user.username}`);
-        }
+        revalidateUserSurfacePaths(user?.username);
 
         return { success: true, videoUrl: videoUrl };
     } catch (error) {

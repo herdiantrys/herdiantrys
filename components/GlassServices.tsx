@@ -115,9 +115,9 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
     }
 
     return (
-        <section className="py-20 relative z-10 overflow-hidden">
+        <section className="relative z-10 overflow-hidden py-16 sm:py-20">
             {/* Background Elements */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--site-secondary)]/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--site-secondary)]/10 blur-[100px] sm:h-[50rem] sm:w-[50rem]" />
 
             <div className="container mx-auto px-4">
                 <motion.div
@@ -136,12 +136,12 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                         title={dict.services.title}
                         subtitle={dict.services.description}
                         alignment="center"
-                        className="mb-20"
+                        className="mb-14 sm:mb-20"
                     />
 
                     <div className="relative max-w-7xl mx-auto">
                         <div className="relative">
-                            <div className="overflow-hidden py-20 -my-10 px-4" style={{
+                            <div className="overflow-hidden px-1 py-14 sm:-my-10 sm:px-4 sm:py-20" style={{
                                 maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
                                 WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
                             }}>
@@ -183,12 +183,12 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                     transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] }
                                                 }
                                             }}
-                                            className="w-full px-4"
+                                            className="w-full px-2 sm:px-4"
                                             style={{ width: `${100 / extendedServices.length}%` }}
                                         >
-                                            <div className="glass h-full rounded-3xl border-[var(--glass-border)] bg-[var(--glass-bg)] overflow-hidden hover:scale-[1.02] transition-transform duration-500 relative group flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-white/60 dark:border-white/10">
+                                            <div className="glass group relative flex h-full flex-col overflow-hidden rounded-[2rem] border-[var(--glass-border)] border-white/60 bg-[var(--glass-bg)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-transform duration-500 hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:shadow-none dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
                                                 {/* Image */}
-                                                <div className="relative h-56 w-full overflow-hidden">
+                                                <div className="relative h-48 w-full overflow-hidden sm:h-56">
                                                     {service.imageUrl ? (
                                                         <Image
                                                             src={service.imageUrl}
@@ -205,12 +205,12 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="p-6 flex-grow flex flex-col">
-                                                    <h3 className="text-xl font-bold mb-2 text-[var(--glass-text)]">{service.title}</h3>
-                                                    <p className="text-sm text-[var(--glass-text-muted)] mb-6 line-clamp-3">{service.description}</p>
+                                                <div className="flex flex-grow flex-col p-5 sm:p-6">
+                                                    <h3 className="mb-2 text-lg font-bold text-[var(--glass-text)] sm:text-xl">{service.title}</h3>
+                                                    <p className="mb-5 text-sm text-[var(--glass-text-muted)] line-clamp-3 sm:mb-6">{service.description}</p>
 
                                                     {/* ... features ... */}
-                                                    <ul className="mb-6 space-y-2 flex-grow">
+                                                    <ul className="mb-5 flex-grow space-y-2 sm:mb-6">
                                                         {service.features?.slice(0, 4).map((feature, i) => (
                                                             <li key={i} className="flex items-start gap-2 text-sm text-[var(--glass-text-muted)]">
                                                                 <Check size={16} className="text-[var(--site-secondary)] mt-0.5 shrink-0" />
@@ -219,7 +219,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                                                         ))}
                                                     </ul>
 
-                                                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between mb-6">
+                                                    <div className="mt-auto mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 sm:mb-6">
                                                         {/* ... prices ... */}
                                                         <span className="text-gray-400 line-through text-sm">
                                                             {(() => {
@@ -236,7 +236,7 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
 
                                                     <a
                                                         href={service.orderLink || "#contact"}
-                                                        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--site-button)] text-[var(--site-button-text)] font-bold py-3.5 px-6 rounded-2xl hover:bg-teal-600 dark:hover:bg-teal-400 transition-all duration-300 group shadow-[0_10px_20px_rgba(20,184,166,0.2)] hover:shadow-[0_15px_30px_rgba(20,184,166,0.4)]"
+                                                        className="group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--site-button)] px-6 py-3.5 font-bold text-[var(--site-button-text)] shadow-[0_10px_20px_rgba(20,184,166,0.2)] transition-all duration-300 hover:bg-teal-600 hover:shadow-[0_15px_30px_rgba(20,184,166,0.4)] dark:hover:bg-teal-400"
                                                     >
                                                         {service.buttonText || dict.services.order_now}
                                                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -251,17 +251,34 @@ const GlassServices = ({ services, dict }: { services: Service[], dict: any }) =
                             {/* Navigation Buttons */}
                             <button
                                 onClick={handlePrev}
-                                className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
+                                className="absolute -left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/10 p-3 text-white transition-all hover:bg-white/10 md:-left-12 sm:flex"
                                 aria-label="Previous service"
                             >
                                 <ChevronLeft size={24} />
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 p-3 rounded-full glass border border-white/10 hover:bg-white/10 transition-all text-white z-20"
+                                className="absolute -right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/10 p-3 text-white transition-all hover:bg-white/10 md:-right-12 sm:flex"
                                 aria-label="Next service"
                             >
                                 <ChevronRight size={24} />
+                            </button>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-center gap-3 sm:hidden">
+                            <button
+                                onClick={handlePrev}
+                                className="glass inline-flex items-center justify-center rounded-full border border-white/10 p-3 text-[var(--glass-text)] transition-all hover:bg-white/10"
+                                aria-label="Previous service"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                className="glass inline-flex items-center justify-center rounded-full border border-white/10 p-3 text-[var(--glass-text)] transition-all hover:bg-white/10"
+                                aria-label="Next service"
+                            >
+                                <ChevronRight size={20} />
                             </button>
                         </div>
                     </div>
