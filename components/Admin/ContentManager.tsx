@@ -22,6 +22,7 @@ import {
     SOCIAL_PLATFORM_OPTIONS,
 } from "@/lib/social-links";
 import { SocialIcon } from "@/components/ui/SocialIcon";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 const tabVariants: Variants = {
     hidden: { opacity: 0, y: 12, scale: 0.98 },
@@ -178,6 +179,7 @@ export default function ContentManager({ initialData }: { initialData: any }) {
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("general");
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [activeMediaTarget, setActiveMediaTarget] = useState<null | "profileImage" | "bannerImage">(null);
 
     const [formData, setFormData] = useState({
         fullName: initialData.fullName || "",
@@ -186,6 +188,8 @@ export default function ContentManager({ initialData }: { initialData: any }) {
         aboutTitle: initialData.aboutTitle || "",
         location: initialData.location || "",
         website: initialData.website || "",
+        profileImage: initialData.profileImage || "",
+        bannerImage: initialData.bannerImage || "",
         skills: initialData.skills || [],
         experience: initialData.experience || [],
         education: initialData.education || [],
@@ -220,11 +224,33 @@ export default function ContentManager({ initialData }: { initialData: any }) {
         toast.promise(promise, {
             loading: `Uploading ${type} image…`,
             success: (data) => {
-                if (data.success) { router.refresh(); return "Image uploaded!"; }
+                if (data.success) {
+                    const fieldName = type === "profile" ? "profileImage" : "bannerImage";
+                    setFormData((currentValue) => ({
+                        ...currentValue,
+                        [fieldName]: data.imageUrl || currentValue[fieldName],
+                    }));
+                    router.refresh();
+                    return "Image uploaded!";
+                }
                 throw new Error(data.error || "Upload failed");
             },
             error: "Failed to upload image"
         });
+    };
+
+    const handleMediaLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset || !activeMediaTarget) {
+            setActiveMediaTarget(null);
+            return;
+        }
+
+        setFormData((currentValue) => ({
+            ...currentValue,
+            [activeMediaTarget]: selectedAsset.url,
+        }));
+        setActiveMediaTarget(null);
     };
 
     const addSocialLink = () => {
@@ -366,9 +392,9 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                 <div>
                                     <FieldLabel>Hero Banner Image</FieldLabel>
                                     <div className="relative h-52 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-black/20 border-2 border-dashed border-slate-300 dark:border-white/10 group hover:border-[var(--site-accent)]/50 transition-all duration-300 shadow-inner">
-                                        {initialData.bannerImage ? (
+                                        {formData.bannerImage ? (
                                             <img
-                                                src={resolveAssetUrl(initialData.bannerImage)}
+                                                src={resolveAssetUrl(formData.bannerImage)}
                                                 alt="Banner"
                                                 onError={(e) => { e.currentTarget.src = "/images/default-banner.jpg"; }}
                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -382,11 +408,21 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                             </div>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-5">
-                                            <label className="cursor-pointer px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md text-white text-sm font-semibold hover:bg-white/25 transition-colors flex items-center gap-2 border border-white/20 shadow-lg">
-                                                <Upload size={15} />
-                                                Upload Banner
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "banner")} />
-                                            </label>
+                                            <div className="flex flex-wrap items-center justify-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveMediaTarget("bannerImage")}
+                                                    className="px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md text-white text-sm font-semibold hover:bg-white/25 transition-colors flex items-center gap-2 border border-white/20 shadow-lg"
+                                                >
+                                                    <Upload size={15} />
+                                                    Open Library
+                                                </button>
+                                                <label className="cursor-pointer px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md text-white text-sm font-semibold hover:bg-white/25 transition-colors flex items-center gap-2 border border-white/20 shadow-lg">
+                                                    <Upload size={15} />
+                                                    Upload Banner
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "banner")} />
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -592,9 +628,9 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                     <div className="flex items-center gap-6 mt-3">
                                         <div className="relative w-28 h-28 flex-shrink-0">
                                             <div className="w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/10 dark:to-black/20 border-2 border-slate-200 dark:border-white/10 group cursor-pointer shadow-lg">
-                                                {initialData.profileImage ? (
+                                                {formData.profileImage ? (
                                                     <img
-                                                        src={resolveAssetUrl(initialData.profileImage, "/avatar-placeholder.png")}
+                                                        src={resolveAssetUrl(formData.profileImage, "/avatar-placeholder.png")}
                                                         alt="Profile"
                                                         onError={(e) => { e.currentTarget.src = "/avatar-placeholder.png"; }}
                                                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
@@ -605,10 +641,19 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                                     </div>
                                                 )}
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center rounded-2xl">
-                                                    <label className="cursor-pointer p-2.5 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors">
-                                                        <Camera size={20} />
-                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "profile")} />
-                                                    </label>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setActiveMediaTarget("profileImage")}
+                                                            className="p-2.5 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors"
+                                                        >
+                                                            <Camera size={20} />
+                                                        </button>
+                                                        <label className="cursor-pointer p-2.5 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors">
+                                                            <Camera size={20} />
+                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "profile")} />
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg bg-gradient-to-br ${activeTabDef?.color} text-white`}>
@@ -620,11 +665,21 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                                             <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
                                                 Used in the Hero section and About section. Recommended size: 400×400px or larger. Hover over the image to upload a new one.
                                             </p>
-                                            <label className="cursor-pointer inline-flex items-center gap-1.5 mt-3 px-3.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-semibold border border-sky-500/20 transition-all">
-                                                <Upload size={13} />
-                                                Upload New Photo
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "profile")} />
-                                            </label>
+                                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveMediaTarget("profileImage")}
+                                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-500/10 hover:bg-slate-500/20 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-500/20 transition-all"
+                                                >
+                                                    <Upload size={13} />
+                                                    Open Library
+                                                </button>
+                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-semibold border border-sky-500/20 transition-all">
+                                                    <Upload size={13} />
+                                                    Upload New Photo
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "profile")} />
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </SectionCard>
@@ -998,6 +1053,16 @@ export default function ContentManager({ initialData }: { initialData: any }) {
                     </button>
                 </div>
             </div>
+
+            <MediaLibraryModal
+                open={activeMediaTarget !== null}
+                onClose={() => setActiveMediaTarget(null)}
+                onConfirmSelection={handleMediaLibrarySelection}
+                title={activeMediaTarget === "bannerImage" ? "Pilih Hero Banner" : "Pilih Profile Picture"}
+                description="Pilih aset gambar lama dari library atau upload gambar baru langsung dari popup ini."
+                preferredFolder="site_content"
+                allowedKinds={["IMAGE"]}
+            />
         </div>
     );
 }

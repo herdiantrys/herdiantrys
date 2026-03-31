@@ -2,7 +2,13 @@ import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function uploadLocalFile(file: File, folder: string): Promise<string> {
+import { registerUploadedMediaAsset } from "@/lib/media-library";
+
+type UploadLocalFileOptions = {
+    uploadedById?: string | null;
+};
+
+export async function uploadLocalFile(file: File, folder: string, options: UploadLocalFileOptions = {}): Promise<string> {
     try {
         const buffer = await file.arrayBuffer();
 
@@ -19,7 +25,19 @@ export async function uploadLocalFile(file: File, folder: string): Promise<strin
         await fs.writeFile(filePath, Buffer.from(buffer));
 
         // Return the public URL
-        return `/uploads/${folder}/${filename}`;
+        const publicUrl = `/uploads/${folder}/${filename}`;
+
+        await registerUploadedMediaAsset({
+            url: publicUrl,
+            folder,
+            fileName: filename,
+            originalName: file.name,
+            mimeType: file.type,
+            size: file.size,
+            uploadedById: options.uploadedById || null,
+        });
+
+        return publicUrl;
     } catch (error) {
         console.error("Local file upload error:", error);
         throw new Error("Failed to upload local file");

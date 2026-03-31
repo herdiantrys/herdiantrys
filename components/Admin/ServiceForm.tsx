@@ -1,16 +1,17 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createService, updateService, uploadServiceAsset } from "@/lib/actions/service.actions";
-import { ArrowLeft, Save, Plus, Trash2, X, Upload, Video, Image as ImageIcon } from "lucide-react";
+import { createService, updateService } from "@/lib/actions/service.actions";
+import { ArrowLeft, Save, Plus, X, Upload, Video, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resolveAssetUrl } from "@/lib/media";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 // Zod Schema
 const serviceSchema = z.object({
@@ -32,8 +33,9 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 export default function ServiceForm({ service, isEdit = false }: { service?: any, isEdit?: boolean }) {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    const [activeMediaTarget, setActiveMediaTarget] = useState<null | "imageUrl" | "gallery">(null);
 
-    const { register, control, handleSubmit, setValue, watch, getValues, formState: { errors } } = useForm<ServiceFormData>({
+    const { register, handleSubmit, setValue, watch, getValues, formState: { errors } } = useForm<ServiceFormData>({
         resolver: zodResolver(serviceSchema),
         defaultValues: {
             title: service?.title || "",
@@ -69,44 +71,25 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
         setFeaturesList(newList);
     };
 
-    const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: "imageUrl" | "gallery") => {
-        if (!e.target.files?.length) return;
-
-        const files = Array.from(e.target.files);
-
-        for (const file of files) {
-            const formData = new FormData();
-            formData.append("file", file);
-            const type = file.type.startsWith('image/') ? 'image' : 'file';
-            formData.append("type", type);
-
-            const promise = uploadServiceAsset(formData);
-
-            toast.promise(promise, {
-                loading: "Uploading asset...",
-                success: (res) => {
-                    if (res.success && res.url) {
-                        return "Asset uploaded!";
-                    }
-                    throw new Error(res.error || "Upload failed");
-                },
-                error: (err) => `Upload failed: ${err.message}`
-            });
-
-            const res = await promise;
-            if (res.success && res.url) {
-                if (fieldName === "imageUrl") {
-                    setValue("imageUrl", res.url);
-                } else {
-                    const currentGallery = getValues("gallery") || [];
-                    const newGalleryItem = {
-                        type: (file.type.startsWith('image/') ? 'image' : 'video') as "image" | "video",
-                        url: res.url
-                    };
-                    setValue("gallery", [...currentGallery, newGalleryItem]);
-                }
-            }
+    const handleLibrarySelection = (assets: MediaAssetRecord[]) => {
+        if (!activeMediaTarget || assets.length === 0) {
+            setActiveMediaTarget(null);
+            return;
         }
+
+        if (activeMediaTarget === "imageUrl") {
+            setValue("imageUrl", assets[0].url);
+        } else {
+            const currentGallery = getValues("gallery") || [];
+            const nextItems = assets.map((asset) => ({
+                type: asset.kind === "VIDEO" ? "video" : "image",
+                url: asset.url,
+            })) as Array<{ type: "image" | "video"; url: string }>;
+
+            setValue("gallery", [...currentGallery, ...nextItems]);
+        }
+
+        setActiveMediaTarget(null);
     };
 
     const removeGalleryItem = (index: number) => {
@@ -236,7 +219,11 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                         {/* Image Upload */}
                         <div className="bg-white dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-2xl shadow-sm dark:shadow-xl">
                             <h2 className="text-lg font-semibold mb-4 text-white">Cover Image</h2>
-                            <div className="relative h-64 w-full rounded-2xl overflow-hidden bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all duration-300">
+                            <button
+                                type="button"
+                                onClick={() => setActiveMediaTarget("imageUrl")}
+                                className="relative block h-64 w-full rounded-2xl overflow-hidden bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all duration-300"
+                            >
                                 {imageUrl ? (
                                     <>
                                         <Image src={resolveAssetUrl(imageUrl)} alt="Cover" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -252,13 +239,7 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                                         <p className="text-sm font-medium">Click to upload cover image</p>
                                     </div>
                                 )}
-                                <input
-                                    type="file"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    accept="image/*"
-                                    onChange={(e) => handleAssetUpload(e, "imageUrl")}
-                                />
-                            </div>
+                            </button>
                         </div>
 
                         {/* Features List */}
@@ -308,19 +289,16 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                     <h2 className="text-lg font-semibold mb-4 text-white">Service Gallery</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {/* Upload Button */}
-                        <label className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-teal-500 dark:hover:border-teal-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors group bg-gray-50 dark:bg-black/20">
+                        <button
+                            type="button"
+                            onClick={() => setActiveMediaTarget("gallery")}
+                            className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-teal-500 dark:hover:border-teal-500/50 flex flex-col items-center justify-center cursor-pointer transition-colors group bg-gray-50 dark:bg-black/20"
+                        >
                             <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-teal-500/10 transition-colors mb-2">
                                 <Upload size={20} className="text-gray-400 dark:text-gray-500 group-hover:text-teal-500" />
                             </div>
                             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-teal-500 text-center px-2">Add Images / Videos</span>
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*,video/*"
-                                className="hidden"
-                                onChange={(e) => handleAssetUpload(e, "gallery")}
-                            />
-                        </label>
+                        </button>
 
                         {/* Gallery Items */}
                         {gallery.map((item, index) => (
@@ -367,6 +345,17 @@ export default function ServiceForm({ service, isEdit = false }: { service?: any
                     </button>
                 </div>
             </form>
+
+            <MediaLibraryModal
+                open={activeMediaTarget !== null}
+                onClose={() => setActiveMediaTarget(null)}
+                onConfirmSelection={handleLibrarySelection}
+                title={activeMediaTarget === "imageUrl" ? "Pilih Cover Service" : "Pilih Gallery Service"}
+                description="Pilih aset lama dari library atau upload file baru langsung dari popup ini."
+                preferredFolder={activeMediaTarget === "imageUrl" ? "service_images" : "service_files"}
+                allowedKinds={activeMediaTarget === "imageUrl" ? ["IMAGE"] : ["IMAGE", "VIDEO"]}
+                multiple={activeMediaTarget === "gallery"}
+            />
         </div>
     );
 }

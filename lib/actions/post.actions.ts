@@ -13,6 +13,9 @@ export const createPost = async (userId: string, formData: FormData, path: strin
         const imageFile = formData.get("image") as File | null;
         const audioFile = formData.get("audio") as File | null;
         const videoFile = formData.get("video") as File | null;
+        const imageUrlField = formData.get("imageUrl") as string | null;
+        const audioUrlField = formData.get("audioUrl") as string | null;
+        const videoUrlField = formData.get("videoUrl") as string | null;
         const authorId = formData.get("authorId") as string || userId;
         const author = await prisma.user.findUnique({
             where: { id: authorId },
@@ -23,9 +26,9 @@ export const createPost = async (userId: string, formData: FormData, path: strin
             return serializeForClient({ success: false, error: "Your account has limited posting privileges." });
         }
 
-        let imageUrl = null;
-        let videoUrl = null;
-        let audioUrl = null;
+        let imageUrl = imageUrlField?.trim() || null;
+        let videoUrl = videoUrlField?.trim() || null;
+        let audioUrl = audioUrlField?.trim() || null;
 
         if (imageFile && imageFile.size > 0) {
             imageUrl = await uploadLocalFile(imageFile, "post_images");
@@ -309,12 +312,27 @@ export const updatePost = async (postId: string, formData: FormData, userId: str
         const imageFile = formData.get("image") as File | null;
         const audioFile = formData.get("audio") as File | null;
         const videoFile = formData.get("video") as File | null;
+        const imageUrlField = formData.get("imageUrl") as string | null;
+        const audioUrlField = formData.get("audioUrl") as string | null;
+        const videoUrlField = formData.get("videoUrl") as string | null;
 
         const updateData: any = {
             title,
             text,
             authorId
         };
+
+        if (imageUrlField !== null) {
+            updateData.image = imageUrlField.trim() || null;
+        }
+
+        if (audioUrlField !== null) {
+            updateData.audio = audioUrlField.trim() || null;
+        }
+
+        if (videoUrlField !== null) {
+            updateData.video = videoUrlField.trim() || null;
+        }
 
         if (imageFile && imageFile.size > 0) {
             const url = await uploadLocalFile(imageFile, "post_images");

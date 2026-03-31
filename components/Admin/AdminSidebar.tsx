@@ -21,6 +21,7 @@ import {
     Layers,
     ChevronDown,
     FolderKanban,
+    Files,
     Menu,
     X,
 } from "lucide-react";
@@ -72,6 +73,7 @@ const buildMenuGroups = (unreadCount: number): NavGroup[] => [
             },
             { name: "Posts", href: "/admin/posts", icon: FileText },
             { name: "Site Content", href: "/admin/content", icon: Layout },
+            { name: "File Manager", href: "/admin/files", icon: Files },
             { name: "Services", href: "/admin/services", icon: Briefcase },
             {
                 name: "Color Space",

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import DeleteConfirmationModal from "./DeleteConfirmationModal"; // Assuming this exists from Posts
 import { Upload } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 interface Rank {
     id: string;
@@ -39,6 +40,7 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
 
     // Delete State
     const [rankToDelete, setRankToDelete] = useState<string | null>(null);
@@ -119,6 +121,19 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
+    };
+
+    const handleMediaLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset) {
+            setIsMediaLibraryOpen(false);
+            return;
+        }
+
+        setSelectedFile(null);
+        setFormData((currentValue) => ({ ...currentValue, image: selectedAsset.url }));
+        setPreviewUrl(selectedAsset.url);
+        setIsMediaLibraryOpen(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -386,6 +401,13 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
                                                     onChange={handleFileSelect}
                                                 />
                                             </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsMediaLibraryOpen(true)}
+                                                className="flex-1 px-4 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/10 rounded-lg text-sm text-center transition-colors"
+                                            >
+                                                Media Library
+                                            </button>
                                             {previewUrl && (
                                                 <button
                                                     type="button"
@@ -446,6 +468,16 @@ export default function AdminRanksClient({ ranks }: { ranks: Rank[] }) {
                 isDeleting={isDeleting}
                 count={1}
                 description="Are you sure you want to delete this rank? Users currently at this rank may be affected."
+            />
+
+            <MediaLibraryModal
+                open={isMediaLibraryOpen}
+                onClose={() => setIsMediaLibraryOpen(false)}
+                onConfirmSelection={handleMediaLibrarySelection}
+                title="Pilih Icon Rank"
+                description="Pilih icon yang sudah pernah diupload atau upload icon baru dari popup ini."
+                preferredFolder="ranks"
+                allowedKinds={["IMAGE"]}
             />
         </div>
     );

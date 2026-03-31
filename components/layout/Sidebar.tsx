@@ -132,6 +132,7 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                         { name: dict.nav?.color_palettes || "Palettes", href: "/admin/color-palettes", icon: Layers },
                     ]
                 },
+                { name: "File Manager", href: "/admin/files", icon: FolderOpen },
             ]
         },
         {
@@ -178,10 +179,11 @@ export default function Sidebar({ dict, isOpen, setIsOpen, user, isCollapsed, se
                     ${isExpanded ? "w-[min(88vw,320px)] lg:w-[var(--shell-sidebar-expanded-width)]" : "w-[min(88vw,320px)] lg:w-[var(--shell-sidebar-collapsed-width)]"}
                 `}
             >
-                <div className="relative flex h-full flex-col border-r border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] shadow-[4px_0_24px_rgba(0,0,0,0.04)] backdrop-blur-3xl dark:shadow-[4px_0_32px_rgba(0,0,0,0.3)]">
+                <div className="relative flex h-full flex-col border-r border-[var(--site-sidebar-border)] bg-[var(--site-sidebar-bg)] shadow-[6px_0_30px_rgba(15,23,42,0.08)] backdrop-blur-3xl dark:shadow-[4px_0_32px_rgba(0,0,0,0.3)]">
 
                     {/* Subtle gradient on the side */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-r-none">
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.48),rgba(255,255,255,0.02)_24%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_28%,transparent_100%)]" />
                         <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-[var(--site-accent)]/10 to-transparent" />
                         <div className="absolute left-0 top-0 h-40 w-full bg-[radial-gradient(circle_at_top,rgba(0,229,255,0.14),transparent_72%)] opacity-80 lg:hidden" />
                     </div>
@@ -525,8 +527,8 @@ function SidebarDropdown({
                 title={!isExpanded ? item.name : ""}
                 className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 relative
                     ${isAnySubActive
-                        ? "bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-fg)] font-semibold"
-                        : "text-[var(--site-sidebar-fg)]/60 hover:bg-[var(--site-sidebar-active)]/50 hover:text-[var(--site-sidebar-fg)]"
+                        ? "border border-[var(--site-sidebar-border-strong)] bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-fg)] font-semibold shadow-[0_12px_28px_rgba(15,23,42,0.08)] dark:shadow-none"
+                        : "border border-transparent text-[var(--site-sidebar-fg)]/60 hover:border-[var(--site-sidebar-border)] hover:bg-white/60 hover:text-[var(--site-sidebar-fg)] dark:hover:border-white/5 dark:hover:bg-[var(--site-sidebar-active)]/50"
                     }
                     ${!isExpanded ? "justify-center" : ""}
                 `}
@@ -584,8 +586,8 @@ function SidebarDropdown({
                                         onClick={() => setIsOpen(false)}
                                         className={`group/sub flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all
                                             ${isSubActive
-                                                ? "bg-[var(--site-sidebar-accent)]/10 text-[var(--site-sidebar-accent)] font-semibold border border-[var(--site-sidebar-accent)]/20"
-                                                : "text-[var(--site-sidebar-fg)]/50 hover:text-[var(--site-sidebar-fg)] hover:bg-[var(--site-sidebar-active)]/50"
+                                                ? "border border-[var(--site-sidebar-accent)]/20 bg-[var(--site-sidebar-accent)]/10 text-[var(--site-sidebar-accent)] font-semibold shadow-[0_10px_24px_rgba(15,23,42,0.06)] dark:shadow-none"
+                                                : "border border-transparent text-[var(--site-sidebar-fg)]/50 hover:border-[var(--site-sidebar-border)] hover:text-[var(--site-sidebar-fg)] hover:bg-white/60 dark:hover:border-white/5 dark:hover:bg-[var(--site-sidebar-active)]/50"
                                             }`}
                                     >
                                         <SubIcon size={13} className={`shrink-0 transition-transform group-hover/sub:scale-110 ${isSubActive ? "text-[var(--site-sidebar-accent)]" : "opacity-50"}`} />
@@ -639,8 +641,8 @@ function SidebarLink({
             className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                 ${!isExpanded ? "justify-center" : ""}
                 ${active
-                    ? "bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-fg)] font-semibold"
-                    : "text-[var(--site-sidebar-fg)]/60 hover:bg-[var(--site-sidebar-active)]/50 hover:text-[var(--site-sidebar-fg)]"
+                    ? "border border-[var(--site-sidebar-border-strong)] bg-[var(--site-sidebar-active)] text-[var(--site-sidebar-fg)] font-semibold shadow-[0_12px_28px_rgba(15,23,42,0.08)] dark:shadow-none"
+                    : "border border-transparent text-[var(--site-sidebar-fg)]/60 hover:border-[var(--site-sidebar-border)] hover:bg-white/60 hover:text-[var(--site-sidebar-fg)] dark:hover:border-white/5 dark:hover:bg-[var(--site-sidebar-active)]/50"
                 }`}
         >
             {active && (
@@ -883,7 +885,7 @@ export function GlobalNavbar({ user, dict, setIsMessageOpen, unreadMessages, isS
             transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
             id="global-navbar"
             style={isFloatingNav ? {} : { left: "var(--navbar-left)", width: "calc(100% - var(--navbar-left))" }}
-            className={`overflow-hidden flex transition-all duration-500 ease-in-out
+            className={`${isFloatingNav ? "overflow-hidden" : "overflow-x-clip overflow-y-visible"} flex transition-all duration-500 ease-in-out
                 ${isFloatingNav
                     ? "floating-dock fixed left-1/2 top-[calc(env(safe-area-inset-top)+0.75rem)] z-50 w-[calc(100%-1rem)] max-w-6xl -translate-x-1/2 flex-col items-stretch gap-2 rounded-[2rem] border border-[var(--site-sidebar-border)] bg-[color-mix(in_srgb,var(--site-sidebar-bg)_82%,transparent)] px-3 py-2.5 shadow-[0_18px_42px_rgba(8,16,32,0.14)] sm:top-6 sm:w-[92%] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:rounded-full sm:px-5"
                     : `fixed right-0 top-0 z-40 min-h-[var(--shell-topbar-height)] w-full items-center justify-between px-3 py-[max(env(safe-area-inset-top),0.75rem)] sm:px-6 md:px-8 md:py-0 ${scrolled

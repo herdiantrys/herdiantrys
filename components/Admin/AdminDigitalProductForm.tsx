@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, ArrowLeft, Loader2, Image as ImageIcon, Link as LinkIcon, FileText, Tag, DollarSign, Sparkles, Upload, X } from "lucide-react";
-import { createDigitalProduct, updateDigitalProduct, uploadDigitalProductAsset } from "@/lib/actions/digital-product.actions";
+import { createDigitalProduct, updateDigitalProduct } from "@/lib/actions/digital-product.actions";
 import { toast } from "sonner";
 import Image from "next/image";
 import { resolveAssetUrl } from "@/lib/media";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 interface AdminProductFormProps {
     initialData?: any;
@@ -16,7 +17,7 @@ interface AdminProductFormProps {
 export default function AdminDigitalProductForm({ initialData, isEdit = false }: AdminProductFormProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
-    const [uploadingField, setUploadingField] = useState<null | "coverImage" | "thumbnail" | "fileUrl">(null);
+    const [activeLibraryField, setActiveLibraryField] = useState<null | "coverImage" | "thumbnail" | "fileUrl">(null);
 
     const [formData, setFormData] = useState({
         title: initialData?.title || "",
@@ -82,7 +83,7 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
             } else {
                 toast.error(result.error || `Failed to ${isEdit ? 'update' : 'create'} product`);
             }
-        } catch (error) {
+        } catch {
             toast.error("An unexpected error occurred");
         } finally {
             setIsSaving(false);
@@ -94,45 +95,15 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
         return decodeURIComponent(value);
     };
 
-    const handleAssetUpload = async (
-        e: React.ChangeEvent<HTMLInputElement>,
-        assetType: "cover" | "thumbnail" | "file",
-        fieldName: "coverImage" | "thumbnail" | "fileUrl"
-    ) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (assetType !== "file" && !file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
-            e.target.value = "";
+    const handleLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset || !activeLibraryField) {
+            setActiveLibraryField(null);
             return;
         }
 
-        if (file.size > 50 * 1024 * 1024) {
-            toast.error("File size must be less than 50MB");
-            e.target.value = "";
-            return;
-        }
-
-        setUploadingField(fieldName);
-        try {
-            const uploadFormData = new FormData();
-            uploadFormData.append("file", file);
-            uploadFormData.append("assetType", assetType);
-
-            const result = await uploadDigitalProductAsset(uploadFormData);
-            if (result.success && result.url) {
-                setFormData(prev => ({ ...prev, [fieldName]: result.url }));
-                toast.success(`${assetType === "file" ? "Product file" : assetType === "cover" ? "Cover image" : "Thumbnail"} uploaded successfully`);
-            } else {
-                toast.error(result.error || "Failed to upload asset");
-            }
-        } catch (error) {
-            toast.error("An error occurred during upload");
-        } finally {
-            setUploadingField(null);
-            e.target.value = "";
-        }
+        setFormData(prev => ({ ...prev, [activeLibraryField]: selectedAsset.url }));
+        setActiveLibraryField(null);
     };
 
     return (
@@ -253,20 +224,14 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                                     className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium text-sm"
                                                 />
                                             </div>
-                                            <label className={`relative inline-flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all ${uploadingField === "coverImage"
-                                                ? "border-[var(--site-accent)]/50 bg-[var(--site-accent)]/10 text-[var(--site-accent)]"
-                                                : "cursor-pointer border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-                                                }`}>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleAssetUpload(e, "cover", "coverImage")}
-                                                    disabled={uploadingField !== null}
-                                                    className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                                                />
-                                                {uploadingField === "coverImage" ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                                                {uploadingField === "coverImage" ? "Uploading..." : "Upload Local"}
-                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveLibraryField("coverImage")}
+                                                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                            >
+                                                <Upload size={16} />
+                                                File Library
+                                            </button>
                                         </div>
                                         <p className="text-[10px] text-slate-400 dark:text-gray-500 ml-1">Upload image cover langsung ke direktori lokal atau tempel URL jika memang diperlukan.</p>
                                     </div>
@@ -288,31 +253,17 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <div className="relative">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/png, image/jpeg, image/webp"
-                                                        onChange={(e) => handleAssetUpload(e, "thumbnail", "thumbnail")}
-                                                        disabled={uploadingField !== null}
-                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                                                    />
-                                                    <div className={`w-full h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed ${uploadingField === "thumbnail" ? 'border-[var(--site-accent)]/50 bg-[var(--site-accent)]/5' : 'border-slate-300 dark:border-white/20 hover:border-slate-400 dark:hover:border-white/40 hover:bg-slate-50 dark:hover:bg-white/5'} transition-all`}>
-                                                        {uploadingField === "thumbnail" ? (
-                                                            <>
-                                                                <Loader2 size={24} className="text-[var(--site-accent)] animate-spin" />
-                                                                <span className="text-sm font-medium text-[var(--site-accent)]">Uploading...</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center">
-                                                                    <ImageIcon size={20} className="text-slate-500 dark:text-gray-400" />
-                                                                </div>
-                                                                <span className="text-sm font-medium text-slate-500 dark:text-gray-400">Click to upload thumbnail</span>
-                                                                <span className="text-[10px] text-slate-400">JPG, PNG, WebP (Max 50MB)</span>
-                                                            </>
-                                                        )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveLibraryField("thumbnail")}
+                                                    className="w-full h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 transition-all hover:border-slate-400 hover:bg-slate-50 dark:border-white/20 dark:hover:border-white/40 dark:hover:bg-white/5"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center">
+                                                        <ImageIcon size={20} className="text-slate-500 dark:text-gray-400" />
                                                     </div>
-                                                </div>
+                                                    <span className="text-sm font-medium text-slate-500 dark:text-gray-400">Open media library</span>
+                                                    <span className="text-[10px] text-slate-400">Pilih thumbnail lama atau upload baru</span>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
@@ -336,19 +287,14 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                                             className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors font-medium"
                                         />
                                     </div>
-                                    <label className={`relative inline-flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-all ${uploadingField === "fileUrl"
-                                        ? "border-[var(--site-accent)]/50 bg-[var(--site-accent)]/10 text-[var(--site-accent)]"
-                                        : "cursor-pointer border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-                                        }`}>
-                                        <input
-                                            type="file"
-                                            onChange={(e) => handleAssetUpload(e, "file", "fileUrl")}
-                                            disabled={uploadingField !== null}
-                                            className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                                        />
-                                        {uploadingField === "fileUrl" ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                                        {uploadingField === "fileUrl" ? "Uploading..." : "Upload File"}
-                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveLibraryField("fileUrl")}
+                                        className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                    >
+                                        <Upload size={16} />
+                                        File Library
+                                    </button>
                                 </div>
                                 {formData.fileUrl && (
                                     <div className="ml-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600 dark:bg-white/5 dark:text-slate-300">
@@ -518,6 +464,32 @@ export default function AdminDigitalProductForm({ initialData, isEdit = false }:
                     </div>
                 </div>
             </form>
+
+            <MediaLibraryModal
+                open={activeLibraryField !== null}
+                onClose={() => setActiveLibraryField(null)}
+                onConfirmSelection={handleLibrarySelection}
+                title={
+                    activeLibraryField === "coverImage"
+                        ? "Pilih Cover Product"
+                        : activeLibraryField === "thumbnail"
+                            ? "Pilih Thumbnail Product"
+                            : "Pilih File Product"
+                }
+                description="Pilih asset yang sudah pernah diupload atau upload file baru langsung dari popup ini."
+                preferredFolder={
+                    activeLibraryField === "coverImage"
+                        ? "digitalproducts_covers"
+                        : activeLibraryField === "thumbnail"
+                            ? "digitalproducts"
+                            : "digitalproduct_files"
+                }
+                allowedKinds={
+                    activeLibraryField === "fileUrl"
+                        ? ["IMAGE", "VIDEO", "AUDIO", "FILE"]
+                        : ["IMAGE"]
+                }
+            />
         </div>
     );
 }

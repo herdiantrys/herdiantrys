@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createTestimonial, updateTestimonial, uploadTestimonialAsset } from "@/lib/actions/testimonial.actions";
+import { createTestimonial, updateTestimonial } from "@/lib/actions/testimonial.actions";
 import { ArrowLeft, Save, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resolveAssetUrl } from "@/lib/media";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 // Zod Schema
 const testimonialSchema = z.object({
@@ -25,6 +26,7 @@ type TestimonialFormData = z.infer<typeof testimonialSchema>;
 export default function TestimonialForm({ testimonial, isEdit = false }: { testimonial?: any, isEdit?: boolean }) {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<TestimonialFormData>({
         resolver: zodResolver(testimonialSchema),
@@ -38,26 +40,15 @@ export default function TestimonialForm({ testimonial, isEdit = false }: { testi
 
     const photoUrl = watch("photo");
 
-    const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files?.length) return;
+    const handleLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset) {
+            setIsMediaLibraryOpen(false);
+            return;
+        }
 
-        const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const promise = uploadTestimonialAsset(formData);
-
-        toast.promise(promise, {
-            loading: "Uploading photo...",
-            success: (res) => {
-                if (res.success && res.url) {
-                    setValue("photo", res.url);
-                    return "Photo uploaded!";
-                }
-                throw new Error(res.error || "Upload failed");
-            },
-            error: (err) => `Upload failed: ${err.message}`
-        });
+        setValue("photo", selectedAsset.url);
+        setIsMediaLibraryOpen(false);
     };
 
     const onSubmit = async (data: TestimonialFormData) => {
@@ -151,29 +142,29 @@ export default function TestimonialForm({ testimonial, isEdit = false }: { testi
                             <h2 className="text-lg font-semibold mb-4 text-white">Author Photo</h2>
                             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {photoUrl ? (
-                                    <div className="relative w-full h-full">
+                                    <div className="relative z-10 w-full h-full pointer-events-none">
                                         <Image src={resolveAssetUrl(photoUrl)} alt="Photo" fill className="object-cover" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("photo", "")}
-                                            className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                            className="pointer-events-auto absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
                                         >
                                             <X size={16} />
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
+                                    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
                                         <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2">
                                             <ImageIcon size={24} />
                                         </div>
                                         <p className="text-sm font-medium">Upload Photo</p>
                                     </div>
                                 )}
-                                <input
-                                    type="file"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    accept="image/*"
-                                    onChange={handleAssetUpload}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMediaLibraryOpen(true)}
+                                    className="absolute inset-0 z-0"
+                                    aria-label="Open testimonial media library"
                                 />
                             </div>
                             <p className="text-xs text-gray-400 mt-4 text-center">
@@ -199,6 +190,16 @@ export default function TestimonialForm({ testimonial, isEdit = false }: { testi
                     </button>
                 </div>
             </form>
+
+            <MediaLibraryModal
+                open={isMediaLibraryOpen}
+                onClose={() => setIsMediaLibraryOpen(false)}
+                onConfirmSelection={handleLibrarySelection}
+                title="Pilih Foto Testimonial"
+                description="Pilih foto yang sudah pernah diupload atau upload foto baru tanpa keluar dari form."
+                preferredFolder="testimonial_images"
+                allowedKinds={["IMAGE"]}
+            />
         </div>
     );
 }

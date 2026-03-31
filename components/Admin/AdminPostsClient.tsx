@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { formatDate } from "@/lib/utils";
 import { getPageNumbers } from "@/lib/utils/getPageNumbers";
 import { resolveAssetUrl } from "@/lib/media";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 export default function AdminPostsClient({ posts, currentUserId }: { posts: any[], currentUserId?: string }) {
     const router = useRouter();
@@ -43,6 +44,7 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
     } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
+    const [activeMediaField, setActiveMediaField] = useState<null | "image" | "video">(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -51,6 +53,35 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
         };
         fetchUsers();
     }, []);
+
+    const handleMediaLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset) {
+            setActiveMediaField(null);
+            return;
+        }
+
+        setEditingPost((previousValue) => {
+            if (!previousValue || !activeMediaField) {
+                return previousValue;
+            }
+
+            if (activeMediaField === "image") {
+                return {
+                    ...previousValue,
+                    image: selectedAsset.url,
+                    imageFile: undefined,
+                } as any;
+            }
+
+            return {
+                ...previousValue,
+                video: selectedAsset.url,
+                videoFile: undefined,
+            } as any;
+        });
+        setActiveMediaField(null);
+    };
 
     // Sort Config
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'createdAt', direction: 'desc' });
@@ -565,6 +596,15 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                                             <ImageIcon size={14} /> Image
                                         </label>
+                                        <div className="mb-2 flex justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveMediaField("image")}
+                                                className="rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-300 transition-colors hover:bg-teal-500/20"
+                                            >
+                                                Library
+                                            </button>
+                                        </div>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -574,6 +614,11 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                             }}
                                             className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-teal-500/10 file:text-teal-400 hover:file:bg-teal-500/20"
                                         />
+                                        {editingPost?.image && (
+                                            <p className="mt-2 truncate text-[11px] text-teal-300/80">
+                                                Selected: {editingPost.image}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Audio Upload */}
@@ -597,6 +642,15 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                         <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                                             <Video size={14} /> Video
                                         </label>
+                                        <div className="mb-2 flex justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveMediaField("video")}
+                                                className="rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-purple-300 transition-colors hover:bg-purple-500/20"
+                                            >
+                                                Library
+                                            </button>
+                                        </div>
                                         <input
                                             type="file"
                                             accept="video/*"
@@ -606,6 +660,11 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                             }}
                                             className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20"
                                         />
+                                        {editingPost?.video && (
+                                            <p className="mt-2 truncate text-[11px] text-purple-300/80">
+                                                Selected: {editingPost.video}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -632,6 +691,9 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                                             formData.append("title", editingPost.title || "");
                                             formData.append("text", editingPost.text);
                                             formData.append("authorId", editingPost.authorId);
+                                            formData.append("imageUrl", editingPost.image || "");
+                                            formData.append("audioUrl", editingPost.audio || "");
+                                            formData.append("videoUrl", editingPost.video || "");
 
                                             // @ts-ignore
                                             if (editingPost.imageFile) formData.append("image", editingPost.imageFile);
@@ -672,6 +734,16 @@ export default function AdminPostsClient({ posts, currentUserId }: { posts: any[
                     </div>
                 )}
             </AnimatePresence>
+
+            <MediaLibraryModal
+                open={activeMediaField !== null}
+                onClose={() => setActiveMediaField(null)}
+                onConfirmSelection={handleMediaLibrarySelection}
+                title={activeMediaField === "image" ? "Pilih Gambar Post" : "Pilih Video Post"}
+                description="Pilih aset lama dari media library atau upload file baru tanpa menutup modal post."
+                preferredFolder={activeMediaField === "image" ? "post_images" : "post_videos"}
+                allowedKinds={activeMediaField === "image" ? ["IMAGE"] : ["VIDEO"]}
+            />
 
             {/* Floating Bulk Action Bar */}
             <AnimatePresence>

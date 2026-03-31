@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { motion } from "framer-motion";
 import { Check, Loader2, RotateCcw, X, ZoomIn } from "lucide-react";
@@ -8,10 +8,35 @@ import { Portal } from "@/components/Portal";
 
 type CropShape = "rect" | "round";
 type CropperObjectFit = "contain" | "horizontal-cover" | "vertical-cover" | "cover";
+type AspectSelectionMode = "preset" | "custom";
+
+export type ImageCropperAspectOption = {
+    value: string;
+    label: string;
+    width: number;
+    height: number;
+    description?: string;
+};
+
+export type ImageCropperAspectSelection = {
+    mode: AspectSelectionMode;
+    value: string;
+    label: string;
+    width: number;
+    height: number;
+    aspect: number;
+};
 
 type ImageCropperProps = {
     imageSrc: string;
     aspect?: number;
+    aspectOptions?: ImageCropperAspectOption[];
+    defaultAspectValue?: string;
+    allowCustomAspect?: boolean;
+    customAspectDefault?: {
+        width: number;
+        height: number;
+    };
     cropShape?: CropShape;
     objectFit?: CropperObjectFit;
     minZoom?: number;
@@ -21,13 +46,19 @@ type ImageCropperProps = {
     helperText?: string;
     confirmLabel?: string;
     cancelLabel?: string;
+    resultDescription?: string;
     onCancel: () => void;
     onCropComplete: (croppedImage: Blob) => void;
+    onAspectChange?: (selection: ImageCropperAspectSelection) => void;
 };
 
 export default function ImageCropper({
     imageSrc,
     aspect = 3 / 1,
+    aspectOptions,
+    defaultAspectValue,
+    allowCustomAspect = false,
+    customAspectDefault,
     cropShape = "rect",
     objectFit = "horizontal-cover",
     minZoom = 1,
@@ -37,20 +68,100 @@ export default function ImageCropper({
     helperText = "Tip: gunakan slider zoom untuk menonjolkan area yang paling penting.",
     confirmLabel = "Apply Crop",
     cancelLabel = "Cancel",
+    resultDescription = "Area yang ada di dalam frame akan menjadi hasil final setelah kamu menekan tombol simpan.",
     onCancel,
     onCropComplete,
+    onAspectChange,
 }: ImageCropperProps) {
+    const normalizedAspectOptions = useMemo(() => {
+        if (aspectOptions?.length) {
+            return aspectOptions;
+        }
+
+        return [
+            {
+                value: "default",
+                label: `${Math.round(aspect * 100) / 100}:1`,
+                width: Math.max(1, Math.round(aspect * 100)),
+                height: 100,
+            },
+        ];
+    }, [aspect, aspectOptions]);
+
+    const defaultAspectOption = useMemo(() => {
+        if (defaultAspectValue) {
+            const matched = normalizedAspectOptions.find((option) => option.value === defaultAspectValue);
+            if (matched) {
+                return matched;
+            }
+        }
+
+        return normalizedAspectOptions[0];
+    }, [defaultAspectValue, normalizedAspectOptions]);
+
+    const initialCustomAspect = useMemo(() => {
+        const width = customAspectDefault?.width || defaultAspectOption?.width || Math.max(1, Math.round(aspect * 100));
+        const height = customAspectDefault?.height || defaultAspectOption?.height || 100;
+
+        return {
+            width: Math.max(1, width),
+            height: Math.max(1, height),
+        };
+    }, [aspect, customAspectDefault?.height, customAspectDefault?.width, defaultAspectOption?.height, defaultAspectOption?.width]);
+
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(minZoom);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
     const [isApplying, setIsApplying] = useState(false);
+    const [selectedAspectValue, setSelectedAspectValue] = useState(defaultAspectOption?.value || "default");
+    const [customAspectWidth, setCustomAspectWidth] = useState(String(initialCustomAspect.width));
+    const [customAspectHeight, setCustomAspectHeight] = useState(String(initialCustomAspect.height));
 
     const zoomLabel = useMemo(() => `${Math.round(zoom * 100)}%`, [zoom]);
     const cropModeLabel = cropShape === "round" ? "Round Crop" : "Free Crop";
+    const parsedCustomAspectWidth = useMemo(() => Math.max(1, Number(customAspectWidth) || 1), [customAspectWidth]);
+    const parsedCustomAspectHeight = useMemo(() => Math.max(1, Number(customAspectHeight) || 1), [customAspectHeight]);
+    const activeAspectSelection = useMemo<ImageCropperAspectSelection>(() => {
+        if (allowCustomAspect && selectedAspectValue === "custom") {
+            return {
+                mode: "custom",
+                value: "custom",
+                label: `${parsedCustomAspectWidth}:${parsedCustomAspectHeight}`,
+                width: parsedCustomAspectWidth,
+                height: parsedCustomAspectHeight,
+                aspect: parsedCustomAspectWidth / parsedCustomAspectHeight,
+            };
+        }
+
+        const option = normalizedAspectOptions.find((item) => item.value === selectedAspectValue) || defaultAspectOption;
+
+        return {
+            mode: "preset",
+            value: option.value,
+            label: option.label,
+            width: option.width,
+            height: option.height,
+            aspect: option.width / option.height,
+        };
+    }, [
+        allowCustomAspect,
+        defaultAspectOption,
+        normalizedAspectOptions,
+        parsedCustomAspectHeight,
+        parsedCustomAspectWidth,
+        selectedAspectValue,
+    ]);
+    const ratioOptionsLabel = normalizedAspectOptions.map((option) => option.label).join(", ");
 
     const handleCropComplete = useCallback((_croppedArea: Area, nextCroppedAreaPixels: Area) => {
         setCroppedAreaPixels(nextCroppedAreaPixels);
     }, []);
+
+    const handleAspectSelection = (nextValue: string) => {
+        setSelectedAspectValue(nextValue);
+        setCrop({ x: 0, y: 0 });
+        setZoom(minZoom);
+    };
 
     const resetView = () => {
         setCrop({ x: 0, y: 0 });
@@ -73,6 +184,10 @@ export default function ImageCropper({
             setIsApplying(false);
         }
     };
+
+    useEffect(() => {
+        onAspectChange?.(activeAspectSelection);
+    }, [activeAspectSelection, onAspectChange]);
 
     return (
         <Portal>
@@ -126,7 +241,7 @@ export default function ImageCropper({
                                 image={imageSrc}
                                 crop={crop}
                                 zoom={zoom}
-                                aspect={aspect}
+                                aspect={activeAspectSelection.aspect}
                                 cropShape={cropShape}
                                 showGrid={false}
                                 objectFit={objectFit}
@@ -173,6 +288,100 @@ export default function ImageCropper({
                                 </div>
                             </div>
 
+                            {(normalizedAspectOptions.length > 1 || allowCustomAspect) && (
+                                <div className="mt-4 rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_16px_36px_rgba(148,163,184,0.12)] dark:border-white/10 dark:bg-[#0b1722]">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                                                Rasio Crop
+                                            </p>
+                                            <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                                                {activeAspectSelection.label}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                                            {activeAspectSelection.mode === "custom" ? "Custom" : "Preset"}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 grid grid-cols-2 gap-2">
+                                        {normalizedAspectOptions.map((option) => {
+                                            const isSelected = selectedAspectValue === option.value;
+
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    type="button"
+                                                    onClick={() => handleAspectSelection(option.value)}
+                                                    className={`rounded-2xl border px-3 py-3 text-left transition ${isSelected
+                                                        ? "border-[var(--site-secondary)]/40 bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] shadow-[0_10px_24px_rgba(var(--site-secondary-rgb),0.14)]"
+                                                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-white/20 dark:hover:text-white"
+                                                        }`}
+                                                >
+                                                    <p className="text-sm font-black">{option.label}</p>
+                                                    {option.description && (
+                                                        <p className="mt-1 text-[11px] leading-5 opacity-80">{option.description}</p>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+
+                                        {allowCustomAspect && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAspectSelection("custom")}
+                                                className={`rounded-2xl border px-3 py-3 text-left transition ${selectedAspectValue === "custom"
+                                                    ? "border-[var(--site-secondary)]/40 bg-[var(--site-secondary)]/10 text-[var(--site-secondary)] shadow-[0_10px_24px_rgba(var(--site-secondary-rgb),0.14)]"
+                                                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-white/20 dark:hover:text-white"
+                                                    }`}
+                                            >
+                                                <p className="text-sm font-black">Custom</p>
+                                                <p className="mt-1 text-[11px] leading-5 opacity-80">
+                                                    Masukkan rasio width dan height sendiri.
+                                                </p>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {allowCustomAspect && selectedAspectValue === "custom" && (
+                                        <div className="mt-4 grid grid-cols-2 gap-3">
+                                            <label className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-white/5">
+                                                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                                    Width
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    step={1}
+                                                    value={customAspectWidth}
+                                                    onChange={(event) => setCustomAspectWidth(event.target.value)}
+                                                    className="mt-2 w-full bg-transparent text-sm font-bold text-slate-900 outline-none dark:text-white"
+                                                />
+                                            </label>
+
+                                            <label className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-white/5">
+                                                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                                    Height
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    step={1}
+                                                    value={customAspectHeight}
+                                                    onChange={(event) => setCustomAspectHeight(event.target.value)}
+                                                    className="mt-2 w-full bg-transparent text-sm font-bold text-slate-900 outline-none dark:text-white"
+                                                />
+                                            </label>
+                                        </div>
+                                    )}
+
+                                    <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                        Pilihan cepat: {ratioOptionsLabel}
+                                        {allowCustomAspect ? ", atau pakai rasio custom sesuai layout cover yang kamu butuhkan." : "."}
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="mt-4 rounded-[26px] border border-dashed border-slate-300/80 bg-slate-50/85 p-4 dark:border-white/10 dark:bg-white/[0.03]">
                                 <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
                                     Panduan
@@ -181,7 +390,7 @@ export default function ImageCropper({
                                     {helperText}
                                 </p>
                                 <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                                    Area yang ada di dalam frame akan menjadi avatar final setelah kamu menekan tombol simpan.
+                                    {resultDescription}
                                 </p>
                             </div>
 

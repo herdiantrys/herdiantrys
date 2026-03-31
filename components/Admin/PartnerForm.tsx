@@ -3,14 +3,15 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createPartner, updatePartner, uploadPartnerAsset } from "@/lib/actions/partner.actions";
-import { ArrowLeft, Save, Upload, X, Image as ImageIcon } from "lucide-react";
+import { createPartner, updatePartner } from "@/lib/actions/partner.actions";
+import { ArrowLeft, Save, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resolveAssetUrl } from "@/lib/media";
+import { MediaLibraryModal, type MediaAssetRecord } from "@/components/Admin/MediaLibrary";
 
 // Zod Schema
 const partnerSchema = z.object({
@@ -25,6 +26,7 @@ type PartnerFormData = z.infer<typeof partnerSchema>;
 export default function PartnerForm({ partner, isEdit = false }: { partner?: any, isEdit?: boolean }) {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    const [activeLibraryField, setActiveLibraryField] = useState<null | "icon" | "iconDark">(null);
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<PartnerFormData>({
         resolver: zodResolver(partnerSchema),
@@ -39,26 +41,15 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
     const iconUrl = watch("icon");
     const iconDarkUrl = watch("iconDark");
 
-    const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: "icon" | "iconDark") => {
-        if (!e.target.files?.length) return;
+    const handleLibrarySelection = (assets: MediaAssetRecord[]) => {
+        const selectedAsset = assets[0];
+        if (!selectedAsset || !activeLibraryField) {
+            setActiveLibraryField(null);
+            return;
+        }
 
-        const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const promise = uploadPartnerAsset(formData);
-
-        toast.promise(promise, {
-            loading: `Uploading ${fieldName === 'icon' ? 'light' : 'dark'} icon...`,
-            success: (res) => {
-                if (res.success && res.url) {
-                    setValue(fieldName, res.url);
-                    return "Icon uploaded!";
-                }
-                throw new Error(res.error || "Upload failed");
-            },
-            error: (err) => `Upload failed: ${err.message}`
-        });
+        setValue(activeLibraryField, selectedAsset.url);
+        setActiveLibraryField(null);
     };
 
     const onSubmit = async (data: PartnerFormData) => {
@@ -136,27 +127,27 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
                             <label className="block text-sm font-medium text-gray-400 mb-2">Light Mode Logo</label>
                             <div className="relative aspect-square rounded-xl overflow-hidden bg-white/50 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {iconUrl ? (
-                                    <div className="relative w-full h-full">
+                                    <div className="relative z-10 w-full h-full pointer-events-none">
                                         <Image src={resolveAssetUrl(iconUrl)} alt="Logo Light" fill className="object-contain p-4" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("icon", "")}
-                                            className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                            className="pointer-events-auto absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
                                         >
                                             <X size={12} />
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
+                                    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
                                         <ImageIcon size={20} />
                                         <span className="text-xs mt-2">Upload Light</span>
                                     </div>
                                 )}
-                                <input
-                                    type="file"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    accept="image/*"
-                                    onChange={(e) => handleAssetUpload(e, "icon")}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveLibraryField("icon")}
+                                    className="absolute inset-0 z-0"
+                                    aria-label="Open light logo media library"
                                 />
                             </div>
                         </div>
@@ -166,27 +157,27 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
                             <label className="block text-sm font-medium text-gray-400 mb-2">Dark Mode Logo</label>
                             <div className="relative aspect-square rounded-xl overflow-hidden bg-black/80 border-2 border-dashed border-gray-200 dark:border-white/10 group hover:border-teal-500 dark:hover:border-teal-500/50 transition-all">
                                 {iconDarkUrl ? (
-                                    <div className="relative w-full h-full">
+                                    <div className="relative z-10 w-full h-full pointer-events-none">
                                         <Image src={resolveAssetUrl(iconDarkUrl)} alt="Logo Dark" fill className="object-contain p-4" />
                                         <button
                                             type="button"
                                             onClick={() => setValue("iconDark", "")}
-                                            className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                            className="pointer-events-auto absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
                                         >
                                             <X size={12} />
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
+                                    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-teal-500">
                                         <ImageIcon size={20} />
                                         <span className="text-xs mt-2">Upload Dark</span>
                                     </div>
                                 )}
-                                <input
-                                    type="file"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    accept="image/*"
-                                    onChange={(e) => handleAssetUpload(e, "iconDark")}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveLibraryField("iconDark")}
+                                    className="absolute inset-0 z-0"
+                                    aria-label="Open dark logo media library"
                                 />
                             </div>
                         </div>
@@ -210,6 +201,16 @@ export default function PartnerForm({ partner, isEdit = false }: { partner?: any
                     </button>
                 </div>
             </form>
+
+            <MediaLibraryModal
+                open={activeLibraryField !== null}
+                onClose={() => setActiveLibraryField(null)}
+                onConfirmSelection={handleLibrarySelection}
+                title="Pilih Logo Partner"
+                description="Pilih gambar yang sudah pernah diupload atau upload file baru langsung dari popup ini."
+                preferredFolder="partner_images"
+                allowedKinds={["IMAGE"]}
+            />
         </div>
     );
 }

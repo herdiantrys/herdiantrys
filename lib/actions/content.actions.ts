@@ -73,6 +73,8 @@ export const updateSiteContent = async (data: Record<string, unknown>) => {
             aboutTitle: asNullableString(data.aboutTitle),
             location: asNullableString(data.location),
             website: asNullableString(data.website),
+            profileImage: asNullableString(data.profileImage),
+            bannerImage: asNullableString(data.bannerImage),
             skills: (Array.isArray(data.skills) ? data.skills : []) as Prisma.InputJsonValue,
             experience: (Array.isArray(data.experience) ? data.experience : []) as Prisma.InputJsonValue,
             education: (Array.isArray(data.education) ? data.education : []) as Prisma.InputJsonValue,

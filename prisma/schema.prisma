@@ -45,6 +45,13 @@ enum ShopItemType {
   BANNER_VIDEO
 }
 
+enum MediaAssetKind {
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
 // Models
 
 model User {
@@ -140,6 +147,7 @@ model User {
   // Messaging
   sentMessages  Message[]      @relation("SentMessages")
   conversations Conversation[] @relation("ConversationParticipants")
+  uploadedMedia MediaAsset[]   @relation("UploadedMediaAssets")
 }
 
 model Notification {
@@ -482,6 +490,26 @@ model Rank {
   image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model MediaAsset {
+  id           String         @id @default(cuid())
+  url          String         @unique
+  folder       String
+  filename     String
+  originalName String
+  mimeType     String
+  kind         MediaAssetKind @default(FILE)
+  size         Int            @default(0)
+  title        String?
+  altText      String?
+  uploadedById String?
+  uploadedBy   User?          @relation("UploadedMediaAssets", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([kind, createdAt])
+  @@index([folder])
 }
 
 model PortfolioConfig {
