@@ -17,6 +17,8 @@ type MediaAssetFilters = {
     kinds?: MediaAssetKind[];
 };
 
+const MAX_MEDIA_ASSET_SIZE = 250 * 1024 * 1024;
+
 const isAdminRole = (role?: string | null) => role === "ADMIN" || role === "SUPER_ADMIN";
 
 const sanitizeText = (value: unknown) => {
@@ -87,6 +89,10 @@ export async function uploadMediaAssetAction(formData: FormData) {
 
         if (!(file instanceof File)) {
             return { success: false, error: "No file uploaded" };
+        }
+
+        if (file.size > MAX_MEDIA_ASSET_SIZE) {
+            return { success: false, error: "Ukuran file maksimal 250MB" };
         }
 
         if (typeof folder !== "string" || !folder.trim()) {

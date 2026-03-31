@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
     workerThreads: false,
     cpus: 1,
     serverActions: {
-      bodySizeLimit: "50mb",
+      // Media library uploads use Server Actions and need headroom above the 250 MB app limit.
+      bodySizeLimit: "300mb",
     },
   },
   images: {

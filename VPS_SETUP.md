@@ -94,6 +94,7 @@ Agar website bisa diakses tanpa port `:3000`, kita setup Nginx.
    server {
        listen 80;
        server_name herdiantry.id www.herdiantry.id 103.214.112.67;
+       client_max_body_size 250M;
 
        location / {
            proxy_pass http://localhost:3000;
@@ -102,10 +103,15 @@ Agar website bisa diakses tanpa port `:3000`, kita setup Nginx.
            proxy_set_header Connection 'upgrade';
            proxy_set_header Host $host;
            proxy_cache_bypass $http_upgrade;
+           proxy_read_timeout 600s;
+           proxy_send_timeout 600s;
+           proxy_request_buffering off;
        }
    }
    ```
 
+
+   > **Penting:** tanpa `client_max_body_size`, Nginx default hanya sekitar `1M`. Upload video besar bisa gagal atau terlihat macet di sekitar `1%`.
 3. Simpan (`Ctrl+X`, `Y`, `Enter`).
 
 4. Aktifkan config:

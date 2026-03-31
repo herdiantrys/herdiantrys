@@ -53,6 +53,30 @@ const parseResponse = (xhr: XMLHttpRequest): ProjectAssetUploadResult => {
     }
 };
 
+const getUploadErrorMessage = (xhr: XMLHttpRequest, payload: ProjectAssetUploadResult) => {
+    if (xhr.status === 413) {
+        return "Upload ditolak server karena batas ukuran request di proxy/server terlalu kecil. Jika memakai Nginx, set client_max_body_size minimal 250M.";
+    }
+
+    if (xhr.status === 401) {
+        return payload.error || "Sesi login habis. Silakan login ulang lalu coba upload lagi.";
+    }
+
+    if (xhr.status === 408 || xhr.status === 504) {
+        return "Upload melewati batas waktu server. Cek timeout reverse proxy lalu coba lagi.";
+    }
+
+    if (xhr.status >= 500) {
+        return payload.error || "Server gagal memproses upload file.";
+    }
+
+    if (xhr.status === 0) {
+        return "Koneksi upload terputus sebelum selesai.";
+    }
+
+    return payload.error || `Upload failed with status ${xhr.status}`;
+};
+
 export const uploadProjectAssetWithProgress = async ({
     file,
     type,
@@ -77,6 +101,7 @@ export const uploadProjectAssetWithProgress = async ({
 
         xhr.open("POST", "/api/uploads/project");
         xhr.responseType = "json";
+        xhr.timeout = 30 * 60 * 1000;
 
         xhr.upload.addEventListener("progress", (event) => {
             if (!event.lengthComputable || event.total <= 0) {
@@ -123,15 +148,19 @@ export const uploadProjectAssetWithProgress = async ({
                 return;
             }
 
-            reject(new Error(payload.error || "Upload failed"));
+            reject(new Error(getUploadErrorMessage(xhr, payload)));
         });
 
         xhr.addEventListener("error", () => {
             reject(new Error("Network error while uploading project asset"));
         });
 
+        xhr.addEventListener("abort", () => {
+            reject(new Error("Upload dibatalkan sebelum selesai"));
+        });
+
         xhr.addEventListener("timeout", () => {
-            reject(new Error("Project asset upload timed out"));
+            reject(new Error("Upload video terlalu lama dan terkena timeout. Cek timeout server/proxy lalu coba lagi."));
         });
 
         xhr.send(formData);

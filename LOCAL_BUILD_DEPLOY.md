@@ -87,3 +87,26 @@ pm2 delete all
 pm2 start ecosystem.config.js
 pm2 save
 ```
+
+
+## 6. If You Put Next.js Behind Nginx
+
+Set the reverse proxy to allow large uploads, otherwise videos can fail very early even when the app itself allows them.
+
+```nginx
+server {
+    client_max_body_size 250M;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_request_buffering off;
+    }
+}
+```
