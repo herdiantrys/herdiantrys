@@ -1,6 +1,4 @@
-import { auth } from "@/auth";
-import { getUserByEmail } from "@/lib/actions/user.actions";
-import { getDefaultProfilePicture } from "@/lib/default-profile-picture";
+﻿import { getRequestUserContext } from "@/lib/request-user-context";
 import Shell from "./layout/Shell";
 
 export default async function AppLayoutAdapter({
@@ -10,49 +8,10 @@ export default async function AppLayoutAdapter({
     children: React.ReactNode,
     dict: any
 }) {
-    const session = await auth();
-    let userData = null;
-
-    if (session?.user?.email) {
-        // Fetch from Prisma Source of Truth
-        userData = await getUserByEmail(session.user.email);
-    }
-
-    // Safe image resolution
-    let resolvedImage = null;
-    if (userData) {
-        if (userData.profileImage) {
-            // Fallback to the raw URL or asset URL
-            resolvedImage = userData.imageURL || userData.profileImage?.asset?.url || userData.profileImage;
-        } else {
-            resolvedImage = userData.imageURL;
-        }
-    }
-
-    // Default placeholder if no image resolved
-    if (!resolvedImage && session?.user) {
-        resolvedImage = getDefaultProfilePicture(session.user.email || session.user.name || session.user.id);
-    }
-
-    const user = session?.user
-        ? {
-            name: session.user.name,
-            email: session.user.email,
-            image: resolvedImage,
-            username: userData?.username,
-            equippedEffect: userData?.equippedEffect,
-            equippedFrame: userData?.equippedFrame,
-            equippedBackground: userData?.equippedBackground,
-            profileColor: userData?.profileColor,
-            frameColor: userData?.frameColor,
-            id: userData?._id || session.user.id,
-            points: userData?.points || 0,
-            role: (userData?.role || session.user.role || "user").toLowerCase()
-        }
-        : null;
+    const { shellUser } = await getRequestUserContext();
 
     return (
-        <Shell dict={dict} user={user} variant={user ? 'default' : 'guest'}>
+        <Shell dict={dict} user={shellUser} variant={shellUser ? "default" : "guest"}>
             {children}
         </Shell>
     );
